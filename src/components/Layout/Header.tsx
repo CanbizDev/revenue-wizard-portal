@@ -51,34 +51,40 @@ const Header: React.FC<HeaderProps> = ({ portalType, user }) => {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4">
+    <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">RP</span>
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <div className="flex items-center space-x-1 sm:space-x-2">
+            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-xs sm:text-sm">RP</span>
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-gray-900">{getPortalTitle()}</h1>
+              <h1 className="text-base sm:text-xl font-semibold text-gray-900">{getPortalTitle()}</h1>
             </div>
           </div>
-          {getPortalBadge()}
+          <div className="hidden sm:block">
+            {getPortalBadge()}
+          </div>
         </div>
 
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="sm" className="relative">
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <div className="sm:hidden">
+            {getPortalBadge()}
+          </div>
+          
+          <Button variant="ghost" size="sm" className="relative p-2">
             <Bell className="h-4 w-4" />
             <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full"></span>
           </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center space-x-2 px-3">
-                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                  <User className="h-4 w-4 text-gray-600" />
+              <Button variant="ghost" className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                  <User className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600" />
                 </div>
                 {user && (
-                  <div className="text-left">
+                  <div className="text-left hidden sm:block">
                     <p className="text-sm font-medium text-gray-900">{user.name}</p>
                     <p className="text-xs text-gray-500">{user.role}</p>
                   </div>

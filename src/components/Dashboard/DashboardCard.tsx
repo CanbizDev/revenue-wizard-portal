@@ -26,13 +26,13 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
   return (
     <Card className={`hover:shadow-md transition-shadow ${className}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-gray-600">
+        <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 truncate">
           {title}
         </CardTitle>
-        <Icon className="h-5 w-5 text-gray-400" />
+        <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold text-gray-900 mb-1">
+        <div className="text-lg sm:text-2xl font-bold text-gray-900 mb-1">
           {typeof value === 'number' ? value.toLocaleString() : value}
         </div>
         {description && (

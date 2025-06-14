@@ -70,8 +70,8 @@ const Sidebar: React.FC<SidebarProps> = ({ portalType, userRole, activeTab, onTa
   const menuItems = getMenuItems();
 
   return (
-    <aside className="w-64 bg-gray-50 border-r border-gray-200 h-full">
-      <nav className="mt-6 px-3">
+    <aside className="w-48 sm:w-64 bg-gray-50 border-r border-gray-200 h-full">
+      <nav className="mt-4 sm:mt-6 px-2 sm:px-3">
         <ul className="space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -82,14 +82,14 @@ const Sidebar: React.FC<SidebarProps> = ({ portalType, userRole, activeTab, onTa
                 <button
                   onClick={() => onTabChange(item.id)}
                   className={cn(
-                    'w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
+                    'w-full flex items-center px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded-md transition-colors',
                     isActive
                       ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-600'
                       : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                   )}
                 >
-                  <Icon className="mr-3 h-4 w-4" />
-                  {item.label}
+                  <Icon className="mr-2 sm:mr-3 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                  <span className="truncate">{item.label}</span>
                 </button>
               </li>
             );
