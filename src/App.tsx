@@ -4,24 +4,86 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
+import CompanyLanding from "./pages/CompanyLanding";
+import ClientLogin from "./pages/ClientLogin";
+import AdminPortal from "./components/Portal/AdminPortal";
+import SellerPortal from "./components/Portal/SellerPortal";
+import ClientPortal from "./components/Portal/ClientPortal";
 import NotFound from "./pages/NotFound";
+import { useState } from "react";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const [currentView, setCurrentView] = useState<string>('selector');
+  const [currentCompany, setCurrentCompany] = useState<string>('');
+  const [currentClient, setCurrentClient] = useState<string>('');
+
+  const handleNavigation = (path: string) => {
+    if (path === '/admin') {
+      setCurrentView('admin');
+    } else if (path.startsWith('/')) {
+      const clientName = path.substring(1);
+      setCurrentClient(clientName);
+      setCurrentView('client-login');
+    }
+  };
+
+  const handleLogin = (role: 'admin' | 'viewer') => {
+    if (role === 'admin') {
+      setCurrentView('client-admin');
+    } else {
+      setCurrentView('client-viewer');
+    }
+  };
+
+  const renderCurrentView = () => {
+    switch (currentView) {
+      case 'selector':
+        return <Index onCompanySelect={(company) => {
+          setCurrentCompany(company);
+          setCurrentView('company-landing');
+        }} />;
+      
+      case 'company-landing':
+        return (
+          <CompanyLanding 
+            company={currentCompany as any}
+            onNavigate={handleNavigation}
+          />
+        );
+      
+      case 'client-login':
+        return (
+          <ClientLogin
+            company={currentCompany as any}
+            client={currentClient}
+            onBack={() => setCurrentView('company-landing')}
+            onLogin={handleLogin}
+          />
+        );
+      
+      case 'admin':
+        return <AdminPortal />;
+      
+      case 'client-admin':
+      case 'client-viewer':
+        return <ClientPortal />;
+      
+      default:
+        return <NotFound />;
+    }
+  };
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        {renderCurrentView()}
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
