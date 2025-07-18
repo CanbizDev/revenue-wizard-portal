@@ -18,14 +18,6 @@ interface IndexProps {
 
 const COMPANIES = [
   {
-    id: 'jupiterbrains',
-    name: 'JupiterBrains',
-    type: 'Root Admin',
-    subdomain: 'jupiterbrains.webreports.app',
-    color: 'red',
-    description: 'Complete ecosystem oversight and global management'
-  },
-  {
     id: 'marketstrendai',
     name: 'MarketsTrendAI',
     type: 'Tier-1 Seller',
