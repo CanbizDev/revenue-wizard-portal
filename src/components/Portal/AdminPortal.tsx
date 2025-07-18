@@ -4,6 +4,7 @@ import Header from '@/components/Layout/Header';
 import Sidebar from '@/components/Layout/Sidebar';
 import DashboardCard from '@/components/Dashboard/DashboardCard';
 import AddSellerForm from '@/components/Forms/AddSellerForm';
+import AddTier2SellerForm from '@/components/Forms/AddTier2SellerForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -22,7 +23,9 @@ import {
 const AdminPortal: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isAddSellerOpen, setIsAddSellerOpen] = useState(false);
+  const [isAddTier2SellerOpen, setIsAddTier2SellerOpen] = useState(false);
   const [sellers, setSellers] = useState<any[]>([]);
+  const [tier2Sellers, setTier2Sellers] = useState<any[]>([]);
   const { toast } = useToast();
 
   const mockUser = {
@@ -51,8 +54,31 @@ const AdminPortal: React.FC = () => {
     }
   };
 
+  const loadTier2Sellers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('tier2_sellers')
+        .select(`
+          *,
+          tier1_seller:sellers(name)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setTier2Sellers(data || []);
+    } catch (error: any) {
+      console.error('Error loading tier2 sellers:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load Tier-2 sellers',
+        variant: 'destructive'
+      });
+    }
+  };
+
   useEffect(() => {
     loadSellers();
+    loadTier2Sellers();
   }, []);
 
   const renderDashboard = () => (
@@ -210,6 +236,74 @@ const AdminPortal: React.FC = () => {
     </div>
   );
 
+  const renderTier2Sellers = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Tier-2 Sellers</h2>
+          <p className="text-gray-600">Manage secondary seller accounts</p>
+        </div>
+        <Button className="flex items-center space-x-2" onClick={() => setIsAddTier2SellerOpen(true)}>
+          <UserPlus className="h-4 w-4" />
+          <span>Add Tier-2 Seller</span>
+        </Button>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Active Tier-2 Sellers</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {tier2Sellers.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                No Tier-2 sellers found. Add your first Tier-2 seller to get started.
+              </div>
+            ) : (
+              tier2Sellers.map((seller) => (
+                <div key={seller.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                        {seller.logo_url ? (
+                          <img src={seller.logo_url} alt={seller.name} className="w-8 h-8 rounded-full object-cover" />
+                        ) : (
+                          <Building2 className="h-5 w-5 text-purple-600" />
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-gray-900">{seller.name}</h3>
+                        <p className="text-sm text-gray-500">{seller.admin_email}</p>
+                        <p className="text-xs text-gray-400">{seller.subdomain}.reportingportal.ai</p>
+                        <p className="text-xs text-blue-600">Under: {seller.tier1_seller?.name}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-6 text-sm text-gray-600">
+                    <div className="text-center">
+                      <p className="font-medium">0</p>
+                      <p className="text-xs">Clients</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="font-medium">₹0</p>
+                      <p className="text-xs">Revenue</p>
+                    </div>
+                    <Badge 
+                      variant={seller.status === 'active' ? 'default' : 'secondary'}
+                      className={seller.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}
+                    >
+                      {seller.status}
+                    </Badge>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
@@ -217,7 +311,7 @@ const AdminPortal: React.FC = () => {
       case 'tier1-sellers':
         return renderTier1Sellers();
       case 'tier2-sellers':
-        return <div className="p-8 text-center text-gray-500">Tier-2 Sellers management coming soon...</div>;
+        return renderTier2Sellers();
       case 'clients':
         return <div className="p-8 text-center text-gray-500">Client management coming soon...</div>;
       case 'revenue':
@@ -247,6 +341,12 @@ const AdminPortal: React.FC = () => {
         isOpen={isAddSellerOpen}
         onClose={() => setIsAddSellerOpen(false)}
         onSuccess={loadSellers}
+      />
+      
+      <AddTier2SellerForm
+        isOpen={isAddTier2SellerOpen}
+        onClose={() => setIsAddTier2SellerOpen(false)}
+        onSuccess={loadTier2Sellers}
       />
     </div>
   );

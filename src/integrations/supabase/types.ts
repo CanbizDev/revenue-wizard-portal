@@ -56,6 +56,59 @@ export type Database = {
         }
         Relationships: []
       }
+      tier2_sellers: {
+        Row: {
+          admin_email: string
+          admin_password_hash: string
+          created_at: string
+          id: string
+          logo_url: string | null
+          name: string
+          site_content: Json | null
+          status: string | null
+          stylesheet_url: string | null
+          subdomain: string
+          tier1_seller_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_email: string
+          admin_password_hash: string
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name: string
+          site_content?: Json | null
+          status?: string | null
+          stylesheet_url?: string | null
+          subdomain: string
+          tier1_seller_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_email?: string
+          admin_password_hash?: string
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          site_content?: Json | null
+          status?: string | null
+          stylesheet_url?: string | null
+          subdomain?: string
+          tier1_seller_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tier2_sellers_tier1_seller_id_fkey"
+            columns: ["tier1_seller_id"]
+            isOneToOne: false
+            referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
