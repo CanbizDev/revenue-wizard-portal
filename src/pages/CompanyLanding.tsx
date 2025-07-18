@@ -80,7 +80,13 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
   };
 
   const handleAdminAccess = () => {
-    onNavigate('/admin');
+    if (company === 'jupiterbrains') {
+      onNavigate('/admin');
+    } else if (company === 'marketstrendai') {
+      onNavigate('/seller-admin');
+    } else {
+      onNavigate('/admin'); // fallback
+    }
   };
 
   return (

@@ -8,6 +8,7 @@ import CompanyLanding from "./pages/CompanyLanding";
 import ClientLogin from "./pages/ClientLogin";
 import AdminPortal from "./components/Portal/AdminPortal";
 import SellerPortal from "./components/Portal/SellerPortal";
+import SellerAdminPortal from "./components/Portal/SellerAdminPortal";
 import ClientPortal from "./components/Portal/ClientPortal";
 import NotFound from "./pages/NotFound";
 import { useState } from "react";
@@ -22,6 +23,8 @@ const App = () => {
   const handleNavigation = (path: string) => {
     if (path === '/admin') {
       setCurrentView('admin');
+    } else if (path === '/seller-admin') {
+      setCurrentView('seller-admin');
     } else if (path.startsWith('/')) {
       const clientName = path.substring(1);
       setCurrentClient(clientName);
@@ -65,6 +68,9 @@ const App = () => {
       
       case 'admin':
         return <AdminPortal />;
+      
+      case 'seller-admin':
+        return <SellerAdminPortal />;
       
       case 'client-admin':
       case 'client-viewer':
