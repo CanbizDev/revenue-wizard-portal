@@ -1,11 +1,14 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '@/components/Layout/Header';
 import Sidebar from '@/components/Layout/Sidebar';
 import DashboardCard from '@/components/Dashboard/DashboardCard';
+import AddSellerForm from '@/components/Forms/AddSellerForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Users, 
   Building2, 
@@ -18,6 +21,9 @@ import {
 
 const AdminPortal: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isAddSellerOpen, setIsAddSellerOpen] = useState(false);
+  const [sellers, setSellers] = useState<any[]>([]);
+  const { toast } = useToast();
 
   const mockUser = {
     name: 'Admin User',
@@ -25,6 +31,29 @@ const AdminPortal: React.FC = () => {
     role: 'JB Administrator',
     company: 'JupiterBrains'
   };
+
+  const loadSellers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('sellers')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setSellers(data || []);
+    } catch (error: any) {
+      console.error('Error loading sellers:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load sellers',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  useEffect(() => {
+    loadSellers();
+  }, []);
 
   const renderDashboard = () => (
     <div className="space-y-6">
@@ -121,7 +150,7 @@ const AdminPortal: React.FC = () => {
           <h2 className="text-2xl font-bold text-gray-900">Tier-1 Sellers</h2>
           <p className="text-gray-600">Manage primary seller accounts</p>
         </div>
-        <Button className="flex items-center space-x-2">
+        <Button className="flex items-center space-x-2" onClick={() => setIsAddSellerOpen(true)}>
           <UserPlus className="h-4 w-4" />
           <span>Add Tier-1 Seller</span>
         </Button>
@@ -133,41 +162,48 @@ const AdminPortal: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {[
-              { name: 'TechCorp Solutions', email: 'admin@techcorp.com', clients: 45, revenue: '₹4,50,000', status: 'active' },
-              { name: 'DataFlow Systems', email: 'contact@dataflow.com', clients: 32, revenue: '₹3,20,000', status: 'active' },
-              { name: 'Analytics Pro', email: 'info@analyticspro.com', clients: 28, revenue: '₹2,80,000', status: 'pending' },
-            ].map((seller, index) => (
-              <div key={index} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                      <Building2 className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-gray-900">{seller.name}</h3>
-                      <p className="text-sm text-gray-500">{seller.email}</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-6 text-sm text-gray-600">
-                  <div className="text-center">
-                    <p className="font-medium">{seller.clients}</p>
-                    <p className="text-xs">Clients</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="font-medium">{seller.revenue}</p>
-                    <p className="text-xs">Revenue</p>
-                  </div>
-                  <Badge 
-                    variant={seller.status === 'active' ? 'default' : 'secondary'}
-                    className={seller.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}
-                  >
-                    {seller.status}
-                  </Badge>
-                </div>
+            {sellers.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                No sellers found. Add your first Tier-1 seller to get started.
               </div>
-            ))}
+            ) : (
+              sellers.map((seller) => (
+                <div key={seller.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        {seller.logo_url ? (
+                          <img src={seller.logo_url} alt={seller.name} className="w-8 h-8 rounded-full object-cover" />
+                        ) : (
+                          <Building2 className="h-5 w-5 text-blue-600" />
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-gray-900">{seller.name}</h3>
+                        <p className="text-sm text-gray-500">{seller.admin_email}</p>
+                        <p className="text-xs text-gray-400">{seller.subdomain}.reportingportal.ai</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-6 text-sm text-gray-600">
+                    <div className="text-center">
+                      <p className="font-medium">0</p>
+                      <p className="text-xs">Clients</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="font-medium">₹0</p>
+                      <p className="text-xs">Revenue</p>
+                    </div>
+                    <Badge 
+                      variant={seller.status === 'active' ? 'default' : 'secondary'}
+                      className={seller.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}
+                    >
+                      {seller.status}
+                    </Badge>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </CardContent>
       </Card>
@@ -206,6 +242,12 @@ const AdminPortal: React.FC = () => {
           {renderContent()}
         </main>
       </div>
+      
+      <AddSellerForm
+        isOpen={isAddSellerOpen}
+        onClose={() => setIsAddSellerOpen(false)}
+        onSuccess={loadSellers}
+      />
     </div>
   );
 };

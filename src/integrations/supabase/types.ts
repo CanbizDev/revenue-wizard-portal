@@ -14,7 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      sellers: {
+        Row: {
+          admin_email: string
+          admin_password_hash: string
+          created_at: string
+          id: string
+          logo_url: string | null
+          name: string
+          site_content: Json | null
+          status: string | null
+          stylesheet_url: string | null
+          subdomain: string
+          updated_at: string
+        }
+        Insert: {
+          admin_email: string
+          admin_password_hash: string
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name: string
+          site_content?: Json | null
+          status?: string | null
+          stylesheet_url?: string | null
+          subdomain: string
+          updated_at?: string
+        }
+        Update: {
+          admin_email?: string
+          admin_password_hash?: string
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          site_content?: Json | null
+          status?: string | null
+          stylesheet_url?: string | null
+          subdomain?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
