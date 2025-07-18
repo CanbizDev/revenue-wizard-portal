@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { User, LogOut, Settings, Bell } from 'lucide-react';
+import { User, LogOut, Settings, Bell, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,9 +21,11 @@ interface HeaderProps {
     role: string;
     company?: string;
   };
+  onMenuToggle?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ portalType, user }) => {
+const Header: React.FC<HeaderProps> = ({ portalType, user, onMenuToggle }) => {
+  const isMobile = useIsMobile();
   const getPortalTitle = () => {
     switch (portalType) {
       case 'admin':
@@ -54,6 +57,11 @@ const Header: React.FC<HeaderProps> = ({ portalType, user }) => {
     <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2 sm:space-x-4">
+          {isMobile && (
+            <Button variant="ghost" size="sm" onClick={onMenuToggle} className="p-2">
+              <Menu className="h-5 w-5" />
+            </Button>
+          )}
           <div className="flex items-center space-x-1 sm:space-x-2">
             <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-xs sm:text-sm">RP</span>

@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import Header from '@/components/Layout/Header';
 import Sidebar from '@/components/Layout/Sidebar';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 import DashboardCard from '@/components/Dashboard/DashboardCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,6 +21,8 @@ import {
 const ClientPortal: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [userRole] = useState<'client_admin' | 'client_viewer'>('client_admin');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const mockUser = {
     name: 'Sarah Johnson',
@@ -34,7 +38,7 @@ const ClientPortal: React.FC = () => {
         <p className="text-gray-600">Welcome to your reporting portal, {mockUser.name}</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <DashboardCard
           title="Active Reports"
           value={8}
@@ -147,7 +151,7 @@ const ClientPortal: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {[
           { 
             title: 'Q4 Analytics Report', 
@@ -237,15 +241,20 @@ const ClientPortal: React.FC = () => {
 
   return (
     <div className="h-screen flex flex-col">
-      <Header portalType="client" user={mockUser} />
-      <div className="flex-1 flex">
+      <Header portalType="client" user={mockUser} onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
+      <div className="flex-1 flex relative">
         <Sidebar 
           portalType="client" 
           userRole={userRole}
           activeTab={activeTab} 
-          onTabChange={setActiveTab} 
+          onTabChange={setActiveTab}
+          isOpen={sidebarOpen}
+          onToggle={() => setSidebarOpen(!sidebarOpen)}
         />
-        <main className="flex-1 p-6 bg-gray-50 overflow-auto">
+        <main className={cn(
+          "flex-1 p-4 sm:p-6 bg-gray-50 overflow-auto",
+          isMobile ? "w-full" : "ml-0"
+        )}>
           {renderContent()}
         </main>
       </div>

@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { 
   Users, 
   BarChart3, 
@@ -11,7 +12,9 @@ import {
   UserPlus,
   CreditCard,
   History,
-  Eye
+  Eye,
+  Menu,
+  X
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -19,9 +22,12 @@ interface SidebarProps {
   userRole?: string;
   activeTab: string;
   onTabChange: (tab: string) => void;
+  isOpen?: boolean;
+  onToggle?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ portalType, userRole, activeTab, onTabChange }) => {
+const Sidebar: React.FC<SidebarProps> = ({ portalType, userRole, activeTab, onTabChange, isOpen = true, onToggle }) => {
+  const isMobile = useIsMobile();
   const getMenuItems = () => {
     switch (portalType) {
       case 'admin':
@@ -68,9 +74,64 @@ const Sidebar: React.FC<SidebarProps> = ({ portalType, userRole, activeTab, onTa
 
   const menuItems = getMenuItems();
 
+  if (isMobile) {
+    return (
+      <>
+        {/* Mobile overlay */}
+        {isOpen && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={onToggle}
+          />
+        )}
+        
+        {/* Mobile sidebar */}
+        <aside className={cn(
+          "fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 z-50 transform transition-transform duration-300 ease-in-out",
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        )}>
+          <div className="flex items-center justify-between p-4 border-b">
+            <h2 className="text-lg font-semibold">Menu</h2>
+            <button onClick={onToggle} className="p-2 hover:bg-gray-100 rounded-md">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <nav className="mt-4 px-3">
+            <ul className="space-y-1">
+              {menuItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                
+                return (
+                  <li key={item.id}>
+                    <button
+                      onClick={() => {
+                        onTabChange(item.id);
+                        onToggle?.();
+                      }}
+                      className={cn(
+                        'w-full flex items-center px-3 py-3 text-sm font-medium rounded-md transition-colors',
+                        isActive
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                      )}
+                    >
+                      <Icon className="mr-3 h-4 w-4 flex-shrink-0" />
+                      <span>{item.label}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        </aside>
+      </>
+    );
+  }
+
   return (
-    <aside className="w-48 sm:w-64 bg-gray-50 border-r border-gray-200 h-full">
-      <nav className="mt-4 sm:mt-6 px-2 sm:px-3">
+    <aside className="w-64 bg-gray-50 border-r border-gray-200 h-full">
+      <nav className="mt-6 px-3">
         <ul className="space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -81,13 +142,13 @@ const Sidebar: React.FC<SidebarProps> = ({ portalType, userRole, activeTab, onTa
                 <button
                   onClick={() => onTabChange(item.id)}
                   className={cn(
-                    'w-full flex items-center px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded-md transition-colors',
+                    'w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
                     isActive
                       ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-600'
                       : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                   )}
                 >
-                  <Icon className="mr-2 sm:mr-3 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                  <Icon className="mr-3 h-4 w-4 flex-shrink-0" />
                   <span className="truncate">{item.label}</span>
                 </button>
               </li>

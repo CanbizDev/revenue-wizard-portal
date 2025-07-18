@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import Header from '@/components/Layout/Header';
 import Sidebar from '@/components/Layout/Sidebar';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 import DashboardCard from '@/components/Dashboard/DashboardCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,6 +20,8 @@ import {
 const SellerPortal: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [userRole] = useState<'tier1_seller' | 'tier2_seller'>('tier1_seller');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const mockUser = {
     name: 'John Smith',
@@ -33,7 +37,7 @@ const SellerPortal: React.FC = () => {
         <p className="text-gray-600">Welcome back, {mockUser.name}</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <DashboardCard
           title="Active Clients"
           value={45}
@@ -111,12 +115,12 @@ const SellerPortal: React.FC = () => {
 
   const renderClients = () => (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">My Clients</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">My Clients</h2>
           <p className="text-gray-600">Manage your client relationships</p>
         </div>
-        <Button className="flex items-center space-x-2">
+        <Button className="flex items-center space-x-2 w-full sm:w-auto">
           <UserPlus className="h-4 w-4" />
           <span>Add New Client</span>
         </Button>
@@ -133,7 +137,7 @@ const SellerPortal: React.FC = () => {
               { name: 'Analytics Ltd', contact: 'info@analytics.com', status: 'active', revenue: '₹38,000', reports: 8 },
               { name: 'TechStart Co', contact: 'hello@techstart.com', status: 'pending', revenue: '₹0', reports: 0 },
             ].map((client, index) => (
-              <div key={index} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-gray-200 rounded-lg space-y-3 sm:space-y-0">
                 <div className="flex-1">
                   <div className="flex items-center space-x-4">
                     <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
@@ -145,7 +149,7 @@ const SellerPortal: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center space-x-6 text-sm text-gray-600">
+                <div className="flex items-center space-x-6 text-sm text-gray-600 w-full sm:w-auto justify-between sm:justify-end">
                   <div className="text-center">
                     <p className="font-medium">{client.reports}</p>
                     <p className="text-xs">Reports</p>
@@ -190,15 +194,20 @@ const SellerPortal: React.FC = () => {
 
   return (
     <div className="h-screen flex flex-col">
-      <Header portalType="seller" user={mockUser} />
-      <div className="flex-1 flex">
+      <Header portalType="seller" user={mockUser} onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
+      <div className="flex-1 flex relative">
         <Sidebar 
           portalType="seller" 
           userRole={userRole}
           activeTab={activeTab} 
-          onTabChange={setActiveTab} 
+          onTabChange={setActiveTab}
+          isOpen={sidebarOpen}
+          onToggle={() => setSidebarOpen(!sidebarOpen)}
         />
-        <main className="flex-1 p-6 bg-gray-50 overflow-auto">
+        <main className={cn(
+          "flex-1 p-4 sm:p-6 bg-gray-50 overflow-auto",
+          isMobile ? "w-full" : "ml-0"
+        )}>
           {renderContent()}
         </main>
       </div>

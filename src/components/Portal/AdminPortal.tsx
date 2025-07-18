@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Layout/Header';
 import Sidebar from '@/components/Layout/Sidebar';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 import DashboardCard from '@/components/Dashboard/DashboardCard';
 import AddSellerForm from '@/components/Forms/AddSellerForm';
 import AddTier2SellerForm from '@/components/Forms/AddTier2SellerForm';
@@ -26,7 +28,9 @@ const AdminPortal: React.FC = () => {
   const [isAddTier2SellerOpen, setIsAddTier2SellerOpen] = useState(false);
   const [sellers, setSellers] = useState<any[]>([]);
   const [tier2Sellers, setTier2Sellers] = useState<any[]>([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const mockUser = {
     name: 'Admin User',
@@ -88,7 +92,7 @@ const AdminPortal: React.FC = () => {
         <p className="text-gray-600">Overview of the entire ReportingPortal.ai ecosystem</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <DashboardCard
           title="Total Tier-1 Sellers"
           value={24}
@@ -171,12 +175,12 @@ const AdminPortal: React.FC = () => {
 
   const renderTier1Sellers = () => (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Tier-1 Sellers</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Tier-1 Sellers</h2>
           <p className="text-gray-600">Manage primary seller accounts</p>
         </div>
-        <Button className="flex items-center space-x-2" onClick={() => setIsAddSellerOpen(true)}>
+        <Button className="flex items-center space-x-2 w-full sm:w-auto" onClick={() => setIsAddSellerOpen(true)}>
           <UserPlus className="h-4 w-4" />
           <span>Add Tier-1 Seller</span>
         </Button>
@@ -194,7 +198,7 @@ const AdminPortal: React.FC = () => {
               </div>
             ) : (
               sellers.map((seller) => (
-                <div key={seller.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div key={seller.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-gray-200 rounded-lg space-y-3 sm:space-y-0">
                   <div className="flex-1">
                     <div className="flex items-center space-x-4">
                       <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
@@ -211,7 +215,7 @@ const AdminPortal: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-6 text-sm text-gray-600">
+                  <div className="flex items-center space-x-6 text-sm text-gray-600 w-full sm:w-auto justify-between sm:justify-end">
                     <div className="text-center">
                       <p className="font-medium">0</p>
                       <p className="text-xs">Clients</p>
@@ -238,12 +242,12 @@ const AdminPortal: React.FC = () => {
 
   const renderTier2Sellers = () => (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Tier-2 Sellers</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Tier-2 Sellers</h2>
           <p className="text-gray-600">Manage secondary seller accounts</p>
         </div>
-        <Button className="flex items-center space-x-2" onClick={() => setIsAddTier2SellerOpen(true)}>
+        <Button className="flex items-center space-x-2 w-full sm:w-auto" onClick={() => setIsAddTier2SellerOpen(true)}>
           <UserPlus className="h-4 w-4" />
           <span>Add Tier-2 Seller</span>
         </Button>
@@ -325,14 +329,19 @@ const AdminPortal: React.FC = () => {
 
   return (
     <div className="h-screen flex flex-col">
-      <Header portalType="admin" user={mockUser} />
-      <div className="flex-1 flex">
+      <Header portalType="admin" user={mockUser} onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
+      <div className="flex-1 flex relative">
         <Sidebar 
           portalType="admin" 
           activeTab={activeTab} 
-          onTabChange={setActiveTab} 
+          onTabChange={setActiveTab}
+          isOpen={sidebarOpen}
+          onToggle={() => setSidebarOpen(!sidebarOpen)}
         />
-        <main className="flex-1 p-6 bg-gray-50 overflow-auto">
+        <main className={cn(
+          "flex-1 p-4 sm:p-6 bg-gray-50 overflow-auto",
+          isMobile ? "w-full" : "ml-0"
+        )}>
           {renderContent()}
         </main>
       </div>
