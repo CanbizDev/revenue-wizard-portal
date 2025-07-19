@@ -4,6 +4,8 @@ import Sidebar from '@/components/Layout/Sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import DashboardCard from '@/components/Dashboard/DashboardCard';
+import AddClientForm from '@/components/Forms/AddClientForm';
+import AddTier2SellerForm from '@/components/Forms/AddTier2SellerForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,12 +22,22 @@ import {
   Eye,
   Send,
   Users,
-  Building2
+  Building2,
+  Plus
 } from 'lucide-react';
 
 const SellerAdminPortal: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showAddClientForm, setShowAddClientForm] = useState(false);
+  const [showAddTier2Form, setShowAddTier2Form] = useState(false);
+  const [clients, setClients] = useState([
+    { id: 1, name: 'Servicon', email: 'contact@servicon.com', company: 'Servicon Ltd', plan: 'Premium', status: 'Active' },
+    { id: 2, name: 'Forte', email: 'info@forte.com', company: 'Forte Inc', plan: 'Enterprise', status: 'Active' },
+  ]);
+  const [tier2Sellers, setTier2Sellers] = useState([
+    { id: 1, name: 'DataAnalytics Pro', subdomain: 'dataanalytics', status: 'Active', clients: 3 },
+  ]);
   const isMobile = useIsMobile();
 
   const mockUser = {
@@ -335,15 +347,131 @@ const SellerAdminPortal: React.FC = () => {
       case 'reports':
         return renderReports();
       case 'clients':
-        return <div className="p-8 text-center text-gray-500">Client management coming soon...</div>;
+        return renderClients();
+      case 'tier2sellers':
+        return renderTier2Sellers();
       default:
         return renderDashboard();
     }
   };
 
+  const handleAddClient = (clientData: any) => {
+    const newClient = {
+      id: clients.length + 1,
+      name: clientData.name,
+      email: clientData.email,
+      company: clientData.company,
+      plan: clientData.subscriptionPlan,
+      status: 'Active'
+    };
+    setClients([...clients, newClient]);
+  };
+
+  const handleAddTier2Seller = (sellerData: any) => {
+    const newSeller = {
+      id: tier2Sellers.length + 1,
+      name: sellerData.name,
+      subdomain: sellerData.subdomain,
+      status: 'Active',
+      clients: 0
+    };
+    setTier2Sellers([...tier2Sellers, newSeller]);
+  };
+
+  const renderClients = () => (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">My Clients</h2>
+          <p className="text-gray-600">Manage your client relationships and subscriptions</p>
+        </div>
+        <Button onClick={() => setShowAddClientForm(true)} className="flex items-center space-x-2">
+          <Plus className="h-4 w-4" />
+          <span>Add Client</span>
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        {clients.map((client) => (
+          <Card key={client.id}>
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">{client.name}</h3>
+                  <p className="text-sm text-gray-600">{client.company}</p>
+                </div>
+                <Badge variant="secondary" className="bg-green-100 text-green-800">
+                  {client.status}
+                </Badge>
+              </div>
+              <div className="space-y-2 text-sm">
+                <p><span className="font-medium">Email:</span> {client.email}</p>
+                <p><span className="font-medium">Plan:</span> {client.plan}</p>
+              </div>
+              <div className="flex space-x-2 mt-4">
+                <Button variant="outline" size="sm" className="flex-1">
+                  View Details
+                </Button>
+                <Button variant="outline" size="sm" className="flex-1">
+                  Generate Report
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderTier2Sellers = () => (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Tier 2 Sellers</h2>
+          <p className="text-gray-600">Manage your sub-sellers and their performance</p>
+        </div>
+        <Button onClick={() => setShowAddTier2Form(true)} className="flex items-center space-x-2">
+          <Plus className="h-4 w-4" />
+          <span>Add Tier 2 Seller</span>
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        {tier2Sellers.map((seller) => (
+          <Card key={seller.id}>
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">{seller.name}</h3>
+                  <p className="text-sm text-gray-600">{seller.subdomain}.marketstrendai.com</p>
+                </div>
+                <Badge variant="secondary" className="bg-green-100 text-green-800">
+                  {seller.status}
+                </Badge>
+              </div>
+              <div className="space-y-2 text-sm">
+                <p><span className="font-medium">Active Clients:</span> {seller.clients}</p>
+                <p><span className="font-medium">Commission Rate:</span> 15%</p>
+              </div>
+              <div className="flex space-x-2 mt-4">
+                <Button variant="outline" size="sm" className="flex-1">
+                  View Performance
+                </Button>
+                <Button variant="outline" size="sm" className="flex-1">
+                  Manage
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+
   const sidebarItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Building2 },
     { id: 'clients', label: 'My Clients', icon: Users },
+    { id: 'tier2sellers', label: 'Tier 2 Sellers', icon: Building2 },
     { id: 'reports', label: 'Report Review', icon: FileText },
     { id: 'billing', label: 'Billing & Cards', icon: CreditCard },
   ];
@@ -401,6 +529,21 @@ const SellerAdminPortal: React.FC = () => {
           {renderContent()}
         </main>
       </div>
+
+      <AddClientForm
+        isOpen={showAddClientForm}
+        onClose={() => setShowAddClientForm(false)}
+        onSubmit={handleAddClient}
+      />
+
+      <AddTier2SellerForm
+        isOpen={showAddTier2Form}
+        onClose={() => setShowAddTier2Form(false)}
+        onSuccess={() => {
+          // Refresh data or update state as needed
+          setShowAddTier2Form(false);
+        }}
+      />
     </div>
   );
 };
