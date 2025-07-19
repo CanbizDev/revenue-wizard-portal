@@ -136,9 +136,10 @@ const AddClientForm: React.FC<AddClientFormProps> = ({ isOpen, onClose, onSubmit
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="basic">Basic - ₹15,000/month</SelectItem>
-                    <SelectItem value="premium">Premium - ₹25,000/month</SelectItem>
-                    <SelectItem value="enterprise">Enterprise - ₹45,000/month</SelectItem>
+                    <SelectItem value="basic">Basic - ₹15,000/month (INR)</SelectItem>
+                    <SelectItem value="premium">Premium - ₹25,000/month (INR)</SelectItem>
+                    <SelectItem value="enterprise">Enterprise - ₹45,000/month (INR)</SelectItem>
+                    <SelectItem value="global">Global Premium - $300/month (USD)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

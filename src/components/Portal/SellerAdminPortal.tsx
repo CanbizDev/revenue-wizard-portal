@@ -45,7 +45,9 @@ const SellerAdminPortal: React.FC = () => {
     { 
       id: 1, 
       name: 'Basic', 
-      price: 15000, 
+      price: 15000,
+      currency: 'INR',
+      currencySymbol: '₹',
       billing: 'monthly', 
       features: ['Monthly Reports', 'Basic Analytics', 'Email Support'],
       maxClients: 5,
@@ -54,7 +56,9 @@ const SellerAdminPortal: React.FC = () => {
     { 
       id: 2, 
       name: 'Premium', 
-      price: 25000, 
+      price: 25000,
+      currency: 'INR',
+      currencySymbol: '₹',
       billing: 'monthly', 
       features: ['Weekly Reports', 'Advanced Analytics', 'Priority Support', 'Custom Dashboards'],
       maxClients: 15,
@@ -63,10 +67,23 @@ const SellerAdminPortal: React.FC = () => {
     { 
       id: 3, 
       name: 'Enterprise', 
-      price: 45000, 
+      price: 45000,
+      currency: 'INR',
+      currencySymbol: '₹',
       billing: 'monthly', 
       features: ['Daily Reports', 'Real-time Analytics', '24/7 Support', 'White-label Solutions', 'API Access'],
       maxClients: 50,
+      active: true
+    },
+    { 
+      id: 4, 
+      name: 'Global Premium', 
+      price: 300,
+      currency: 'USD',
+      currencySymbol: '$',
+      billing: 'monthly', 
+      features: ['Weekly Reports', 'Advanced Analytics', 'Priority Support', 'Custom Dashboards', 'Multi-currency Support'],
+      maxClients: 15,
       active: true
     },
   ]);
@@ -96,8 +113,8 @@ const SellerAdminPortal: React.FC = () => {
         />
         <DashboardCard
           title="Monthly Revenue"
-          value="₹7,50,000"
-          description="This month's earnings"
+          value="₹7,50,000 + $900"
+          description="Multi-currency earnings"
           icon={DollarSign}
           trend={{ value: 18, isPositive: true }}
         />
@@ -545,9 +562,10 @@ const SellerAdminPortal: React.FC = () => {
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">{plan.name}</h3>
                   <div className="flex items-center space-x-2">
-                    <span className="text-2xl font-bold text-gray-900">₹{plan.price.toLocaleString()}</span>
+                    <span className="text-2xl font-bold text-gray-900">{plan.currencySymbol}{plan.price.toLocaleString()}</span>
                     <span className="text-sm text-gray-500">/{plan.billing}</span>
                   </div>
+                  <span className="text-xs text-gray-400">{plan.currency}</span>
                 </div>
                 <Badge variant={plan.active ? "default" : "secondary"} className={plan.active ? "bg-green-100 text-green-800" : ""}>
                   {plan.active ? 'Active' : 'Inactive'}

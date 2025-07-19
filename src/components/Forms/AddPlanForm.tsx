@@ -18,9 +18,21 @@ interface AddPlanFormProps {
 
 const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, editingPlan }) => {
   const { toast } = useToast();
+  
+  const currencyOptions = [
+    { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
+    { code: 'USD', symbol: '$', name: 'US Dollar' },
+    { code: 'EUR', symbol: '€', name: 'Euro' },
+    { code: 'GBP', symbol: '£', name: 'British Pound' },
+    { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
+    { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
+    { code: 'SGD', symbol: 'S$', name: 'Singapore Dollar' },
+  ];
+
   const [formData, setFormData] = useState({
     name: editingPlan?.name || '',
     price: editingPlan?.price || '',
+    currency: editingPlan?.currency || 'INR',
     billing: editingPlan?.billing || 'monthly',
     maxClients: editingPlan?.maxClients || '',
     description: editingPlan?.description || '',
@@ -40,10 +52,13 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
       return;
     }
 
+    const selectedCurrency = currencyOptions.find(c => c.code === formData.currency);
+    
     const planData = {
       ...formData,
       price: parseInt(formData.price),
       maxClients: parseInt(formData.maxClients),
+      currencySymbol: selectedCurrency?.symbol || '₹',
       features: formData.features.filter(f => f.trim() !== '')
     };
 
@@ -53,6 +68,7 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
       setFormData({
         name: '',
         price: '',
+        currency: 'INR',
         billing: 'monthly',
         maxClients: '',
         description: '',
@@ -116,7 +132,21 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="price">Price (₹) *</Label>
+                <Label htmlFor="maxClients">Max Clients *</Label>
+                <Input
+                  id="maxClients"
+                  type="number"
+                  value={formData.maxClients}
+                  onChange={(e) => handleChange('maxClients', e.target.value)}
+                  placeholder="15"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="price">Price *</Label>
                 <Input
                   id="price"
                   type="number"
@@ -126,9 +156,21 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
                   required
                 />
               </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="currency">Currency *</Label>
+                <Select value={formData.currency} onValueChange={(value) => handleChange('currency', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {currencyOptions.map((currency) => (
+                      <SelectItem key={currency.code} value={currency.code}>
+                        {currency.symbol} {currency.code} - {currency.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="billing">Billing Cycle</Label>
                 <Select value={formData.billing} onValueChange={(value) => handleChange('billing', value)}>
@@ -142,16 +184,17 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="maxClients">Max Clients *</Label>
-                <Input
-                  id="maxClients"
-                  type="number"
-                  value={formData.maxClients}
-                  onChange={(e) => handleChange('maxClients', e.target.value)}
-                  placeholder="15"
-                  required
-                />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Price Preview</Label>
+              <div className="px-3 py-2 bg-gray-50 border rounded-md">
+                <span className="text-lg font-semibold">
+                  {currencyOptions.find(c => c.code === formData.currency)?.symbol || '₹'}
+                  {formData.price ? parseInt(formData.price).toLocaleString() : '0'} 
+                  <span className="text-sm text-gray-500"> / {formData.billing}</span>
+                </span>
+                <div className="text-xs text-gray-500 mt-1">{formData.currency}</div>
               </div>
             </div>
 
