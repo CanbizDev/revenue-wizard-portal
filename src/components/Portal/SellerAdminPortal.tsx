@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import DashboardCard from '@/components/Dashboard/DashboardCard';
 import AddClientForm from '@/components/Forms/AddClientForm';
 import AddTier2SellerForm from '@/components/Forms/AddTier2SellerForm';
+import AddPlanForm from '@/components/Forms/AddPlanForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -31,12 +32,43 @@ const SellerAdminPortal: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showAddClientForm, setShowAddClientForm] = useState(false);
   const [showAddTier2Form, setShowAddTier2Form] = useState(false);
+  const [showAddPlanForm, setShowAddPlanForm] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<any>(null);
   const [clients, setClients] = useState([
     { id: 1, name: 'Servicon', email: 'contact@servicon.com', company: 'Servicon Ltd', plan: 'Premium', status: 'Active' },
     { id: 2, name: 'Forte', email: 'info@forte.com', company: 'Forte Inc', plan: 'Enterprise', status: 'Active' },
   ]);
   const [tier2Sellers, setTier2Sellers] = useState([
     { id: 1, name: 'DataAnalytics Pro', subdomain: 'dataanalytics', status: 'Active', clients: 3 },
+  ]);
+  const [plans, setPlans] = useState([
+    { 
+      id: 1, 
+      name: 'Basic', 
+      price: 15000, 
+      billing: 'monthly', 
+      features: ['Monthly Reports', 'Basic Analytics', 'Email Support'],
+      maxClients: 5,
+      active: true
+    },
+    { 
+      id: 2, 
+      name: 'Premium', 
+      price: 25000, 
+      billing: 'monthly', 
+      features: ['Weekly Reports', 'Advanced Analytics', 'Priority Support', 'Custom Dashboards'],
+      maxClients: 15,
+      active: true
+    },
+    { 
+      id: 3, 
+      name: 'Enterprise', 
+      price: 45000, 
+      billing: 'monthly', 
+      features: ['Daily Reports', 'Real-time Analytics', '24/7 Support', 'White-label Solutions', 'API Access'],
+      maxClients: 50,
+      active: true
+    },
   ]);
   const isMobile = useIsMobile();
 
@@ -350,6 +382,8 @@ const SellerAdminPortal: React.FC = () => {
         return renderClients();
       case 'tier2sellers':
         return renderTier2Sellers();
+      case 'plans':
+        return renderPlans();
       default:
         return renderDashboard();
     }
@@ -376,6 +410,28 @@ const SellerAdminPortal: React.FC = () => {
       clients: 0
     };
     setTier2Sellers([...tier2Sellers, newSeller]);
+  };
+
+  const handleAddPlan = (planData: any) => {
+    const newPlan = {
+      id: plans.length + 1,
+      ...planData,
+      active: true
+    };
+    setPlans([...plans, newPlan]);
+  };
+
+  const handleEditPlan = (planData: any) => {
+    setPlans(plans.map(plan => 
+      plan.id === editingPlan.id ? { ...editingPlan, ...planData } : plan
+    ));
+    setEditingPlan(null);
+  };
+
+  const togglePlanStatus = (planId: number) => {
+    setPlans(plans.map(plan => 
+      plan.id === planId ? { ...plan, active: !plan.active } : plan
+    ));
   };
 
   const renderClients = () => (
@@ -468,10 +524,83 @@ const SellerAdminPortal: React.FC = () => {
     </div>
   );
 
+  const renderPlans = () => (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Subscription Plans</h2>
+          <p className="text-gray-600">Manage your pricing plans and features</p>
+        </div>
+        <Button onClick={() => setShowAddPlanForm(true)} className="flex items-center space-x-2">
+          <Plus className="h-4 w-4" />
+          <span>Add New Plan</span>
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        {plans.map((plan) => (
+          <Card key={plan.id} className={`relative ${!plan.active ? 'opacity-60' : ''}`}>
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">{plan.name}</h3>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-2xl font-bold text-gray-900">₹{plan.price.toLocaleString()}</span>
+                    <span className="text-sm text-gray-500">/{plan.billing}</span>
+                  </div>
+                </div>
+                <Badge variant={plan.active ? "default" : "secondary"} className={plan.active ? "bg-green-100 text-green-800" : ""}>
+                  {plan.active ? 'Active' : 'Inactive'}
+                </Badge>
+              </div>
+              
+              <div className="space-y-3 mb-4">
+                <div className="text-sm">
+                  <span className="font-medium">Max Clients:</span> {plan.maxClients}
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-700 mb-2">Features:</p>
+                  <ul className="text-sm text-gray-600 space-y-1">
+                    {plan.features.map((feature, index) => (
+                      <li key={index} className="flex items-center">
+                        <CheckCircle className="h-3 w-3 text-green-500 mr-2 flex-shrink-0" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              
+              <div className="flex space-x-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => setEditingPlan(plan)}
+                >
+                  Edit
+                </Button>
+                <Button 
+                  variant={plan.active ? "outline" : "default"}
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => togglePlanStatus(plan.id)}
+                >
+                  {plan.active ? 'Deactivate' : 'Activate'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+
   const sidebarItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Building2 },
     { id: 'clients', label: 'My Clients', icon: Users },
     { id: 'tier2sellers', label: 'Tier 2 Sellers', icon: Building2 },
+    { id: 'plans', label: 'Subscription Plans', icon: CreditCard },
     { id: 'reports', label: 'Report Review', icon: FileText },
     { id: 'billing', label: 'Billing & Cards', icon: CreditCard },
   ];
@@ -544,6 +673,16 @@ const SellerAdminPortal: React.FC = () => {
           // Refresh data or update state as needed
           setShowAddTier2Form(false);
         }}
+      />
+
+      <AddPlanForm
+        isOpen={showAddPlanForm || editingPlan !== null}
+        onClose={() => {
+          setShowAddPlanForm(false);
+          setEditingPlan(null);
+        }}
+        onSubmit={editingPlan ? handleEditPlan : handleAddPlan}
+        editingPlan={editingPlan}
       />
     </div>
   );
