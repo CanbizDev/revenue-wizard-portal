@@ -480,7 +480,8 @@ const SellerAdminPortal: React.FC = () => {
     <div className="h-screen flex flex-col">
       <Header 
         portalType="admin" 
-        user={mockUser} 
+        user={mockUser}
+        sellerName="MarketsTrendAI"
         onMenuToggle={() => setSidebarOpen(!sidebarOpen)} 
       />
       <div className="flex-1 flex relative">

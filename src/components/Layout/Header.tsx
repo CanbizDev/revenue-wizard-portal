@@ -21,15 +21,16 @@ interface HeaderProps {
     role: string;
     company?: string;
   };
+  sellerName?: string;
   onMenuToggle?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ portalType, user, onMenuToggle }) => {
+const Header: React.FC<HeaderProps> = ({ portalType, user, sellerName, onMenuToggle }) => {
   const isMobile = useIsMobile();
   const getPortalTitle = () => {
     switch (portalType) {
       case 'admin':
-        return 'JB Admin Portal';
+        return sellerName ? `${sellerName} Admin Portal` : 'JB Admin Portal';
       case 'seller':
         return 'Seller Portal';
       case 'client':
