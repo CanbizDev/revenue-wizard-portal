@@ -7,6 +7,7 @@ import DashboardCard from '@/components/Dashboard/DashboardCard';
 import AddClientForm from '@/components/Forms/AddClientForm';
 import AddTier2SellerForm from '@/components/Forms/AddTier2SellerForm';
 import AddPlanForm from '@/components/Forms/AddPlanForm';
+import { ClientIntakeForm } from '@/components/Forms/ClientIntakeForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -34,10 +35,13 @@ const SellerAdminPortal: React.FC = () => {
   const [showAddTier2Form, setShowAddTier2Form] = useState(false);
   const [showAddPlanForm, setShowAddPlanForm] = useState(false);
   const [editingPlan, setEditingPlan] = useState<any>(null);
+  const [showIntakeForm, setShowIntakeForm] = useState(false);
+  const [selectedClientForIntake, setSelectedClientForIntake] = useState<any>(null);
   const [clients, setClients] = useState([
-    { id: 1, name: 'Servicon', email: 'contact@servicon.com', company: 'Servicon Ltd', plan: 'Premium', status: 'Active' },
-    { id: 2, name: 'Forte', email: 'info@forte.com', company: 'Forte Inc', plan: 'Enterprise', status: 'Active' },
+    { id: 1, name: 'Servicon', email: 'contact@servicon.com', company: 'Servicon Ltd', plan: 'Premium', status: 'Active', intakeFormCompleted: true },
+    { id: 2, name: 'Forte', email: 'info@forte.com', company: 'Forte Inc', plan: 'Enterprise', status: 'Active', intakeFormCompleted: false },
   ]);
+  const [clientIntakeData, setClientIntakeData] = useState<any>({});
   const [tier2Sellers, setTier2Sellers] = useState([
     { id: 1, name: 'DataAnalytics Pro', subdomain: 'dataanalytics', status: 'Active', clients: 3 },
   ]);
@@ -413,9 +417,34 @@ const SellerAdminPortal: React.FC = () => {
       email: clientData.email,
       company: clientData.company,
       plan: clientData.subscriptionPlan,
-      status: 'Active'
+      status: 'Active',
+      intakeFormCompleted: clientData.intakeFormCompleted || false
     };
     setClients([...clients, newClient]);
+  };
+
+  const handleIntakeFormSubmit = (intakeData: any) => {
+    setClientIntakeData(prev => ({
+      ...prev,
+      [selectedClientForIntake.id]: intakeData
+    }));
+    
+    // Update client to mark intake form as completed
+    setClients(prevClients => 
+      prevClients.map(client => 
+        client.id === selectedClientForIntake.id 
+          ? { ...client, intakeFormCompleted: true }
+          : client
+      )
+    );
+    
+    setShowIntakeForm(false);
+    setSelectedClientForIntake(null);
+  };
+
+  const openIntakeForm = (client: any) => {
+    setSelectedClientForIntake(client);
+    setShowIntakeForm(true);
   };
 
   const handleAddTier2Seller = (sellerData: any) => {
@@ -480,13 +509,30 @@ const SellerAdminPortal: React.FC = () => {
               <div className="space-y-2 text-sm">
                 <p><span className="font-medium">Email:</span> {client.email}</p>
                 <p><span className="font-medium">Plan:</span> {client.plan}</p>
+                <div className="flex items-center space-x-2">
+                  <span className="font-medium">Intake Form:</span>
+                  <Badge variant={client.intakeFormCompleted ? "default" : "secondary"} 
+                         className={client.intakeFormCompleted ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}>
+                    {client.intakeFormCompleted ? 'Completed' : 'Pending'}
+                  </Badge>
+                </div>
               </div>
-              <div className="flex space-x-2 mt-4">
-                <Button variant="outline" size="sm" className="flex-1">
-                  View Details
-                </Button>
-                <Button variant="outline" size="sm" className="flex-1">
-                  Generate Report
+              <div className="flex flex-col space-y-2 mt-4">
+                <div className="flex space-x-2">
+                  <Button variant="outline" size="sm" className="flex-1">
+                    View Details
+                  </Button>
+                  <Button variant="outline" size="sm" className="flex-1">
+                    Generate Report
+                  </Button>
+                </div>
+                <Button 
+                  variant={client.intakeFormCompleted ? "outline" : "default"}
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => openIntakeForm(client)}
+                >
+                  {client.intakeFormCompleted ? 'Update Intake Form' : 'Complete Intake Form'}
                 </Button>
               </div>
             </CardContent>
@@ -682,6 +728,7 @@ const SellerAdminPortal: React.FC = () => {
         isOpen={showAddClientForm}
         onClose={() => setShowAddClientForm(false)}
         onSubmit={handleAddClient}
+        availablePlans={plans.filter(plan => plan.active)}
       />
 
       <AddTier2SellerForm
@@ -701,6 +748,17 @@ const SellerAdminPortal: React.FC = () => {
         }}
         onSubmit={editingPlan ? handleEditPlan : handleAddPlan}
         editingPlan={editingPlan}
+      />
+
+      <ClientIntakeForm
+        isOpen={showIntakeForm}
+        onClose={() => {
+          setShowIntakeForm(false);
+          setSelectedClientForIntake(null);
+        }}
+        onSubmit={handleIntakeFormSubmit}
+        clientId={selectedClientForIntake?.id}
+        existingData={selectedClientForIntake ? clientIntakeData[selectedClientForIntake.id] : null}
       />
     </div>
   );

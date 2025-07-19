@@ -12,9 +12,10 @@ interface AddClientFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (clientData: any) => void;
+  availablePlans?: any[];
 }
 
-const AddClientForm: React.FC<AddClientFormProps> = ({ isOpen, onClose, onSubmit }) => {
+const AddClientForm: React.FC<AddClientFormProps> = ({ isOpen, onClose, onSubmit, availablePlans = [] }) => {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
@@ -23,7 +24,8 @@ const AddClientForm: React.FC<AddClientFormProps> = ({ isOpen, onClose, onSubmit
     phone: '',
     industry: '',
     description: '',
-    subscriptionPlan: 'basic'
+    subscriptionPlan: '',
+    intakeFormCompleted: false
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -46,7 +48,8 @@ const AddClientForm: React.FC<AddClientFormProps> = ({ isOpen, onClose, onSubmit
       phone: '',
       industry: '',
       description: '',
-      subscriptionPlan: 'basic'
+      subscriptionPlan: '',
+      intakeFormCompleted: false
     });
     onClose();
     
@@ -136,10 +139,20 @@ const AddClientForm: React.FC<AddClientFormProps> = ({ isOpen, onClose, onSubmit
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="basic">Basic - ₹15,000/month (INR)</SelectItem>
-                    <SelectItem value="premium">Premium - ₹25,000/month (INR)</SelectItem>
-                    <SelectItem value="enterprise">Enterprise - ₹45,000/month (INR)</SelectItem>
-                    <SelectItem value="global">Global Premium - $300/month (USD)</SelectItem>
+                    {availablePlans.length > 0 ? (
+                      availablePlans.map((plan) => (
+                        <SelectItem key={plan.id} value={plan.id.toString()}>
+                          {plan.name} - {plan.price} {plan.currency}/{plan.billingCycle}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <>
+                        <SelectItem value="basic">Basic - ₹15,000/month (INR)</SelectItem>
+                        <SelectItem value="premium">Premium - ₹25,000/month (INR)</SelectItem>
+                        <SelectItem value="enterprise">Enterprise - ₹45,000/month (INR)</SelectItem>
+                        <SelectItem value="global">Global Premium - $300/month (USD)</SelectItem>
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
