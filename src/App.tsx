@@ -70,7 +70,7 @@ const App = () => {
         return <AdminPortal />;
       
       case 'seller-admin':
-        return <SellerAdminPortal />;
+        return <SellerAdminPortal company={currentCompany as any} />;
       
       case 'client-admin':
       case 'client-viewer':

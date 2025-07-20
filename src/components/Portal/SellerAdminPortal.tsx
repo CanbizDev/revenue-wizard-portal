@@ -29,7 +29,7 @@ import {
   Plus
 } from 'lucide-react';
 
-const SellerAdminPortal: React.FC = () => {
+const SellerAdminPortal: React.FC<{company?: 'marketstrendai' | 'xyzseller'}> = ({ company = 'marketstrendai' }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showAddClientForm, setShowAddClientForm] = useState(false);
@@ -94,12 +94,24 @@ const SellerAdminPortal: React.FC = () => {
   ]);
   const isMobile = useIsMobile();
 
-  const mockUser = {
-    name: 'MarketsTrendAI Admin',
-    email: 'admin@marketstrendai.com',
-    role: 'Tier-1 Seller Admin',
-    company: 'MarketsTrendAI'
+  const getCompanyData = () => {
+    if (company === 'xyzseller') {
+      return {
+        name: 'XYZSeller Admin',
+        email: 'admin@xyzseller.com',
+        role: 'Tier-2 Seller Admin',
+        company: 'XYZSeller'
+      };
+    }
+    return {
+      name: 'MarketsTrendAI Admin',
+      email: 'admin@marketstrendai.com',
+      role: 'Tier-1 Seller Admin',
+      company: 'MarketsTrendAI'
+    };
   };
+
+  const mockUser = getCompanyData();
 
   const renderDashboard = () => (
     <div className="space-y-6">
@@ -397,7 +409,7 @@ const SellerAdminPortal: React.FC = () => {
       case 'dashboard':
         return renderDashboard();
       case 'commissions':
-        return <CommissionsView userRole="tier1_seller" />;
+        return <CommissionsView userRole={company === 'xyzseller' ? 'tier2_seller' : 'tier1_seller'} />;
       case 'billing':
         return renderBilling();
       case 'reports':
