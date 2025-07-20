@@ -37,20 +37,89 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  /* Servicon Theme - Professional blue corporate */
+  .theme-servicon {
+    --background: 248 250 252;
+    --foreground: 216 34% 17%;
+    --card: 255 255 255;
+    --card-foreground: 216 34% 17%;
+    --popover: 255 255 255;
+    --popover-foreground: 216 34% 17%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 255 255 255;
+    --secondary: 214 100% 97%;
+    --secondary-foreground: 217 91% 60%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 220 100% 95%;
+    --accent-foreground: 217 91% 60%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 217 91% 60%;
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(214 100% 70%));
+    --gradient-hero: linear-gradient(135deg, hsl(217 91% 45%), hsl(217 91% 60%));
+  }
+
+  /* MarketTrends AI Theme - Modern purple/blue tech */
+  .theme-markettrends {
+    --background: 255 255 255;
+    --foreground: 217 33% 17%;
+    --card: 255 255 255;
+    --card-foreground: 217 33% 17%;
+    --popover: 255 255 255;
+    --popover-foreground: 217 33% 17%;
+    --primary: 245 58% 51%;
+    --primary-foreground: 255 255 255;
+    --secondary: 245 100% 97%;
+    --secondary-foreground: 245 58% 51%;
+    --muted: 244 6% 94%;
+    --muted-foreground: 244 4% 46%;
+    --accent: 245 100% 96%;
+    --accent-foreground: 245 58% 51%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 244 6% 91%;
+    --input: 244 6% 91%;
+    --ring: 245 58% 51%;
+    --gradient-primary: linear-gradient(135deg, hsl(245 58% 51%), hsl(250 100% 65%));
+    --gradient-hero: linear-gradient(135deg, hsl(245 58% 51%), hsl(245 100% 70%));
+  }
+
+  /* Jupiter Brains Theme - Cosmic dark purple/space */
+  .theme-jupiterbrains {
+    --background: 236 19% 7%;
+    --foreground: 245 20% 90%;
+    --card: 234 20% 12%;
+    --card-foreground: 245 20% 90%;
+    --popover: 234 20% 12%;
+    --popover-foreground: 245 20% 90%;
+    --primary: 258 90% 66%;
+    --primary-foreground: 255 255 255;
+    --secondary: 234 20% 15%;
+    --secondary-foreground: 245 20% 80%;
+    --muted: 234 20% 15%;
+    --muted-foreground: 234 15% 60%;
+    --accent: 258 90% 15%;
+    --accent-foreground: 258 90% 80%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 234 20% 20%;
+    --input: 234 20% 20%;
+    --ring: 258 90% 66%;
+    --gradient-primary: linear-gradient(135deg, hsl(258 90% 66%), hsl(270 100% 75%));
+    --gradient-hero: linear-gradient(135deg, hsl(236 19% 7%), hsl(234 20% 12%));
+    --space-dots: radial-gradient(circle at 25% 25%, hsl(258 90% 66% / 0.3) 1px, transparent 1px);
   }
 
   .dark {

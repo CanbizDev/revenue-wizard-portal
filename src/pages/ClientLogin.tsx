@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Shield, Users, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Shield, Users, Eye, EyeOff, Building2, Brain, TrendingUp } from 'lucide-react';
+import { applyClientTheme, getClientDisplayName, type ClientTheme } from '@/utils/theme';
 
 interface ClientLoginProps {
   company: 'marketstrendai' | 'xyzseller';
@@ -13,16 +14,49 @@ interface ClientLoginProps {
   onLogin: (role: 'admin' | 'viewer') => void;
 }
 
-const COMPANY_DATA = {
-  marketstrendai: {
-    name: 'MarketsTrendAI',
-    subdomain: 'marketstrendai.webreports.app',
-    color: 'blue'
+interface ClientConfig {
+  name: string;
+  icon: any;
+  tagline: string;
+  description: string;
+  bgPattern: string;
+  accentColor: string;
+  isSpaceTheme?: boolean;
+}
+
+const CLIENT_CONFIG: Record<string, ClientConfig> = {
+  servicon: {
+    name: 'Servicon',
+    icon: Building2,
+    tagline: 'Critical Cleaning Services in Complex Spaces',
+    description: 'Professional facility management solutions',
+    bgPattern: 'bg-gradient-to-br from-primary/5 via-background to-primary/10',
+    accentColor: 'from-primary to-blue-600'
   },
-  xyzseller: {
-    name: 'XYZSeller',
-    subdomain: 'xyzseller.webreports.app',
-    color: 'green'
+  marketstrendai: {
+    name: 'MarketTrends AI',
+    icon: TrendingUp,
+    tagline: 'Your Market Intelligence Agent',
+    description: 'AI-powered market insights and analytics',
+    bgPattern: 'bg-gradient-to-br from-primary/5 via-background to-primary/10',
+    accentColor: 'from-primary to-purple-600'
+  },
+  markettrends: {
+    name: 'MarketTrends AI', 
+    icon: TrendingUp,
+    tagline: 'Your Market Intelligence Agent',
+    description: 'AI-powered market insights and analytics',
+    bgPattern: 'bg-gradient-to-br from-primary/5 via-background to-primary/10',
+    accentColor: 'from-primary to-purple-600'
+  },
+  jupiterbrains: {
+    name: 'Jupiter Brains',
+    icon: Brain,
+    tagline: 'Agentic AI. Tuned for Your Domain.',
+    description: 'Enterprise-grade AI agents that grow with your business',
+    bgPattern: 'bg-gradient-to-br from-background via-muted/30 to-primary/10',
+    accentColor: 'from-primary to-purple-400',
+    isSpaceTheme: true
   }
 };
 
@@ -32,32 +66,24 @@ const ClientLogin: React.FC<ClientLoginProps> = ({ company, client, onBack, onLo
   const [showPassword, setShowPassword] = useState(false);
   const [loginType, setLoginType] = useState<'admin' | 'viewer'>('admin');
   
-  const companyData = COMPANY_DATA[company];
-  const clientName = client.charAt(0).toUpperCase() + client.slice(1);
-
-  const getColorClasses = (color: string) => {
-    const colorMap = {
-      blue: {
-        bg: 'from-blue-50 to-blue-100',
-        icon: 'bg-blue-500',
-        text: 'text-blue-700',
-        button: 'bg-blue-600 hover:bg-blue-700',
-        badge: 'bg-blue-100 text-blue-800',
-        border: 'border-blue-200'
-      },
-      green: {
-        bg: 'from-green-50 to-green-100',
-        icon: 'bg-green-500',
-        text: 'text-green-700',
-        button: 'bg-green-600 hover:bg-green-700',
-        badge: 'bg-green-100 text-green-800',
-        border: 'border-green-200'
-      }
+  const normalizedClient = client.toLowerCase();
+  const clientConfig = CLIENT_CONFIG[normalizedClient as keyof typeof CLIENT_CONFIG] || CLIENT_CONFIG.servicon;
+  const clientDisplayName = getClientDisplayName(client);
+  const IconComponent = clientConfig.icon;
+  
+  useEffect(() => {
+    applyClientTheme(client);
+    
+    return () => {
+      // Clean up theme on unmount
+      document.documentElement.classList.remove(
+        'theme-servicon',
+        'theme-markettrends',
+        'theme-jupiterbrains'
+      );
     };
-    return colorMap[color as keyof typeof colorMap];
-  };
+  }, [client]);
 
-  const colors = getColorClasses(companyData.color);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,9 +93,23 @@ const ClientLogin: React.FC<ClientLoginProps> = ({ company, client, onBack, onLo
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
+    <div className={`min-h-screen ${clientConfig.bgPattern} ${clientConfig.isSpaceTheme ? 'relative overflow-hidden' : ''}`}>
+      {/* Space theme background effect */}
+      {clientConfig.isSpaceTheme && (
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute inset-0" style={{
+            background: `
+              radial-gradient(circle at 25% 25%, hsl(var(--primary) / 0.3) 1px, transparent 1px),
+              radial-gradient(circle at 75% 75%, hsl(var(--primary) / 0.2) 1px, transparent 1px),
+              radial-gradient(circle at 50% 10%, hsl(var(--primary) / 0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: '100px 100px, 150px 150px, 200px 200px'
+          }} />
+        </div>
+      )}
+      
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header className="relative z-10 bg-card/80 backdrop-blur-sm border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -77,26 +117,25 @@ const ClientLogin: React.FC<ClientLoginProps> = ({ company, client, onBack, onLo
                 variant="ghost" 
                 size="sm" 
                 onClick={onBack}
-                className="text-gray-600 hover:text-gray-900"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back
               </Button>
               <div className="flex items-center space-x-3">
-                <div className={`w-8 h-8 ${colors.icon} rounded-lg flex items-center justify-center`}>
-                  <span className="text-white font-bold text-sm">{clientName.charAt(0)}</span>
+                <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg">
+                  <IconComponent className="w-5 h-5 text-primary-foreground" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900">
-                    {clientName}
+                  <h1 className="text-xl font-bold text-foreground">
+                    {clientDisplayName}
                   </h1>
-                  <p className="text-sm text-gray-500">via {companyData.name}</p>
+                  <p className="text-sm text-muted-foreground">{clientConfig.tagline}</p>
                 </div>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-sm text-gray-500">{companyData.subdomain}/{client}</p>
-              <Badge className={`${colors.badge} px-2 py-1 text-xs`}>
+              <Badge className="bg-primary/10 text-primary border-primary/20 px-3 py-1 text-xs font-medium">
                 Client Portal
               </Badge>
             </div>
@@ -105,14 +144,20 @@ const ClientLogin: React.FC<ClientLoginProps> = ({ company, client, onBack, onLo
       </header>
 
       {/* Main Content */}
-      <main className="py-16 px-4 sm:px-6">
+      <main className="relative z-10 py-16 px-4 sm:px-6">
         <div className="max-w-md mx-auto">
-          {/* Welcome */}
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              Welcome to {clientName}
+          {/* Welcome Section */}
+          <div className="text-center mb-12">
+            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center shadow-xl">
+              <IconComponent className="w-10 h-10 text-primary-foreground" />
+            </div>
+            <h2 className="text-3xl font-bold text-foreground mb-3">
+              Welcome to {clientDisplayName}
             </h2>
-            <p className="text-gray-600">
+            <p className="text-lg text-muted-foreground mb-2">
+              {clientConfig.description}
+            </p>
+            <p className="text-sm text-muted-foreground">
               Sign in to access your reports and dashboard
             </p>
           </div>
@@ -120,46 +165,46 @@ const ClientLogin: React.FC<ClientLoginProps> = ({ company, client, onBack, onLo
           {/* Login Type Selection */}
           <div className="grid grid-cols-2 gap-4 mb-8">
             <Card 
-              className={`cursor-pointer transition-all duration-200 ${
+              className={`cursor-pointer transition-all duration-300 hover:scale-[1.02] ${
                 loginType === 'admin' 
-                  ? `${colors.border} shadow-lg bg-gradient-to-br ${colors.bg}` 
-                  : 'border-gray-200 hover:border-gray-300'
+                  ? 'border-primary shadow-xl bg-gradient-to-br from-primary/5 to-primary/10 ring-2 ring-primary/20' 
+                  : 'border-border hover:border-primary/30 bg-card/60 backdrop-blur-sm'
               }`}
               onClick={() => setLoginType('admin')}
             >
-              <CardContent className="p-4 text-center">
-                <Shield className={`w-8 h-8 mx-auto mb-2 ${
-                  loginType === 'admin' ? colors.text : 'text-gray-400'
+              <CardContent className="p-6 text-center">
+                <Shield className={`w-8 h-8 mx-auto mb-3 ${
+                  loginType === 'admin' ? 'text-primary' : 'text-muted-foreground'
                 }`} />
-                <h3 className={`font-semibold ${
-                  loginType === 'admin' ? colors.text : 'text-gray-600'
+                <h3 className={`font-semibold text-sm ${
+                  loginType === 'admin' ? 'text-primary' : 'text-foreground'
                 }`}>
                   Admin Login
                 </h3>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Full management access
                 </p>
               </CardContent>
             </Card>
 
             <Card 
-              className={`cursor-pointer transition-all duration-200 ${
+              className={`cursor-pointer transition-all duration-300 hover:scale-[1.02] ${
                 loginType === 'viewer' 
-                  ? `${colors.border} shadow-lg bg-gradient-to-br ${colors.bg}` 
-                  : 'border-gray-200 hover:border-gray-300'
+                  ? 'border-primary shadow-xl bg-gradient-to-br from-primary/5 to-primary/10 ring-2 ring-primary/20' 
+                  : 'border-border hover:border-primary/30 bg-card/60 backdrop-blur-sm'
               }`}
               onClick={() => setLoginType('viewer')}
             >
-              <CardContent className="p-4 text-center">
-                <Users className={`w-8 h-8 mx-auto mb-2 ${
-                  loginType === 'viewer' ? colors.text : 'text-gray-400'
+              <CardContent className="p-6 text-center">
+                <Users className={`w-8 h-8 mx-auto mb-3 ${
+                  loginType === 'viewer' ? 'text-primary' : 'text-muted-foreground'
                 }`} />
-                <h3 className={`font-semibold ${
-                  loginType === 'viewer' ? colors.text : 'text-gray-600'
+                <h3 className={`font-semibold text-sm ${
+                  loginType === 'viewer' ? 'text-primary' : 'text-foreground'
                 }`}>
                   Viewer Login
                 </h3>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Read-only access
                 </p>
               </CardContent>
@@ -167,16 +212,16 @@ const ClientLogin: React.FC<ClientLoginProps> = ({ company, client, onBack, onLo
           </div>
 
           {/* Login Form */}
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-center">
+          <Card className="shadow-2xl bg-card/80 backdrop-blur-sm border-border/50">
+            <CardHeader className="pb-6">
+              <CardTitle className="text-center text-xl font-bold text-foreground">
                 {loginType === 'admin' ? 'Admin' : 'Viewer'} Sign In
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div>
-                  <Label htmlFor="email">Email Address</Label>
+              <form onSubmit={handleLogin} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm font-medium text-foreground">Email Address</Label>
                   <Input
                     id="email"
                     type="email"
@@ -184,11 +229,12 @@ const ClientLogin: React.FC<ClientLoginProps> = ({ company, client, onBack, onLo
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    className="h-11 bg-background/50 border-border focus:border-primary focus:ring-primary/20"
                   />
                 </div>
                 
-                <div>
-                  <Label htmlFor="password">Password</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-sm font-medium text-foreground">Password</Label>
                   <div className="relative">
                     <Input
                       id="password"
@@ -197,6 +243,7 @@ const ClientLogin: React.FC<ClientLoginProps> = ({ company, client, onBack, onLo
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
+                      className="h-11 bg-background/50 border-border focus:border-primary focus:ring-primary/20 pr-10"
                     />
                     <Button
                       type="button"
@@ -206,9 +253,9 @@ const ClientLogin: React.FC<ClientLoginProps> = ({ company, client, onBack, onLo
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-gray-400" />
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
                       ) : (
-                        <Eye className="h-4 w-4 text-gray-400" />
+                        <Eye className="h-4 w-4 text-muted-foreground" />
                       )}
                     </Button>
                   </div>
@@ -216,7 +263,7 @@ const ClientLogin: React.FC<ClientLoginProps> = ({ company, client, onBack, onLo
 
                 <Button 
                   type="submit" 
-                  className={`w-full ${colors.button}`}
+                  className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-lg hover:shadow-xl transition-all duration-200"
                   disabled={!email || !password}
                 >
                   Sign In as {loginType === 'admin' ? 'Admin' : 'Viewer'}
@@ -224,7 +271,7 @@ const ClientLogin: React.FC<ClientLoginProps> = ({ company, client, onBack, onLo
               </form>
 
               <div className="mt-6 text-center">
-                <Button variant="link" className="text-sm text-gray-500">
+                <Button variant="link" className="text-sm text-muted-foreground hover:text-primary">
                   Forgot your password?
                 </Button>
               </div>
@@ -232,12 +279,12 @@ const ClientLogin: React.FC<ClientLoginProps> = ({ company, client, onBack, onLo
           </Card>
 
           {/* Demo Credentials */}
-          <Card className="mt-6 bg-gray-50 border-gray-200">
+          <Card className="mt-6 bg-muted/30 border-border/50 backdrop-blur-sm">
             <CardContent className="p-4">
-              <h4 className="font-semibold text-sm text-gray-700 mb-2">Demo Credentials</h4>
-              <div className="text-xs text-gray-600 space-y-1">
-                <p><strong>Admin:</strong> admin@{client}.com / admin123</p>
-                <p><strong>Viewer:</strong> viewer@{client}.com / viewer123</p>
+              <h4 className="font-semibold text-sm text-foreground mb-2">Demo Credentials</h4>
+              <div className="text-xs text-muted-foreground space-y-1">
+                <p><strong className="text-foreground">Admin:</strong> admin@{client}.com / admin123</p>
+                <p><strong className="text-foreground">Viewer:</strong> viewer@{client}.com / viewer123</p>
               </div>
             </CardContent>
           </Card>
@@ -245,16 +292,19 @@ const ClientLogin: React.FC<ClientLoginProps> = ({ company, client, onBack, onLo
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-6">
+      <footer className="relative z-10 bg-card/60 backdrop-blur-sm border-t border-border py-8 mt-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
-          <div className="flex items-center justify-center space-x-3 mb-2">
-            <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xs">WR</span>
+          <div className="flex items-center justify-center space-x-3 mb-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg">
+              <IconComponent className="w-4 h-4 text-primary-foreground" />
             </div>
-            <h3 className="text-lg font-bold">WebReports.app</h3>
+            <h3 className="text-lg font-bold text-foreground">{clientDisplayName}</h3>
           </div>
-          <p className="text-gray-400 text-sm">
-            Secure login powered by {companyData.name}
+          <p className="text-muted-foreground text-sm mb-2">
+            {clientConfig.description}
+          </p>
+          <p className="text-muted-foreground text-xs">
+            Secure portal access • Professional reporting platform
           </p>
         </div>
       </footer>
