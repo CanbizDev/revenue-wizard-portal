@@ -13,6 +13,7 @@ import ClientPortal from "./components/Portal/ClientPortal";
 import NotFound from "./pages/NotFound";
 import { useState, useEffect } from "react";
 import { getSubdomain, getCompanyFromSubdomain } from "./utils/subdomain";
+import { applyTheme, getThemeForCompany } from "./utils/theme";
 
 const queryClient = new QueryClient();
 
@@ -21,7 +22,7 @@ const App = () => {
   const [currentCompany, setCurrentCompany] = useState<string>('');
   const [currentClient, setCurrentClient] = useState<string>('');
 
-  // Handle subdomain-based routing on app load
+  // Handle subdomain-based routing and theme application
   useEffect(() => {
     const subdomain = getSubdomain();
     const company = getCompanyFromSubdomain(subdomain);
@@ -30,11 +31,24 @@ const App = () => {
       // If we have a valid company subdomain, go directly to company landing
       setCurrentCompany(company);
       setCurrentView('company-landing');
+      // Apply company-specific theme
+      const theme = getThemeForCompany(company);
+      applyTheme(theme);
     } else {
       // If no subdomain or invalid subdomain, show company selector
       setCurrentView('selector');
+      // Reset to default theme
+      applyTheme(null);
     }
   }, []);
+
+  // Apply theme when company changes
+  useEffect(() => {
+    if (currentCompany) {
+      const theme = getThemeForCompany(currentCompany);
+      applyTheme(theme);
+    }
+  }, [currentCompany]);
 
   const handleNavigation = (path: string) => {
     if (path === '/admin') {
