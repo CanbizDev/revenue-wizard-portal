@@ -174,26 +174,26 @@ const SellerAdminPortal: React.FC<{company?: 'marketstrendai' | 'xyzseller'}> = 
           <DashboardCard
             title="Total Clients"
             value={totalClients.toString()}
-            icon={<Users className="h-6 w-6" />}
-            trend="+12%"
+            icon={Users}
+            trend={{ value: 12, isPositive: true }}
           />
           <DashboardCard
             title="Monthly Revenue"
             value={`₹${monthlyRevenue.toLocaleString()}`}
-            icon={<DollarSign className="h-6 w-6" />}
-            trend="+8%"
+            icon={DollarSign}
+            trend={{ value: 8, isPositive: true }}
           />
           <DashboardCard
             title="Active Plans"
             value={activePlans.toString()}
-            icon={<BarChart3 className="h-6 w-6" />}
-            trend="0%"
+            icon={BarChart3}
+            trend={{ value: 0, isPositive: true }}
           />
           <DashboardCard
             title="Commission Earned"
             value={`₹${totalCommissions.toLocaleString()}`}
-            icon={<TrendingUp className="h-6 w-6" />}
-            trend="+15%"
+            icon={TrendingUp}
+            trend={{ value: 15, isPositive: true }}
           />
         </div>
 
@@ -262,7 +262,11 @@ const SellerAdminPortal: React.FC<{company?: 'marketstrendai' | 'xyzseller'}> = 
                 Add a new client to your portfolio
               </DialogDescription>
             </DialogHeader>
-            <AddClientForm onSubmit={handleAddClient} />
+            <AddClientForm 
+              isOpen={showAddClientForm}
+              onClose={() => setShowAddClientForm(false)}
+              onSubmit={handleAddClient} 
+            />
           </DialogContent>
         </Dialog>
       </div>
@@ -362,7 +366,11 @@ const SellerAdminPortal: React.FC<{company?: 'marketstrendai' | 'xyzseller'}> = 
                 Create a new subscription plan
               </DialogDescription>
             </DialogHeader>
-            <AddPlanForm onSubmit={handleAddPlan} />
+            <AddPlanForm 
+              isOpen={showAddPlanForm}
+              onClose={() => setShowAddPlanForm(false)}
+              onSubmit={handleAddPlan} 
+            />
           </DialogContent>
         </Dialog>
       </div>
@@ -551,15 +559,15 @@ const SellerAdminPortal: React.FC<{company?: 'marketstrendai' | 'xyzseller'}> = 
       <Header 
         user={mockUser}
         onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
+        portalType="seller"
       />
       
       <div className="flex">
         <Sidebar
           activeTab={activeTab}
           onTabChange={setActiveTab}
-          sidebarOpen={sidebarOpen}
-          setSidebarOpen={setSidebarOpen}
           userRole="seller"
+          portalType="seller"
         />
         
         <main className="flex-1 p-6">
@@ -576,7 +584,11 @@ const SellerAdminPortal: React.FC<{company?: 'marketstrendai' | 'xyzseller'}> = 
                 Add a new client to your portfolio
               </DialogDescription>
             </DialogHeader>
-            <AddClientForm onSubmit={handleAddClient} />
+            <AddClientForm 
+              isOpen={showAddClientForm}
+              onClose={() => setShowAddClientForm(false)}
+              onSubmit={handleAddClient} 
+            />
           </DialogContent>
         </Dialog>
       )}
@@ -594,8 +606,12 @@ const SellerAdminPortal: React.FC<{company?: 'marketstrendai' | 'xyzseller'}> = 
               </DialogDescription>
             </DialogHeader>
             <AddPlanForm 
+              isOpen={showAddPlanForm}
+              onClose={() => {
+                setShowAddPlanForm(false);
+                setEditingPlan(null);
+              }}
               onSubmit={editingPlan ? handleEditPlan : handleAddPlan} 
-              initialData={editingPlan}
             />
           </DialogContent>
         </Dialog>

@@ -181,7 +181,7 @@ const SellerPortal: React.FC = () => {
       case 'clients':
         return renderClients();
       case 'commissions':
-        return <CommissionsView userRole={userRole} />;
+        return <CommissionsView userRole={userRole} company="marketstrendai" />;
       case 'tier2-sellers':
         return userRole === 'tier1_seller' ? 
           <div className="p-8 text-center text-gray-500">Tier-2 Sellers management coming soon...</div> : 
