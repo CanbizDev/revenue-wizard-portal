@@ -43,6 +43,7 @@ const Sidebar: React.FC<SidebarProps> = ({ portalType, userRole, activeTab, onTa
         const sellerItems = [
           { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
           { id: 'clients', label: 'My Clients', icon: Users },
+          { id: 'commissions', label: 'Commissions', icon: CreditCard },
           { id: 'billing', label: 'Billing & Revenue', icon: DollarSign },
           { id: 'reports', label: 'Reports', icon: FileText },
         ];

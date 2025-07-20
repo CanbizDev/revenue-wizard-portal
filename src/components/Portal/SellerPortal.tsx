@@ -5,6 +5,7 @@ import Sidebar from '@/components/Layout/Sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import DashboardCard from '@/components/Dashboard/DashboardCard';
+import CommissionsView from '@/components/Portal/CommissionsView';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -179,6 +180,8 @@ const SellerPortal: React.FC = () => {
         return renderDashboard();
       case 'clients':
         return renderClients();
+      case 'commissions':
+        return <CommissionsView userRole={userRole} />;
       case 'tier2-sellers':
         return userRole === 'tier1_seller' ? 
           <div className="p-8 text-center text-gray-500">Tier-2 Sellers management coming soon...</div> : 
