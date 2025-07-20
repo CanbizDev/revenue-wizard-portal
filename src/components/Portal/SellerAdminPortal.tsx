@@ -87,6 +87,7 @@ const SellerAdminPortal: React.FC<{company?: 'marketstrendai' | 'xyzseller'}> = 
       id: 1,
       name: 'Regional Partner A',
       email: 'partner.a@email.com',
+      subdomain: 'partnera',
       company: 'Partner A Corp',
       commission: '15%',
       clients: 12,
@@ -97,6 +98,7 @@ const SellerAdminPortal: React.FC<{company?: 'marketstrendai' | 'xyzseller'}> = 
       id: 2,
       name: 'Regional Partner B',
       email: 'partner.b@email.com',
+      subdomain: 'partnerb',
       company: 'Partner B LLC',
       commission: '12%',
       clients: 8,
@@ -438,6 +440,107 @@ const SellerAdminPortal: React.FC<{company?: 'marketstrendai' | 'xyzseller'}> = 
     </div>
   );
 
+  const renderTier2Sellers = () => (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Tier-2 Seller Management</h1>
+        <Dialog open={showAddTier2SellerForm} onOpenChange={setShowAddTier2SellerForm}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Tier-2 Seller
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Add New Tier-2 Seller</DialogTitle>
+              <DialogDescription>
+                Create a new Tier-2 seller account under your organization
+              </DialogDescription>
+            </DialogHeader>
+            <AddTier2SellerForm 
+              isOpen={showAddTier2SellerForm}
+              onClose={() => setShowAddTier2SellerForm(false)}
+              onSuccess={() => {
+                // Refresh data or handle success
+                toast({
+                  title: "Tier-2 Seller Added",
+                  description: "New Tier-2 seller has been successfully created.",
+                });
+              }} 
+            />
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>All Tier-2 Sellers</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Subdomain</TableHead>
+                <TableHead>Admin Email</TableHead>
+                <TableHead>Commission</TableHead>
+                <TableHead>Clients</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {tier2Sellers.map((seller) => (
+                <TableRow key={seller.id}>
+                  <TableCell className="font-medium">{seller.name}</TableCell>
+                  <TableCell>{seller.subdomain || 'N/A'}</TableCell>
+                  <TableCell>{seller.email}</TableCell>
+                  <TableCell>{seller.commission}</TableCell>
+                  <TableCell>{seller.clients}</TableCell>
+                  <TableCell>
+                    <Badge variant={seller.status === 'Active' ? 'default' : 'secondary'}>
+                      {seller.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button variant="outline" size="sm">
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will permanently delete the Tier-2 seller.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction>Delete</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
@@ -448,6 +551,8 @@ const SellerAdminPortal: React.FC<{company?: 'marketstrendai' | 'xyzseller'}> = 
         return renderClients();
       case 'plans':
         return renderPlans();
+      case 'tier2-sellers':
+        return company === 'marketstrendai' ? renderTier2Sellers() : renderDashboard();
       default:
         return renderDashboard();
     }
@@ -566,7 +671,7 @@ const SellerAdminPortal: React.FC<{company?: 'marketstrendai' | 'xyzseller'}> = 
         <Sidebar
           activeTab={activeTab}
           onTabChange={setActiveTab}
-          userRole="seller"
+          userRole={company === 'xyzseller' ? 'tier2_seller' : 'tier1_seller'}
           portalType="seller"
         />
         
@@ -587,7 +692,8 @@ const SellerAdminPortal: React.FC<{company?: 'marketstrendai' | 'xyzseller'}> = 
             <AddClientForm 
               isOpen={showAddClientForm}
               onClose={() => setShowAddClientForm(false)}
-              onSubmit={handleAddClient} 
+              onSubmit={handleAddClient}
+              availablePlans={plans}
             />
           </DialogContent>
         </Dialog>
@@ -630,6 +736,29 @@ const SellerAdminPortal: React.FC<{company?: 'marketstrendai' | 'xyzseller'}> = 
               isOpen={showIntakeForm}
               onClose={() => setShowIntakeForm(false)}
               onSubmit={handleIntakeFormSubmit} 
+            />
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {showAddTier2SellerForm && (
+        <Dialog open={showAddTier2SellerForm} onOpenChange={setShowAddTier2SellerForm}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Add New Tier-2 Seller</DialogTitle>
+              <DialogDescription>
+                Create a new Tier-2 seller account under your organization
+              </DialogDescription>
+            </DialogHeader>
+            <AddTier2SellerForm 
+              isOpen={showAddTier2SellerForm}
+              onClose={() => setShowAddTier2SellerForm(false)}
+              onSuccess={() => {
+                toast({
+                  title: "Tier-2 Seller Added",
+                  description: "New Tier-2 seller has been successfully created.",
+                });
+              }} 
             />
           </DialogContent>
         </Dialog>
