@@ -4,6 +4,7 @@ import Sidebar from '@/components/Layout/Sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import DashboardCard from '@/components/Dashboard/DashboardCard';
+import CommissionsView from '@/components/Portal/CommissionsView';
 import AddClientForm from '@/components/Forms/AddClientForm';
 import AddTier2SellerForm from '@/components/Forms/AddTier2SellerForm';
 import AddPlanForm from '@/components/Forms/AddPlanForm';
@@ -395,6 +396,8 @@ const SellerAdminPortal: React.FC = () => {
     switch (activeTab) {
       case 'dashboard':
         return renderDashboard();
+      case 'commissions':
+        return <CommissionsView userRole="tier1_seller" />;
       case 'billing':
         return renderBilling();
       case 'reports':
@@ -663,6 +666,7 @@ const SellerAdminPortal: React.FC = () => {
   const sidebarItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Building2 },
     { id: 'clients', label: 'My Clients', icon: Users },
+    { id: 'commissions', label: 'Commissions', icon: CreditCard },
     { id: 'tier2sellers', label: 'Tier 2 Sellers', icon: Building2 },
     { id: 'plans', label: 'Subscription Plans', icon: CreditCard },
     { id: 'reports', label: 'Report Review', icon: FileText },
