@@ -11,30 +11,14 @@ import SellerPortal from "./components/Portal/SellerPortal";
 import SellerAdminPortal from "./components/Portal/SellerAdminPortal";
 import ClientPortal from "./components/Portal/ClientPortal";
 import NotFound from "./pages/NotFound";
-import { useState, useEffect } from "react";
-import { getSubdomain, getCompanyFromSubdomain } from "./utils/subdomain";
+import { useState } from "react";
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [currentView, setCurrentView] = useState<string>('loading');
+  const [currentView, setCurrentView] = useState<string>('selector');
   const [currentCompany, setCurrentCompany] = useState<string>('');
   const [currentClient, setCurrentClient] = useState<string>('');
-
-  // Handle subdomain-based routing on app load
-  useEffect(() => {
-    const subdomain = getSubdomain();
-    const company = getCompanyFromSubdomain(subdomain);
-    
-    if (company) {
-      // If we have a valid company subdomain, go directly to company landing
-      setCurrentCompany(company);
-      setCurrentView('company-landing');
-    } else {
-      // If no subdomain or invalid subdomain, show company selector
-      setCurrentView('selector');
-    }
-  }, []);
 
   const handleNavigation = (path: string) => {
     if (path === '/admin') {
@@ -58,9 +42,6 @@ const App = () => {
 
   const renderCurrentView = () => {
     switch (currentView) {
-      case 'loading':
-        return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
-      
       case 'selector':
         return <Index onCompanySelect={(company) => {
           setCurrentCompany(company);
