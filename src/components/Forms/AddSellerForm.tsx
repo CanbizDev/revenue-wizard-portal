@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Upload, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -23,7 +24,9 @@ const AddSellerForm: React.FC<AddSellerFormProps> = ({ isOpen, onClose, onSucces
     subdomain: '',
     adminEmail: '',
     adminPassword: '',
-    siteContent: ''
+    siteContent: '',
+    commissionType: 'percentage' as 'fixed' | 'percentage',
+    commissionValue: ''
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [stylesheetFile, setStylesheetFile] = useState<File | null>(null);
@@ -96,7 +99,9 @@ const AddSellerForm: React.FC<AddSellerFormProps> = ({ isOpen, onClose, onSucces
           admin_password_hash: passwordHash,
           logo_url: logoUrl,
           stylesheet_url: stylesheetUrl,
-          site_content: formData.siteContent ? JSON.parse(formData.siteContent) : null
+          site_content: formData.siteContent ? JSON.parse(formData.siteContent) : null,
+          commission_type: formData.commissionType,
+          commission_value: formData.commissionValue ? parseFloat(formData.commissionValue) : null
         });
 
       if (error) {
@@ -114,7 +119,9 @@ const AddSellerForm: React.FC<AddSellerFormProps> = ({ isOpen, onClose, onSucces
         subdomain: '',
         adminEmail: '',
         adminPassword: '',
-        siteContent: ''
+        siteContent: '',
+        commissionType: 'percentage' as 'fixed' | 'percentage',
+        commissionValue: ''
       });
       setLogoFile(null);
       setStylesheetFile(null);
@@ -196,6 +203,41 @@ const AddSellerForm: React.FC<AddSellerFormProps> = ({ isOpen, onClose, onSucces
                   Generate
                 </Button>
               </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="commissionType">Commission Type *</Label>
+              <Select
+                value={formData.commissionType}
+                onValueChange={(value) => handleInputChange('commissionType', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select commission type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="percentage">Percentage</SelectItem>
+                  <SelectItem value="fixed">Fixed Amount</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="commissionValue">
+                Commission Value * {formData.commissionType === 'percentage' ? '(%)' : '($)'}
+              </Label>
+              <Input
+                id="commissionValue"
+                type="number"
+                step={formData.commissionType === 'percentage' ? '0.01' : '0.01'}
+                min="0"
+                max={formData.commissionType === 'percentage' ? '100' : undefined}
+                value={formData.commissionValue}
+                onChange={(e) => handleInputChange('commissionValue', e.target.value)}
+                placeholder={formData.commissionType === 'percentage' ? '10.5' : '50.00'}
+                required
+              />
             </div>
           </div>
 

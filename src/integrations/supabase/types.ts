@@ -18,6 +18,8 @@ export type Database = {
         Row: {
           admin_email: string
           admin_password_hash: string
+          commission_type: string | null
+          commission_value: number | null
           created_at: string
           id: string
           logo_url: string | null
@@ -31,6 +33,8 @@ export type Database = {
         Insert: {
           admin_email: string
           admin_password_hash: string
+          commission_type?: string | null
+          commission_value?: number | null
           created_at?: string
           id?: string
           logo_url?: string | null
@@ -44,6 +48,8 @@ export type Database = {
         Update: {
           admin_email?: string
           admin_password_hash?: string
+          commission_type?: string | null
+          commission_value?: number | null
           created_at?: string
           id?: string
           logo_url?: string | null
