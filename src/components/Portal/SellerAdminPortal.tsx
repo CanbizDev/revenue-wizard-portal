@@ -15,6 +15,7 @@ import CommissionsView from './CommissionsView';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useSellerData } from '@/hooks/useSellerData';
+import { supabase } from '@/integrations/supabase/client';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -81,31 +82,47 @@ const SellerAdminPortal: React.FC<{company?: 'marketstrendai' | 'xyzseller'}> = 
     updatePlan 
   } = useSellerData(company);
 
-  // Mock tier2 sellers data (if needed for tier-1 sellers)
-  const [tier2Sellers] = useState([
-    {
-      id: 1,
-      name: 'Regional Partner A',
-      email: 'partner.a@email.com',
-      subdomain: 'partnera',
-      company: 'Partner A Corp',
-      commission: '15%',
-      clients: 12,
-      status: 'Active',
-      joinedDate: '2024-01-10'
-    },
-    {
-      id: 2,
-      name: 'Regional Partner B',
-      email: 'partner.b@email.com',
-      subdomain: 'partnerb',
-      company: 'Partner B LLC',
-      commission: '12%',
-      clients: 8,
-      status: 'Active',
-      joinedDate: '2024-01-20'
+  // Fetch tier2 sellers from database
+  const [tier2Sellers, setTier2Sellers] = useState<any[]>([]);
+
+  // Fetch tier2 sellers if this is a tier1 seller
+  React.useEffect(() => {
+    if (company === 'marketstrendai' && sellerData) {
+      const fetchTier2Sellers = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('tier2_sellers')
+            .select(`
+              *,
+              clients:clients(count)
+            `)
+            .eq('tier1_seller_id', sellerData.id);
+
+          if (error) throw error;
+          
+          const formattedSellers = data?.map(seller => ({
+            id: seller.id,
+            name: seller.name,
+            email: seller.admin_email,
+            subdomain: seller.subdomain,
+            company: seller.name,
+            commission: seller.commission_type === 'percentage' 
+              ? `${seller.commission_value}%` 
+              : `₹${seller.commission_value}`,
+            clients: seller.clients?.[0]?.count || 0,
+            status: seller.status,
+            joinedDate: new Date(seller.created_at).toLocaleDateString()
+          })) || [];
+          
+          setTier2Sellers(formattedSellers);
+        } catch (error) {
+          console.error('Error fetching tier2 sellers:', error);
+        }
+      };
+
+      fetchTier2Sellers();
     }
-  ]);
+  }, [company, sellerData]);
 
   const getCompanyData = () => {
     if (!sellerData) {

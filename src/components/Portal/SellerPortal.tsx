@@ -9,6 +9,7 @@ import CommissionsView from '@/components/Portal/CommissionsView';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useSellerData } from '@/hooks/useSellerData';
 import { 
   Users, 
   DollarSign, 
@@ -24,95 +25,134 @@ const SellerPortal: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
 
-  const mockUser = {
-    name: 'John Smith',
-    email: 'john@techcorp.com',
-    role: userRole === 'tier1_seller' ? 'Tier-1 Seller' : 'Tier-2 Seller',
-    company: 'TechCorp Solutions'
+  // Get real data from database
+  const { sellerData, clients, commissions, loading } = useSellerData('marketstrendai');
+
+  const getUser = () => {
+    if (!sellerData) {
+      return {
+        name: 'Loading...',
+        email: 'loading@example.com',
+        role: 'Loading...',
+        company: 'Loading...'
+      };
+    }
+    return {
+      name: `${sellerData.name} Admin`,
+      email: sellerData.admin_email,
+      role: userRole === 'tier1_seller' ? 'Tier-1 Seller' : 'Tier-2 Seller',
+      company: sellerData.name
+    };
   };
 
-  const renderDashboard = () => (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Seller Dashboard</h2>
-        <p className="text-gray-600">Welcome back, {mockUser.name}</p>
-      </div>
+  const mockUser = getUser();
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <DashboardCard
-          title="Active Clients"
-          value={45}
-          description="Paying customers"
-          icon={Users}
-          trend={{ value: 8, isPositive: true }}
-        />
-        {userRole === 'tier1_seller' && (
+  const renderDashboard = () => {
+    if (loading) {
+      return (
+        <div className="flex h-64 items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      );
+    }
+
+    const activeClients = clients.filter(c => c.status === 'active').length;
+    const monthlyRevenue = clients.reduce((sum, client) => {
+      if (client.subscription_plans) {
+        return sum + client.subscription_plans.price;
+      }
+      return sum;
+    }, 0);
+    const thisMonthCommissions = commissions
+      .filter(c => new Date(c.transaction_date).getMonth() === new Date().getMonth())
+      .length;
+
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Seller Dashboard</h2>
+          <p className="text-gray-600">Welcome back, {mockUser.name}</p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <DashboardCard
-            title="Tier-2 Sellers"
-            value={12}
-            description="Under your management"
-            icon={Building2}
-            trend={{ value: 2, isPositive: true }}
+            title="Active Clients"
+            value={activeClients}
+            description="Paying customers"
+            icon={Users}
+            trend={{ value: 8, isPositive: true }}
           />
-        )}
-        <DashboardCard
-          title="Monthly Revenue"
-          value="₹4,50,000"
-          description="This month's earnings"
-          icon={DollarSign}
-          trend={{ value: 15, isPositive: true }}
-        />
-        <DashboardCard
-          title="Reports Generated"
-          value={234}
-          description="This month"
-          icon={FileText}
-          trend={{ value: 12, isPositive: true }}
-        />
-      </div>
+          {userRole === 'tier1_seller' && (
+            <DashboardCard
+              title="Tier-2 Sellers"
+              value={0}
+              description="Under your management"
+              icon={Building2}
+              trend={{ value: 0, isPositive: true }}
+            />
+          )}
+          <DashboardCard
+            title="Monthly Revenue"
+            value={`₹${monthlyRevenue.toLocaleString()}`}
+            description="This month's earnings"
+            icon={DollarSign}
+            trend={{ value: 15, isPositive: true }}
+          />
+          <DashboardCard
+            title="Reports Generated"
+            value={thisMonthCommissions}
+            description="This month"
+            icon={FileText}
+            trend={{ value: 12, isPositive: true }}
+          />
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <TrendingUp className="h-5 w-5" />
-              <span>Revenue Trends</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
-              <p className="text-gray-500">Revenue chart placeholder</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <TrendingUp className="h-5 w-5" />
+                <span>Revenue Trends</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
+                <p className="text-gray-500">Revenue chart placeholder</p>
+              </div>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Client Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                { client: 'DataFlow Inc', action: 'Report generated', amount: '₹25,000', time: '2 hours ago' },
-                { client: 'Analytics Ltd', action: 'Payment received', amount: '₹18,000', time: '5 hours ago' },
-                { client: 'TechStart Co', action: 'New subscription', amount: '₹30,000', time: '1 day ago' },
-              ].map((activity, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{activity.client}</p>
-                    <p className="text-xs text-gray-500">{activity.action} • {activity.time}</p>
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Client Activity</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {clients.slice(0, 3).map((client, index) => (
+                  <div key={client.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{client.name}</p>
+                      <p className="text-xs text-gray-500">{client.company} • {new Date(client.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-green-600">
+                        {client.subscription_plans ? `₹${client.subscription_plans.price.toLocaleString()}` : 'No Plan'}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-green-600">{activity.amount}</p>
+                ))}
+                {clients.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No client activity yet.
                   </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderClients = () => (
     <div className="space-y-6">
@@ -133,12 +173,8 @@ const SellerPortal: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {[
-              { name: 'DataFlow Inc', contact: 'admin@dataflow.com', status: 'active', revenue: '₹45,000', reports: 12 },
-              { name: 'Analytics Ltd', contact: 'info@analytics.com', status: 'active', revenue: '₹38,000', reports: 8 },
-              { name: 'TechStart Co', contact: 'hello@techstart.com', status: 'pending', revenue: '₹0', reports: 0 },
-            ].map((client, index) => (
-              <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-gray-200 rounded-lg space-y-3 sm:space-y-0">
+            {clients.map((client) => (
+              <div key={client.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-gray-200 rounded-lg space-y-3 sm:space-y-0">
                 <div className="flex-1">
                   <div className="flex items-center space-x-4">
                     <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
@@ -146,17 +182,19 @@ const SellerPortal: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="font-medium text-gray-900">{client.name}</h3>
-                      <p className="text-sm text-gray-500">{client.contact}</p>
+                      <p className="text-sm text-gray-500">{client.email}</p>
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-6 text-sm text-gray-600 w-full sm:w-auto justify-between sm:justify-end">
                   <div className="text-center">
-                    <p className="font-medium">{client.reports}</p>
-                    <p className="text-xs">Reports</p>
+                    <p className="font-medium">{client.subscription_plans?.name || 'No Plan'}</p>
+                    <p className="text-xs">Plan</p>
                   </div>
                   <div className="text-center">
-                    <p className="font-medium">{client.revenue}</p>
+                    <p className="font-medium">
+                      {client.subscription_plans ? `₹${client.subscription_plans.price.toLocaleString()}` : '₹0'}
+                    </p>
                     <p className="text-xs">Revenue</p>
                   </div>
                   <Badge 
@@ -168,6 +206,11 @@ const SellerPortal: React.FC = () => {
                 </div>
               </div>
             ))}
+            {clients.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                No clients found. Add your first client to get started.
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
