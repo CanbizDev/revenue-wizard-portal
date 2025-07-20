@@ -14,6 +14,131 @@ export type Database = {
   }
   public: {
     Tables: {
+      clients: {
+        Row: {
+          company: string
+          created_at: string
+          email: string
+          id: string
+          intake_form_completed: boolean | null
+          name: string
+          plan_id: string | null
+          seller_id: string | null
+          status: string | null
+          tier2_seller_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          company: string
+          created_at?: string
+          email: string
+          id?: string
+          intake_form_completed?: boolean | null
+          name: string
+          plan_id?: string | null
+          seller_id?: string | null
+          status?: string | null
+          tier2_seller_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          email?: string
+          id?: string
+          intake_form_completed?: boolean | null
+          name?: string
+          plan_id?: string | null
+          seller_id?: string | null
+          status?: string | null
+          tier2_seller_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clients_plan_fk"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clients_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clients_tier2_seller_id_fkey"
+            columns: ["tier2_seller_id"]
+            isOneToOne: false
+            referencedRelation: "tier2_sellers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commissions: {
+        Row: {
+          amount: number
+          client_id: string | null
+          commission_amount: number
+          created_at: string
+          id: string
+          seller_id: string | null
+          status: string | null
+          tier2_seller_id: string | null
+          transaction_date: string
+          type: string
+        }
+        Insert: {
+          amount: number
+          client_id?: string | null
+          commission_amount: number
+          created_at?: string
+          id?: string
+          seller_id?: string | null
+          status?: string | null
+          tier2_seller_id?: string | null
+          transaction_date?: string
+          type: string
+        }
+        Update: {
+          amount?: number
+          client_id?: string | null
+          commission_amount?: number
+          created_at?: string
+          id?: string
+          seller_id?: string | null
+          status?: string | null
+          tier2_seller_id?: string | null
+          transaction_date?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commissions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commissions_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commissions_tier2_seller_id_fkey"
+            columns: ["tier2_seller_id"]
+            isOneToOne: false
+            referencedRelation: "tier2_sellers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sellers: {
         Row: {
           admin_email: string
@@ -61,6 +186,69 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      subscription_plans: {
+        Row: {
+          active: boolean | null
+          billing: string
+          created_at: string
+          currency: string
+          currency_symbol: string
+          features: Json | null
+          id: string
+          max_clients: number | null
+          name: string
+          price: number
+          seller_id: string | null
+          tier2_seller_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          billing?: string
+          created_at?: string
+          currency?: string
+          currency_symbol?: string
+          features?: Json | null
+          id?: string
+          max_clients?: number | null
+          name: string
+          price: number
+          seller_id?: string | null
+          tier2_seller_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          billing?: string
+          created_at?: string
+          currency?: string
+          currency_symbol?: string
+          features?: Json | null
+          id?: string
+          max_clients?: number | null
+          name?: string
+          price?: number
+          seller_id?: string | null
+          tier2_seller_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_plans_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_plans_tier2_seller_id_fkey"
+            columns: ["tier2_seller_id"]
+            isOneToOne: false
+            referencedRelation: "tier2_sellers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tier2_sellers: {
         Row: {
