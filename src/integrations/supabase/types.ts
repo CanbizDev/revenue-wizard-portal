@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           company: string
           created_at: string
+          deleted_at: string | null
           email: string
           id: string
           intake_form_completed: boolean | null
@@ -31,6 +32,7 @@ export type Database = {
         Insert: {
           company: string
           created_at?: string
+          deleted_at?: string | null
           email: string
           id?: string
           intake_form_completed?: boolean | null
@@ -44,6 +46,7 @@ export type Database = {
         Update: {
           company?: string
           created_at?: string
+          deleted_at?: string | null
           email?: string
           id?: string
           intake_form_completed?: boolean | null
@@ -194,6 +197,7 @@ export type Database = {
           created_at: string
           currency: string
           currency_symbol: string
+          deleted_at: string | null
           features: Json | null
           id: string
           max_clients: number | null
@@ -209,6 +213,7 @@ export type Database = {
           created_at?: string
           currency?: string
           currency_symbol?: string
+          deleted_at?: string | null
           features?: Json | null
           id?: string
           max_clients?: number | null
@@ -224,6 +229,7 @@ export type Database = {
           created_at?: string
           currency?: string
           currency_symbol?: string
+          deleted_at?: string | null
           features?: Json | null
           id?: string
           max_clients?: number | null
@@ -257,6 +263,7 @@ export type Database = {
           commission_type: string | null
           commission_value: number | null
           created_at: string
+          deleted_at: string | null
           id: string
           logo_url: string | null
           name: string
@@ -273,6 +280,7 @@ export type Database = {
           commission_type?: string | null
           commission_value?: number | null
           created_at?: string
+          deleted_at?: string | null
           id?: string
           logo_url?: string | null
           name: string
@@ -289,6 +297,7 @@ export type Database = {
           commission_type?: string | null
           commission_value?: number | null
           created_at?: string
+          deleted_at?: string | null
           id?: string
           logo_url?: string | null
           name?: string
@@ -314,7 +323,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      soft_delete_client: {
+        Args: { client_id: string }
+        Returns: boolean
+      }
+      soft_delete_plan: {
+        Args: { plan_id: string }
+        Returns: boolean
+      }
+      soft_delete_tier2_seller: {
+        Args: { seller_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

@@ -87,7 +87,7 @@ export const useSellerData = (company: 'marketstrendai' | 'xyzseller') => {
         if (sellerError) throw sellerError;
         setSellerData(seller);
 
-        // Fetch tier-1 seller clients
+        // Fetch tier-1 seller clients (exclude deleted)
         const { data: clientsData, error: clientsError } = await supabase
           .from('clients')
           .select(`
@@ -98,16 +98,18 @@ export const useSellerData = (company: 'marketstrendai' | 'xyzseller') => {
               currency_symbol
             )
           `)
-          .eq('seller_id', seller.id);
+          .eq('seller_id', seller.id)
+          .is('deleted_at', null);
 
         if (clientsError) throw clientsError;
         setClients(clientsData || []);
 
-        // Fetch tier-1 seller plans
+        // Fetch tier-1 seller plans (exclude deleted)
         const { data: plansData, error: plansError } = await supabase
           .from('subscription_plans')
           .select('*')
-          .eq('seller_id', seller.id);
+          .eq('seller_id', seller.id)
+          .is('deleted_at', null);
 
         if (plansError) throw plansError;
         setPlans(plansData || []);
@@ -139,7 +141,7 @@ export const useSellerData = (company: 'marketstrendai' | 'xyzseller') => {
         if (sellerError) throw sellerError;
         setSellerData(seller);
 
-        // Fetch tier-2 seller clients
+        // Fetch tier-2 seller clients (exclude deleted)
         const { data: clientsData, error: clientsError } = await supabase
           .from('clients')
           .select(`
@@ -150,16 +152,18 @@ export const useSellerData = (company: 'marketstrendai' | 'xyzseller') => {
               currency_symbol
             )
           `)
-          .eq('tier2_seller_id', seller.id);
+          .eq('tier2_seller_id', seller.id)
+          .is('deleted_at', null);
 
         if (clientsError) throw clientsError;
         setClients(clientsData || []);
 
-        // Fetch tier-2 seller plans
+        // Fetch tier-2 seller plans (exclude deleted)
         const { data: plansData, error: plansError } = await supabase
           .from('subscription_plans')
           .select('*')
-          .eq('tier2_seller_id', seller.id);
+          .eq('tier2_seller_id', seller.id)
+          .is('deleted_at', null);
 
         if (plansError) throw plansError;
         setPlans(plansData || []);
@@ -250,6 +254,54 @@ export const useSellerData = (company: 'marketstrendai' | 'xyzseller') => {
     }
   };
 
+  const deleteClient = async (clientId: string) => {
+    try {
+      const { error } = await supabase.rpc('soft_delete_client', {
+        client_id: clientId
+      });
+
+      if (error) throw error;
+      
+      // Refresh data
+      fetchSellerData();
+      return true;
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  const deletePlan = async (planId: string) => {
+    try {
+      const { error } = await supabase.rpc('soft_delete_plan', {
+        plan_id: planId
+      });
+
+      if (error) throw error;
+      
+      // Refresh data
+      fetchSellerData();
+      return true;
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  const deleteTier2Seller = async (sellerId: string) => {
+    try {
+      const { error } = await supabase.rpc('soft_delete_tier2_seller', {
+        seller_id: sellerId
+      });
+
+      if (error) throw error;
+      
+      // Refresh data
+      fetchSellerData();
+      return true;
+    } catch (err) {
+      throw err;
+    }
+  };
+
   useEffect(() => {
     fetchSellerData();
   }, [company]);
@@ -264,6 +316,9 @@ export const useSellerData = (company: 'marketstrendai' | 'xyzseller') => {
     refetch: fetchSellerData,
     addClient,
     addPlan,
-    updatePlan
+    updatePlan,
+    deleteClient,
+    deletePlan,
+    deleteTier2Seller
   };
 };

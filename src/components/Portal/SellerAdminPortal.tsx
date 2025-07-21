@@ -79,7 +79,10 @@ const SellerAdminPortal: React.FC<{company?: 'marketstrendai' | 'xyzseller'}> = 
     error, 
     addClient, 
     addPlan, 
-    updatePlan 
+    updatePlan,
+    deleteClient,
+    deletePlan,
+    deleteTier2Seller
   } = useSellerData(company);
 
   // Fetch tier2 sellers from database
@@ -96,7 +99,8 @@ const SellerAdminPortal: React.FC<{company?: 'marketstrendai' | 'xyzseller'}> = 
               *,
               clients:clients(count)
             `)
-            .eq('tier1_seller_id', sellerData.id);
+            .eq('tier1_seller_id', sellerData.id)
+            .is('deleted_at', null);
 
           if (error) throw error;
           
@@ -345,14 +349,16 @@ const SellerAdminPortal: React.FC<{company?: 'marketstrendai' | 'xyzseller'}> = 
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogTitle>Delete Client</AlertDialogTitle>
                             <AlertDialogDescription>
-                              This action cannot be undone. This will permanently delete the client.
+                              Are you sure you want to delete {client.name}? This action will soft-delete the client and preserve commission history for audit purposes.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction>Delete</AlertDialogAction>
+                            <AlertDialogAction onClick={() => handleDeleteClient(client.id)}>
+                              Delete
+                            </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
@@ -448,6 +454,27 @@ const SellerAdminPortal: React.FC<{company?: 'marketstrendai' | 'xyzseller'}> = 
                   >
                     {plan.active ? 'Deactivate' : 'Activate'}
                   </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Plan</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete "{plan.name}"? This action will check for active clients and prevent deletion if any are found.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDeletePlan(plan.id)}>
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
             </CardContent>
@@ -536,14 +563,16 @@ const SellerAdminPortal: React.FC<{company?: 'marketstrendai' | 'xyzseller'}> = 
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogTitle>Delete Tier-2 Seller</AlertDialogTitle>
                             <AlertDialogDescription>
-                              This action cannot be undone. This will permanently delete the Tier-2 seller.
+                              Are you sure you want to delete {seller.name}? This action will check for active clients and prevent deletion if any are found. All associated plans will also be deleted.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction>Delete</AlertDialogAction>
+                            <AlertDialogAction onClick={() => handleDeleteTier2Seller(seller.id)}>
+                              Delete
+                            </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
@@ -671,6 +700,54 @@ const SellerAdminPortal: React.FC<{company?: 'marketstrendai' | 'xyzseller'}> = 
       toast({
         title: "Error",
         description: "Failed to update plan status. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteClient = async (clientId: string) => {
+    try {
+      await deleteClient(clientId);
+      toast({
+        title: "Client Deleted",
+        description: "Client has been successfully deleted.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete client. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeletePlan = async (planId: string) => {
+    try {
+      await deletePlan(planId);
+      toast({
+        title: "Plan Deleted",
+        description: "Plan has been successfully deleted.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete plan. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteTier2Seller = async (sellerId: string) => {
+    try {
+      await deleteTier2Seller(sellerId);
+      toast({
+        title: "Tier-2 Seller Deleted",
+        description: "Tier-2 seller has been successfully deleted.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete tier-2 seller. Please try again.",
         variant: "destructive"
       });
     }
