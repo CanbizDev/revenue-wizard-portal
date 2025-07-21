@@ -25,11 +25,20 @@ const App = () => {
   useEffect(() => {
     const subdomain = getSubdomain();
     const company = getCompanyFromSubdomain(subdomain);
+    const currentPath = window.location.pathname;
     
     if (company) {
-      // If we have a valid company subdomain, go directly to company landing
       setCurrentCompany(company);
-      setCurrentView('company-landing');
+      
+      // Check if there's a client name in the path (e.g., /servicon)
+      if (currentPath !== '/' && currentPath.length > 1) {
+        const clientName = currentPath.substring(1);
+        setCurrentClient(clientName);
+        setCurrentView('client-login');
+      } else {
+        // No client path, go to company landing
+        setCurrentView('company-landing');
+      }
     } else {
       // If no subdomain or invalid subdomain, show company selector
       setCurrentView('selector');
