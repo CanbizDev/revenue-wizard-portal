@@ -122,7 +122,7 @@ const Index: React.FC<IndexProps> = ({ onCompanySelect }) => {
               <h3 className="text-base sm:text-lg font-semibold mb-2">Tier-1 Seller</h3>
               <p className="text-sm sm:text-base text-gray-600">MarketsTrendAI - Primary client management</p>
             </div>
-            <div className="text-center sm:col-span-2 md:col-span-1">
+            <div className="text-center sm:col-span-1 md:col-span-1">
               <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                 <Globe className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
               </div>
@@ -141,32 +141,32 @@ const Index: React.FC<IndexProps> = ({ onCompanySelect }) => {
             <p className="text-sm sm:text-base text-gray-600">Select a company to access its dedicated subdomain and portal</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto mb-16">
             {COMPANIES.map((company) => {
               const colors = getColorClasses(company.color);
               return (
-                <Card key={company.id} className={`hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br ${colors.bg} h-full`}>
-                  <CardHeader className="text-center pb-4">
-                    <div className={`w-12 h-12 sm:w-16 sm:h-16 ${colors.icon} rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4`}>
-                      <Building2 className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                <Card key={company.id} className={`hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br ${colors.bg} h-full flex flex-col min-h-[400px]`}>
+                  <CardHeader className="text-center pb-4 flex-shrink-0">
+                    <div className={`w-16 h-16 ${colors.icon} rounded-full flex items-center justify-center mx-auto mb-4`}>
+                      <Building2 className="w-8 h-8 text-white" />
                     </div>
-                    <CardTitle className={`text-lg sm:text-xl ${colors.text}`}>{company.name}</CardTitle>
-                    <p className="text-xs sm:text-sm text-gray-600">{company.subdomain}</p>
-                  </CardHeader>
-                  <CardContent className="text-center flex flex-col h-full">
-                    <Badge className={`${colors.badge} mb-4 self-center`}>
+                    <CardTitle className={`text-xl ${colors.text} mb-2`}>{company.name}</CardTitle>
+                    <p className="text-sm text-gray-600 mb-3">{company.subdomain}</p>
+                    <Badge className={`${colors.badge} self-center`}>
                       {company.type}
                     </Badge>
-                    <p className="text-xs sm:text-sm text-gray-600 mb-6 flex-grow">
+                  </CardHeader>
+                  <CardContent className="text-center flex flex-col flex-grow px-6 pb-6">
+                    <p className="text-sm text-gray-600 mb-6 flex-grow leading-relaxed">
                       {company.description}
                     </p>
                     <Button 
                       onClick={() => onCompanySelect(company.id)}
-                      className={`w-full ${colors.button} text-sm mt-auto`}
-                      size="sm"
+                      className={`w-full ${colors.button} text-sm py-3 mt-auto`}
+                      size="lg"
                     >
                       {company.id === 'marketstrendai' ? 'Enter Tier-1 Seller' : `Enter ${company.name}`}
-                      <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
+                      <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </CardContent>
                 </Card>
