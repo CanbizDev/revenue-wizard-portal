@@ -102,7 +102,7 @@ const App = () => {
       
       case 'client-admin':
       case 'client-viewer':
-        return <ClientPortal />;
+        return <ClientPortal client={currentClient} />;
       
       default:
         return <NotFound />;

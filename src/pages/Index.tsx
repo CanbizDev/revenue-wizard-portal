@@ -27,11 +27,11 @@ const COMPANIES = [
   },
   {
     id: 'marketstrendai',
-    name: 'MarketsTrendAI',
+    name: 'Tier-1 Seller',
     type: 'Tier-1 Seller',
     subdomain: 'marketstrendai.webreports.app',
     color: 'blue',
-    description: 'Primary seller with clients: Servicon, Forte'
+    description: 'Primary seller with multiple clients'
   },
   {
     id: 'xyzseller',
@@ -160,12 +160,12 @@ const Index: React.FC<IndexProps> = ({ onCompanySelect }) => {
                     <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">
                       {company.description}
                     </p>
-                    <Button 
+                     <Button 
                       onClick={() => onCompanySelect(company.id)}
                       className={`w-full ${colors.button} text-sm`}
                       size="sm"
                     >
-                      Enter {company.name}
+                      {company.id === 'marketstrendai' ? 'Enter Tier-1 Seller' : `Enter ${company.name}`}
                       <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
                   </CardContent>

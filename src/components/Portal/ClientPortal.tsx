@@ -8,6 +8,7 @@ import DashboardCard from '@/components/Dashboard/DashboardCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import ClientProjectDashboard from './ClientProjectDashboard';
 import { 
   FileText, 
   CreditCard, 
@@ -18,17 +19,21 @@ import {
   Download
 } from 'lucide-react';
 
-const ClientPortal: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
+interface ClientPortalProps {
+  client?: string;
+}
+
+const ClientPortal: React.FC<ClientPortalProps> = ({ client = 'markettrendsai' }) => {
+  const [activeTab, setActiveTab] = useState('projects');
   const [userRole] = useState<'client_admin' | 'client_viewer'>('client_admin');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
 
   const mockUser = {
     name: 'Sarah Johnson',
-    email: 'sarah@dataflow.com',
+    email: `sarah@${client.toLowerCase()}.com`,
     role: userRole === 'client_admin' ? 'Client Admin' : 'Client Viewer',
-    company: 'DataFlow Inc'
+    company: client.charAt(0).toUpperCase() + client.slice(1)
   };
 
   const renderDashboard = () => (
@@ -222,6 +227,8 @@ const ClientPortal: React.FC = () => {
 
   const renderContent = () => {
     switch (activeTab) {
+      case 'projects':
+        return <ClientProjectDashboard client={client} />;
       case 'dashboard':
         return renderDashboard();
       case 'reports':
@@ -235,7 +242,7 @@ const ClientPortal: React.FC = () => {
       case 'billing':
         return <div className="p-8 text-center text-gray-500">Billing management coming soon...</div>;
       default:
-        return renderDashboard();
+        return <ClientProjectDashboard client={client} />;
     }
   };
 

@@ -21,13 +21,13 @@ const COMPANY_DATA = {
     description: 'Complete ecosystem oversight and management'
   },
   marketstrendai: {
-    name: 'MarketsTrendAI',
+    name: 'Tier-1 Seller',
     subdomain: 'marketstrendai.webreports.app',
     type: 'Tier-1 Seller',
     color: 'blue',
-    clients: ['Servicon', 'Forte'],
+    clients: ['MarketTrendsAI', 'Margin'],
     hasAdmin: true,
-    description: 'Primary seller with direct clients'
+    description: 'Primary seller with multiple clients'
   },
   xyzseller: {
     name: 'XYZSeller',
