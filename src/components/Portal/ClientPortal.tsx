@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import ClientProjectDashboard from './ClientProjectDashboard';
+import ClientUserManagement from './ClientUserManagement';
+import ClientBilling from './ClientBilling';
 import { 
   FileText, 
   CreditCard, 
@@ -231,10 +233,10 @@ const ClientPortal: React.FC<ClientPortalProps> = ({ client = 'markettrendsai' }
         return <div className="p-8 text-center text-gray-500">Report history coming soon...</div>;
       case 'users':
         return userRole === 'client_admin' ? 
-          <div className="p-8 text-center text-gray-500">User management coming soon...</div> : 
+          <ClientUserManagement client={client} /> : 
           renderDashboard();
       case 'billing':
-        return <div className="p-8 text-center text-gray-500">Billing management coming soon...</div>;
+        return <ClientBilling client={client} />;
       default:
         return <ClientProjectDashboard client={client} />;
     }
