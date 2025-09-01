@@ -43,6 +43,7 @@ const Sidebar: React.FC<SidebarProps> = ({ portalType, userRole, activeTab, onTa
         const sellerItems = [
           { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
           { id: 'clients', label: 'My Clients', icon: Users },
+          { id: 'projects', label: 'Project Management', icon: Building2 },
           { id: 'plans', label: 'Subscription Plans', icon: CreditCard },
           { id: 'commissions', label: 'Commissions', icon: DollarSign },
           { id: 'billing', label: 'Billing & Revenue', icon: DollarSign },
@@ -57,6 +58,7 @@ const Sidebar: React.FC<SidebarProps> = ({ portalType, userRole, activeTab, onTa
       
       case 'client':
         const clientItems = [
+          { id: 'projects', label: 'Projects', icon: BarChart3 },
           { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
           { id: 'reports', label: 'Current Reports', icon: FileText },
           { id: 'history', label: 'Report History', icon: History },
@@ -64,7 +66,7 @@ const Sidebar: React.FC<SidebarProps> = ({ portalType, userRole, activeTab, onTa
         ];
         
         if (userRole === 'client_admin') {
-          clientItems.splice(3, 0, { id: 'users', label: 'User Management', icon: Users });
+          clientItems.splice(4, 0, { id: 'users', label: 'User Management', icon: Users });
         }
         
         return clientItems;

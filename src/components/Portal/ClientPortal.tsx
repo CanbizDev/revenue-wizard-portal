@@ -43,18 +43,12 @@ const ClientPortal: React.FC<ClientPortalProps> = ({ client = 'markettrendsai' }
         <p className="text-gray-600">Welcome to your reporting portal, {mockUser.name}</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <DashboardCard
           title="Active Reports"
           value={8}
           description="Available this month"
           icon={FileText}
-        />
-        <DashboardCard
-          title="Report Views"
-          value={145}
-          description="Total this month"
-          icon={Eye}
         />
         {userRole === 'client_admin' && (
           <DashboardCard

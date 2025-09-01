@@ -145,7 +145,7 @@ const Index: React.FC<IndexProps> = ({ onCompanySelect }) => {
             {COMPANIES.map((company) => {
               const colors = getColorClasses(company.color);
               return (
-                <Card key={company.id} className={`hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br ${colors.bg}`}>
+                <Card key={company.id} className={`hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br ${colors.bg} h-full`}>
                   <CardHeader className="text-center pb-4">
                     <div className={`w-12 h-12 sm:w-16 sm:h-16 ${colors.icon} rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4`}>
                       <Building2 className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
@@ -153,16 +153,16 @@ const Index: React.FC<IndexProps> = ({ onCompanySelect }) => {
                     <CardTitle className={`text-lg sm:text-xl ${colors.text}`}>{company.name}</CardTitle>
                     <p className="text-xs sm:text-sm text-gray-600">{company.subdomain}</p>
                   </CardHeader>
-                  <CardContent className="text-center">
-                    <Badge className={`${colors.badge} mb-4`}>
+                  <CardContent className="text-center flex flex-col h-full">
+                    <Badge className={`${colors.badge} mb-4 self-center`}>
                       {company.type}
                     </Badge>
-                    <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">
+                    <p className="text-xs sm:text-sm text-gray-600 mb-6 flex-grow">
                       {company.description}
                     </p>
-                     <Button 
+                    <Button 
                       onClick={() => onCompanySelect(company.id)}
-                      className={`w-full ${colors.button} text-sm`}
+                      className={`w-full ${colors.button} text-sm mt-auto`}
                       size="sm"
                     >
                       {company.id === 'marketstrendai' ? 'Enter Tier-1 Seller' : `Enter ${company.name}`}

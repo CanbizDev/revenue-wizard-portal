@@ -12,6 +12,8 @@ import { ClientIntakeForm } from '@/components/Forms/ClientIntakeForm';
 import AddTier2SellerForm from '@/components/Forms/AddTier2SellerForm';
 import AddPlanForm from '@/components/Forms/AddPlanForm';
 import CommissionsView from './CommissionsView';
+import ProjectManagement from './ProjectManagement';
+import ProjectBilling from './ProjectBilling';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useSellerData } from '@/hooks/useSellerData';
@@ -591,14 +593,20 @@ const SellerAdminPortal: React.FC<{company?: 'marketstrendai' | 'xyzseller'}> = 
     switch (activeTab) {
       case 'dashboard':
         return renderDashboard();
-      case 'commissions':
-        return <CommissionsView userRole={company === 'xyzseller' ? 'tier2_seller' : 'tier1_seller'} company={company} />;
       case 'clients':
         return renderClients();
+      case 'projects':
+        return <ProjectManagement />;
       case 'plans':
         return renderPlans();
       case 'tier2-sellers':
         return company === 'marketstrendai' ? renderTier2Sellers() : renderDashboard();
+      case 'commissions':
+        return <CommissionsView userRole={company === 'xyzseller' ? 'tier2_seller' : 'tier1_seller'} company={company} />;
+      case 'billing':
+        return <ProjectBilling />;
+      case 'reports':
+        return <div className="p-8 text-center text-gray-500">Reports coming soon...</div>;
       default:
         return renderDashboard();
     }
