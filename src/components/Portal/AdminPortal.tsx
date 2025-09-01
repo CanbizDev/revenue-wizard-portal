@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import DashboardCard from '@/components/Dashboard/DashboardCard';
 import AddSellerForm from '@/components/Forms/AddSellerForm';
 import AddTier2SellerForm from '@/components/Forms/AddTier2SellerForm';
+import RevenueOverview from '@/components/Revenue/RevenueOverview';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -319,7 +320,7 @@ const AdminPortal: React.FC = () => {
       case 'clients':
         return <div className="p-8 text-center text-gray-500">Client management coming soon...</div>;
       case 'revenue':
-        return <div className="p-8 text-center text-gray-500">Revenue overview coming soon...</div>;
+        return <RevenueOverview />;
       case 'settings':
         return <div className="p-8 text-center text-gray-500">Global settings coming soon...</div>;
       default:
