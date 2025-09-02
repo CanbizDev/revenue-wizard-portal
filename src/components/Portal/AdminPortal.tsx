@@ -30,7 +30,7 @@ interface AdminPortalProps {
 }
 
 const AdminPortal: React.FC<AdminPortalProps> = ({ onNavigate, activeTab: propActiveTab }) => {
-  const activeTab = propActiveTab || 'dashboard';
+  const [activeTab, setActiveTab] = useState(propActiveTab || 'dashboard');
   const [isAddSellerOpen, setIsAddSellerOpen] = useState(false);
   const [isAddTier2SellerOpen, setIsAddTier2SellerOpen] = useState(false);
   const [sellers, setSellers] = useState<any[]>([]);
@@ -92,6 +92,12 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onNavigate, activeTab: propAc
     loadTier2Sellers();
   }, []);
 
+  // Update active tab when prop changes
+  useEffect(() => {
+    if (propActiveTab && propActiveTab !== activeTab) {
+      setActiveTab(propActiveTab);
+    }
+  }, [propActiveTab, activeTab]);
 
   const renderDashboard = () => (
     <div className="space-y-6">
@@ -342,7 +348,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onNavigate, activeTab: propAc
         <Sidebar 
           portalType="admin" 
           activeTab={activeTab} 
-          onTabChange={(tab) => onNavigate?.(`/${tab}`)}
+          onTabChange={setActiveTab}
           isOpen={sidebarOpen}
           onToggle={() => setSidebarOpen(!sidebarOpen)}
         />
