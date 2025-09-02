@@ -270,6 +270,16 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
             </CardContent>
           </Card>
         </div>
+
+        {/* Navigation buttons for quick access */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => onNavigate?.('/admin')}>
+            <CardContent className="p-6 text-center">
+              <h3 className="font-semibold mb-2">Access Client Portal</h3>
+              <p className="text-sm text-muted-foreground">Manage individual client accounts and projects</p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   };
