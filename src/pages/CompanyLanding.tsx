@@ -158,42 +158,12 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
               </Card>
             )}
 
-            {/* For non-JupiterBrains companies, show grid layout */}
+            {/* For non-JupiterBrains companies, show centered client access */}
             {company !== 'jupiterbrains' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
-                {/* Admin Access */}
-                {companyData.hasAdmin && (
-                  <Card className={`hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br ${colors.bg}`}>
-                    <CardHeader className="text-center pb-4">
-                      <div className={`w-16 h-16 ${colors.icon} rounded-full flex items-center justify-center mx-auto mb-4`}>
-                        <Shield className="w-8 h-8 text-white" />
-                      </div>
-                      <CardTitle className={`text-xl ${colors.text}`}>Admin Portal</CardTitle>
-                      <p className="text-sm text-gray-600">
-                        Full administrative access and management
-                      </p>
-                    </CardHeader>
-                    <CardContent className="text-center">
-                      <ul className="text-sm text-gray-600 mb-6 space-y-2">
-                        <li>• Manage all operations</li>
-                        <li>• View comprehensive analytics</li>
-                        <li>• Configure system settings</li>
-                        <li>• Oversee all entities</li>
-                      </ul>
-                      <Button 
-                        onClick={handleAdminAccess}
-                        className={`w-full ${colors.button}`}
-                      >
-                        Access Admin Portal
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </CardContent>
-                  </Card>
-                )}
-
+              <div className="flex justify-center w-full">
                 {/* Client Access */}
                 {companyData.clients.length > 0 && (
-                  <Card className="hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-gray-50 to-gray-100">
+                  <Card className="hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-gray-50 to-gray-100 w-full max-w-md">
                     <CardHeader className="text-center pb-4">
                       <div className="w-16 h-16 bg-gray-500 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Users className="w-8 h-8 text-white" />
