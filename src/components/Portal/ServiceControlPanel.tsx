@@ -24,10 +24,12 @@ interface ServiceStatus {
   isActive: boolean;
   email?: string;
   subdomain?: string;
+  serviceType?: 'doc' | 'email' | 'project'; // Track specific service type
 }
 
 const ServiceControlPanel: React.FC = () => {
   const [services, setServices] = useState<ServiceStatus[]>([]);
+  const [serviceStates, setServiceStates] = useState<{[key: string]: boolean}>({});
   const [loading, setLoading] = useState(true);
   const [showExamples, setShowExamples] = useState(false);
   const { toast } = useToast();
@@ -35,6 +37,21 @@ const ServiceControlPanel: React.FC = () => {
   useEffect(() => {
     loadServicesData();
   }, []);
+
+  // Initialize service states for independent control
+  useEffect(() => {
+    const initialStates: {[key: string]: boolean} = {};
+    services.forEach(service => {
+      if (service.type === 'tier1') {
+        // Create independent states for Doc and Email services
+        initialStates[`${service.id}-doc`] = service.isActive;
+        initialStates[`${service.id}-email`] = service.isActive;
+      } else if (service.type === 'project') {
+        initialStates[service.id] = service.isActive;
+      }
+    });
+    setServiceStates(initialStates);
+  }, [services]);
 
   // Example data for demonstration
   const getExampleServices = (): ServiceStatus[] => [
@@ -226,6 +243,19 @@ const ServiceControlPanel: React.FC = () => {
     }
   };
 
+  // New toggle function for independent services
+  const toggleIndependentService = (serviceKey: string) => {
+    setServiceStates(prev => ({
+      ...prev,
+      [serviceKey]: !prev[serviceKey]
+    }));
+    
+    toast({
+      title: 'Demo Mode',
+      description: `Service ${!serviceStates[serviceKey] ? 'activated' : 'deactivated'} independently`,
+    });
+  };
+
   const toggleService = async (serviceId: string, currentStatus: boolean, type: string) => {
     // If showing examples, just update local state
     if (showExamples || serviceId.startsWith('example-')) {
@@ -299,12 +329,12 @@ const ServiceControlPanel: React.FC = () => {
 
   services.forEach(service => {
     if (service.type === 'tier1') {
-      // Add Doc and Email services for Tier 1
+      // Add Doc and Email services for Tier 1 using independent states
       flattenedServices.push({
         company: service.name,
         tier: 'Tier 1',
         service: 'Doc',
-        status: service.isActive,
+        status: serviceStates[`${service.id}-doc`] ?? service.isActive,
         id: `${service.id}-doc`,
         type: service.type
       });
@@ -312,7 +342,7 @@ const ServiceControlPanel: React.FC = () => {
         company: service.name,
         tier: 'Tier 1',
         service: 'Email',
-        status: service.isActive,
+        status: serviceStates[`${service.id}-email`] ?? service.isActive,
         id: `${service.id}-email`,
         type: service.type
       });
@@ -322,7 +352,7 @@ const ServiceControlPanel: React.FC = () => {
         company: service.parentName || 'Unknown Parent',
         tier: 'Tier 1',
         service: service.name,
-        status: service.isActive,
+        status: serviceStates[service.id] ?? service.isActive,
         id: service.id,
         type: service.type
       });
@@ -441,10 +471,10 @@ const ServiceControlPanel: React.FC = () => {
                       checked={item.status}
                       onCheckedChange={() => {
                         if (item.service === 'Doc' || item.service === 'Email') {
-                          // For Doc/Email services, toggle the main tier1 service
-                          const mainServiceId = item.id.replace('-doc', '').replace('-email', '');
-                          toggleService(mainServiceId, item.status, item.type);
+                          // Use independent toggle for Doc/Email services
+                          toggleIndependentService(item.id);
                         } else {
+                          // Use regular toggle for project services
                           toggleService(item.id, item.status, item.type);
                         }
                       }}
