@@ -52,10 +52,7 @@ const App = () => {
     if (path === '/admin' || path === '/tier1-sellers' || path === '/tier2-sellers' || path === '/plans' || path === '/service-control' || path === '/settings') {
       setCurrentView('admin');
       setCurrentActiveTab(path.substring(1)); // Remove leading slash
-    } else if (path === '/seller-admin') {
-      setCurrentView('seller-admin');
-      setCurrentActiveTab('dashboard'); // Always start with dashboard for seller-admin
-    } else if (path === '/clients' || path === '/commissions' || path === '/client-portal') {
+    } else if (path === '/seller-admin' || path === '/clients' || path === '/commissions' || path === '/client-portal') {
       setCurrentView('seller-admin');
       setCurrentActiveTab(path.substring(1));
     } else if (path === '/dashboard') {
