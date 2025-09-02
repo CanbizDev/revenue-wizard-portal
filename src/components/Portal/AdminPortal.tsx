@@ -24,7 +24,11 @@ import {
   BarChart3
 } from 'lucide-react';
 
-const AdminPortal: React.FC = () => {
+interface AdminPortalProps {
+  onNavigate?: (path: string) => void;
+}
+
+const AdminPortal: React.FC<AdminPortalProps> = ({ onNavigate }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isAddSellerOpen, setIsAddSellerOpen] = useState(false);
   const [isAddTier2SellerOpen, setIsAddTier2SellerOpen] = useState(false);
@@ -331,7 +335,7 @@ const AdminPortal: React.FC = () => {
 
   return (
     <div className="h-screen flex flex-col">
-      <Header portalType="admin" user={mockUser} onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
+      <Header portalType="admin" user={mockUser} onMenuToggle={() => setSidebarOpen(!sidebarOpen)} onNavigate={onNavigate} />
       <div className="flex-1 flex relative">
         <Sidebar 
           portalType="admin" 

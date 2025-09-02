@@ -23,9 +23,10 @@ import {
 
 interface ClientPortalProps {
   client?: string;
+  onNavigate?: (path: string) => void;
 }
 
-const ClientPortal: React.FC<ClientPortalProps> = ({ client = 'markettrendsai' }) => {
+const ClientPortal: React.FC<ClientPortalProps> = ({ client = 'markettrendsai', onNavigate }) => {
   const [activeTab, setActiveTab] = useState('projects');
   const [userRole] = useState<'client_admin' | 'client_viewer'>('client_admin');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -60,12 +61,6 @@ const ClientPortal: React.FC<ClientPortalProps> = ({ client = 'markettrendsai' }
             icon={Users}
           />
         )}
-        <DashboardCard
-          title="Subscription"
-          value="Premium"
-          description="Active until Dec 2025"
-          icon={CreditCard}
-        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -244,7 +239,7 @@ const ClientPortal: React.FC<ClientPortalProps> = ({ client = 'markettrendsai' }
 
   return (
     <div className="h-screen flex flex-col">
-      <Header portalType="client" user={mockUser} onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
+      <Header portalType="client" user={mockUser} onMenuToggle={() => setSidebarOpen(!sidebarOpen)} onNavigate={onNavigate} />
       <div className="flex-1 flex relative">
         <Sidebar 
           portalType="client" 

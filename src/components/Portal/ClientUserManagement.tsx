@@ -13,7 +13,7 @@ interface User {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'member' | 'viewer';
+  role: 'associate' | 'executive';
   project: string;
   status: 'active' | 'inactive';
   lastLogin: string;
@@ -32,7 +32,7 @@ interface Project {
 }
 
 const ClientUserManagement: React.FC<{ client: string }> = ({ client }) => {
-  const [activeTab, setActiveTab] = useState<'users' | 'projects'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'projects' | 'tier2-sellers'>('users');
   
   // Mock data for users
   const [users, setUsers] = useState<User[]>([
@@ -40,7 +40,7 @@ const ClientUserManagement: React.FC<{ client: string }> = ({ client }) => {
       id: '1',
       name: 'John Smith',
       email: 'john@markettrendsai.com',
-      role: 'admin',
+      role: 'executive',
       project: 'Forte',
       status: 'active',
       lastLogin: '2024-01-15',
@@ -50,7 +50,7 @@ const ClientUserManagement: React.FC<{ client: string }> = ({ client }) => {
       id: '2',
       name: 'Sarah Wilson',
       email: 'sarah@markettrendsai.com',
-      role: 'member',
+      role: 'associate',
       project: 'Servicon',
       status: 'active',
       lastLogin: '2024-01-14',
@@ -60,7 +60,7 @@ const ClientUserManagement: React.FC<{ client: string }> = ({ client }) => {
       id: '3',
       name: 'Mike Johnson',
       email: 'mike@markettrendsai.com',
-      role: 'viewer',
+      role: 'associate',
       project: 'Forte',
       status: 'inactive',
       lastLogin: '2024-01-10',
@@ -115,7 +115,7 @@ const ClientUserManagement: React.FC<{ client: string }> = ({ client }) => {
   const [newUser, setNewUser] = useState({
     name: '',
     email: '',
-    role: 'member' as 'admin' | 'member' | 'viewer',
+    role: 'associate' as 'associate' | 'executive',
     project: ''
   });
 
@@ -143,7 +143,7 @@ const ClientUserManagement: React.FC<{ client: string }> = ({ client }) => {
         joinedDate: new Date().toLocaleDateString()
       };
       setUsers([...users, user]);
-      setNewUser({ name: '', email: '', role: 'member', project: '' });
+      setNewUser({ name: '', email: '', role: 'associate', project: '' });
       setIsUserDialogOpen(false);
     }
   };
@@ -182,12 +182,10 @@ const ClientUserManagement: React.FC<{ client: string }> = ({ client }) => {
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'admin':
+      case 'executive':
         return 'bg-purple-100 text-purple-800';
-      case 'member':
+      case 'associate':
         return 'bg-blue-100 text-blue-800';
-      case 'viewer':
-        return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -197,7 +195,7 @@ const ClientUserManagement: React.FC<{ client: string }> = ({ client }) => {
   const userStats = {
     totalUsers: users.length,
     activeUsers: users.filter(u => u.status === 'active').length,
-    adminUsers: users.filter(u => u.role === 'admin').length
+    executiveUsers: users.filter(u => u.role === 'executive').length
   };
 
   const projectStats = {
@@ -242,6 +240,17 @@ const ClientUserManagement: React.FC<{ client: string }> = ({ client }) => {
             <Activity className="inline-block w-4 h-4 mr-2" />
             Projects ({projects.length})
           </button>
+          <button
+            onClick={() => setActiveTab('tier2-sellers')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'tier2-sellers'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300'
+            }`}
+          >
+            <Users className="inline-block w-4 h-4 mr-2" />
+            Tier-2 Sellers
+          </button>
         </nav>
       </div>
 
@@ -279,8 +288,8 @@ const ClientUserManagement: React.FC<{ client: string }> = ({ client }) => {
                 <div className="flex items-center space-x-2">
                   <Users className="h-5 w-5 text-purple-600" />
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Admin Users</p>
-                    <p className="text-2xl font-bold text-foreground">{userStats.adminUsers}</p>
+                    <p className="text-sm font-medium text-muted-foreground">Executive Users</p>
+                    <p className="text-2xl font-bold text-foreground">{userStats.executiveUsers}</p>
                   </div>
                 </div>
               </CardContent>
@@ -322,14 +331,13 @@ const ClientUserManagement: React.FC<{ client: string }> = ({ client }) => {
                   </div>
                   <div>
                     <Label htmlFor="userRole">Role</Label>
-                    <Select value={newUser.role} onValueChange={(value: 'admin' | 'member' | 'viewer') => setNewUser({ ...newUser, role: value })}>
+                    <Select value={newUser.role} onValueChange={(value: 'associate' | 'executive') => setNewUser({ ...newUser, role: value })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="member">Member</SelectItem>
-                        <SelectItem value="viewer">Viewer</SelectItem>
+                        <SelectItem value="executive">Executive</SelectItem>
+                        <SelectItem value="associate">Associate</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -597,6 +605,138 @@ const ClientUserManagement: React.FC<{ client: string }> = ({ client }) => {
               </Card>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Tier-2 Sellers Tab */}
+      {activeTab === 'tier2-sellers' && (
+        <div className="space-y-6">
+          {/* Tier-2 Seller Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-2">
+                  <Users className="h-5 w-5 text-blue-600" />
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Total Tier-2 Sellers</p>
+                    <p className="text-2xl font-bold text-foreground">3</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-2">
+                  <Activity className="h-5 w-5 text-green-600" />
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Active Sellers</p>
+                    <p className="text-2xl font-bold text-foreground">2</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-2">
+                  <FileText className="h-5 w-5 text-purple-600" />
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Total Clients</p>
+                    <p className="text-2xl font-bold text-foreground">12</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Add Tier-2 Seller Button */}
+          <div className="flex justify-end">
+            <Button className="bg-primary hover:bg-primary/90">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Tier-2 Seller
+            </Button>
+          </div>
+
+          {/* Tier-2 Sellers Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle>All Tier-2 Sellers</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Subdomain</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Clients</TableHead>
+                    <TableHead>Commission</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {[
+                    {
+                      id: '1',
+                      name: 'TechSolutions Pro',
+                      email: 'admin@techsolutions.com',
+                      subdomain: 'techsolutions',
+                      status: 'active',
+                      clients: 5,
+                      commission: '15%'
+                    },
+                    {
+                      id: '2',
+                      name: 'DataFlow Systems',
+                      email: 'admin@dataflow.com',
+                      subdomain: 'dataflow',
+                      status: 'active',
+                      clients: 3,
+                      commission: '12%'
+                    },
+                    {
+                      id: '3',
+                      name: 'Analytics Hub',
+                      email: 'admin@analytics.com',
+                      subdomain: 'analytics',
+                      status: 'inactive',
+                      clients: 4,
+                      commission: '10%'
+                    }
+                  ].map((seller) => (
+                    <TableRow key={seller.id}>
+                      <TableCell className="font-medium">{seller.name}</TableCell>
+                      <TableCell>{seller.email}</TableCell>
+                      <TableCell>{seller.subdomain}.reportingportal.ai</TableCell>
+                      <TableCell>
+                        <Badge className={getStatusColor(seller.status)}>
+                          {seller.status.charAt(0).toUpperCase() + seller.status.slice(1)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{seller.clients}</TableCell>
+                      <TableCell>{seller.commission}</TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Button size="sm" variant="outline">
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         </div>
       )}
     </div>

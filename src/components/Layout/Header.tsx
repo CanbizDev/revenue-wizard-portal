@@ -23,9 +23,10 @@ interface HeaderProps {
   };
   sellerName?: string;
   onMenuToggle?: () => void;
+  onNavigate?: (path: string) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ portalType, user, sellerName, onMenuToggle }) => {
+const Header: React.FC<HeaderProps> = ({ portalType, user, sellerName, onMenuToggle, onNavigate }) => {
   const isMobile = useIsMobile();
   const getPortalTitle = () => {
     switch (portalType) {
@@ -115,7 +116,16 @@ const Header: React.FC<HeaderProps> = ({ portalType, user, sellerName, onMenuTog
                 <Settings className="mr-2 h-4 w-4" />
                 Settings
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-red-600">
+              {onNavigate && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => onNavigate('/home')}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Back to Home
+                  </DropdownMenuItem>
+                </>
+              )}
+              <DropdownMenuItem className="text-red-600" onClick={() => onNavigate?.('/home')}>
                 <LogOut className="mr-2 h-4 w-4" />
                 Sign out
               </DropdownMenuItem>

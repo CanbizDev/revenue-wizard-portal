@@ -50,6 +50,13 @@ const App = () => {
       setCurrentView('admin');
     } else if (path === '/seller-admin') {
       setCurrentView('seller-admin');
+    } else if (path === '/home') {
+      setCurrentView('selector');
+      setCurrentCompany('');
+      setCurrentClient('');
+    } else if (path === '/back') {
+      setCurrentView('company-landing');
+      setCurrentClient('');
     } else if (path.startsWith('/')) {
       const clientName = path.substring(1);
       setCurrentClient(clientName);
@@ -95,14 +102,14 @@ const App = () => {
         );
       
       case 'admin':
-        return <AdminPortal />;
+        return <AdminPortal onNavigate={handleNavigation} />;
       
       case 'seller-admin':
-        return <SellerAdminPortal company={currentCompany as any} />;
+        return <SellerAdminPortal company={currentCompany as any} onNavigate={handleNavigation} />;
       
       case 'client-admin':
       case 'client-viewer':
-        return <ClientPortal client={currentClient} />;
+        return <ClientPortal client={currentClient} onNavigate={handleNavigation} />;
       
       default:
         return <NotFound />;

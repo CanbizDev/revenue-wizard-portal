@@ -58,7 +58,12 @@ import {
   Plus
 } from 'lucide-react';
 
-const SellerAdminPortal: React.FC<{company?: 'marketstrendai' | 'xyzseller'}> = ({ company = 'marketstrendai' }) => {
+interface SellerAdminPortalProps {
+  company?: 'marketstrendai' | 'xyzseller';
+  onNavigate?: (path: string) => void;
+}
+
+const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'marketstrendai', onNavigate }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showAddClientForm, setShowAddClientForm] = useState(false);
@@ -767,6 +772,7 @@ const SellerAdminPortal: React.FC<{company?: 'marketstrendai' | 'xyzseller'}> = 
         user={mockUser}
         onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
         portalType="seller"
+        onNavigate={onNavigate}
       />
       
       <div className="flex">

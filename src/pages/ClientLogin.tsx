@@ -64,7 +64,7 @@ const ClientLogin: React.FC<ClientLoginProps> = ({ company, client, onBack, onLo
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loginType, setLoginType] = useState<'admin' | 'viewer'>('admin');
+  
   
   const normalizedClient = client.toLowerCase();
   const clientConfig = CLIENT_CONFIG[normalizedClient as keyof typeof CLIENT_CONFIG] || CLIENT_CONFIG.servicon;
@@ -88,7 +88,7 @@ const ClientLogin: React.FC<ClientLoginProps> = ({ company, client, onBack, onLo
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (email && password) {
-      onLogin(loginType);
+      onLogin('admin');
     }
   };
 
@@ -162,60 +162,12 @@ const ClientLogin: React.FC<ClientLoginProps> = ({ company, client, onBack, onLo
             </p>
           </div>
 
-          {/* Login Type Selection */}
-          <div className="grid grid-cols-2 gap-4 mb-8">
-            <Card 
-              className={`cursor-pointer transition-all duration-300 hover:scale-[1.02] ${
-                loginType === 'admin' 
-                  ? 'border-primary shadow-xl bg-gradient-to-br from-primary/5 to-primary/10 ring-2 ring-primary/20' 
-                  : 'border-border hover:border-primary/30 bg-card/60 backdrop-blur-sm'
-              }`}
-              onClick={() => setLoginType('admin')}
-            >
-              <CardContent className="p-6 text-center">
-                <Shield className={`w-8 h-8 mx-auto mb-3 ${
-                  loginType === 'admin' ? 'text-primary' : 'text-muted-foreground'
-                }`} />
-                <h3 className={`font-semibold text-sm ${
-                  loginType === 'admin' ? 'text-primary' : 'text-foreground'
-                }`}>
-                  Admin Login
-                </h3>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Full management access
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card 
-              className={`cursor-pointer transition-all duration-300 hover:scale-[1.02] ${
-                loginType === 'viewer' 
-                  ? 'border-primary shadow-xl bg-gradient-to-br from-primary/5 to-primary/10 ring-2 ring-primary/20' 
-                  : 'border-border hover:border-primary/30 bg-card/60 backdrop-blur-sm'
-              }`}
-              onClick={() => setLoginType('viewer')}
-            >
-              <CardContent className="p-6 text-center">
-                <Users className={`w-8 h-8 mx-auto mb-3 ${
-                  loginType === 'viewer' ? 'text-primary' : 'text-muted-foreground'
-                }`} />
-                <h3 className={`font-semibold text-sm ${
-                  loginType === 'viewer' ? 'text-primary' : 'text-foreground'
-                }`}>
-                  Viewer Login
-                </h3>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Read-only access
-                </p>
-              </CardContent>
-            </Card>
-          </div>
 
           {/* Login Form */}
           <Card className="shadow-2xl bg-card/80 backdrop-blur-sm border-border/50">
             <CardHeader className="pb-6">
               <CardTitle className="text-center text-xl font-bold text-foreground">
-                {loginType === 'admin' ? 'Admin' : 'Viewer'} Sign In
+                Admin Sign In
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -266,7 +218,7 @@ const ClientLogin: React.FC<ClientLoginProps> = ({ company, client, onBack, onLo
                   className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-lg hover:shadow-xl transition-all duration-200"
                   disabled={!email || !password}
                 >
-                  Sign In as {loginType === 'admin' ? 'Admin' : 'Viewer'}
+                  Sign In as Admin
                 </Button>
               </form>
 
@@ -284,7 +236,6 @@ const ClientLogin: React.FC<ClientLoginProps> = ({ company, client, onBack, onLo
               <h4 className="font-semibold text-sm text-foreground mb-2">Demo Credentials</h4>
               <div className="text-xs text-muted-foreground space-y-1">
                 <p><strong className="text-foreground">Admin:</strong> admin@{client}.com / admin123</p>
-                <p><strong className="text-foreground">Viewer:</strong> viewer@{client}.com / viewer123</p>
               </div>
             </CardContent>
           </Card>
