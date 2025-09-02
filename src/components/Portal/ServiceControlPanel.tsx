@@ -29,11 +29,127 @@ interface ServiceStatus {
 const ServiceControlPanel: React.FC = () => {
   const [services, setServices] = useState<ServiceStatus[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showExamples, setShowExamples] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     loadServicesData();
   }, []);
+
+  // Example data for demonstration
+  const getExampleServices = (): ServiceStatus[] => [
+    // Tier-1 Sellers
+    {
+      id: 'example-tier1-1',
+      name: 'MarketsTrendsAI',
+      type: 'tier1',
+      isActive: true,
+      email: 'admin@marketstrendsai.com',
+      subdomain: 'marketstrendsai'
+    },
+    {
+      id: 'example-tier1-2',
+      name: 'TechCorp Solutions',
+      type: 'tier1',
+      isActive: true,
+      email: 'admin@techcorp.com',
+      subdomain: 'techcorp'
+    },
+    {
+      id: 'example-tier1-3',
+      name: 'DataFlow Analytics',
+      type: 'tier1',
+      isActive: false,
+      email: 'admin@dataflow.com',
+      subdomain: 'dataflow'
+    },
+    // Tier-2 Sellers
+    {
+      id: 'example-tier2-1',
+      name: 'Analytics Pro',
+      type: 'tier2',
+      parentId: 'example-tier1-1',
+      parentName: 'MarketsTrendsAI',
+      isActive: true,
+      email: 'admin@analyticspro.com',
+      subdomain: 'analyticspro'
+    },
+    {
+      id: 'example-tier2-2',
+      name: 'Business Intelligence Corp',
+      type: 'tier2',
+      parentId: 'example-tier1-2',
+      parentName: 'TechCorp Solutions',
+      isActive: true,
+      email: 'admin@bicorp.com',
+      subdomain: 'bicorp'
+    },
+    {
+      id: 'example-tier2-3',
+      name: 'Smart Analytics Ltd',
+      type: 'tier2',
+      parentId: 'example-tier1-1',
+      parentName: 'MarketsTrendsAI',
+      isActive: false,
+      email: 'admin@smartanalytics.com',
+      subdomain: 'smartanalytics'
+    },
+    // Projects
+    {
+      id: 'example-project-1',
+      name: 'Forte Construction',
+      type: 'project',
+      parentId: 'example-tier1-1',
+      parentName: 'MarketsTrendsAI',
+      isActive: true,
+      email: 'projects@forte.com'
+    },
+    {
+      id: 'example-project-2',
+      name: 'Servicon Industries',
+      type: 'project',
+      parentId: 'example-tier1-1',
+      parentName: 'MarketsTrendsAI',
+      isActive: true,
+      email: 'admin@servicon.com'
+    },
+    {
+      id: 'example-project-3',
+      name: 'Cementech Ltd',
+      type: 'project',
+      parentId: 'example-tier1-1',
+      parentName: 'MarketsTrendsAI',
+      isActive: true,
+      email: 'contact@cementech.com'
+    },
+    {
+      id: 'example-project-4',
+      name: 'PPI Manufacturing',
+      type: 'project',
+      parentId: 'example-tier1-2',
+      parentName: 'TechCorp Solutions',
+      isActive: false,
+      email: 'info@ppi.com'
+    },
+    {
+      id: 'example-project-5',
+      name: 'Global Logistics Inc',
+      type: 'project',
+      parentId: 'example-tier2-1',
+      parentName: 'Analytics Pro',
+      isActive: true,
+      email: 'admin@globallogistics.com'
+    },
+    {
+      id: 'example-project-6',
+      name: 'RetailTech Solutions',
+      type: 'project',
+      parentId: 'example-tier2-2',
+      parentName: 'Business Intelligence Corp',
+      isActive: false,
+      email: 'support@retailtech.com'
+    }
+  ];
 
   const loadServicesData = async () => {
     try {
@@ -123,10 +239,15 @@ const ServiceControlPanel: React.FC = () => {
       setServices(allServices);
     } catch (error: any) {
       console.error('Error loading services data:', error);
+      
+      // If there's an error loading real data, show example data
+      setServices(getExampleServices());
+      setShowExamples(true);
+      
       toast({
-        title: 'Error',
-        description: 'Failed to load services data',
-        variant: 'destructive'
+        title: 'Demo Mode',
+        description: 'Showing example data. Connect to database for real services.',
+        variant: 'default'
       });
     } finally {
       setLoading(false);
@@ -134,6 +255,20 @@ const ServiceControlPanel: React.FC = () => {
   };
 
   const toggleService = async (serviceId: string, currentStatus: boolean, type: string) => {
+    // If showing examples, just update local state
+    if (showExamples || serviceId.startsWith('example-')) {
+      setServices(prev => prev.map(service => 
+        service.id === serviceId 
+          ? { ...service, isActive: !currentStatus }
+          : service
+      ));
+      
+      toast({
+        title: 'Demo Mode',
+        description: `Service ${!currentStatus ? 'activated' : 'deactivated'} in demo mode`,
+      });
+      return;
+    }
     try {
       const newStatus = currentStatus ? 'inactive' : 'active';
       
@@ -247,16 +382,39 @@ const ServiceControlPanel: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Service Control Panel</h2>
-          <p className="text-gray-600">Manually control service access for all levels</p>
+          <p className="text-gray-600">
+            Manually control service access for all levels
+            {showExamples && <span className="text-orange-600"> • Showing example data</span>}
+          </p>
         </div>
-        <Button 
-          variant="outline" 
-          onClick={loadServicesData}
-          className="flex items-center space-x-2"
-        >
-          <Settings className="h-4 w-4" />
-          <span>Refresh</span>
-        </Button>
+        <div className="flex items-center space-x-2">
+          {!showExamples && (
+            <Button 
+              variant="outline" 
+              onClick={loadServicesData}
+              className="flex items-center space-x-2"
+            >
+              <Settings className="h-4 w-4" />
+              <span>Refresh</span>
+            </Button>
+          )}
+          <Button 
+            variant={showExamples ? "default" : "outline"}
+            onClick={() => {
+              if (showExamples) {
+                loadServicesData();
+                setShowExamples(false);
+              } else {
+                setServices(getExampleServices());
+                setShowExamples(true);
+              }
+            }}
+            className="flex items-center space-x-2"
+          >
+            <Shield className="h-4 w-4" />
+            <span>{showExamples ? 'Load Real Data' : 'Show Examples'}</span>
+          </Button>
+        </div>
       </div>
 
       {/* Service Overview Cards */}
@@ -483,9 +641,19 @@ const ServiceControlPanel: React.FC = () => {
             <div>
               <h4 className="font-medium text-orange-900 mb-1">Service Control Notice</h4>
               <p className="text-sm text-orange-800">
-                Deactivating a service will immediately prevent access to the respective portal. 
-                Use this control carefully, especially for active clients with ongoing projects.
-                Reactivation will restore full access immediately.
+                {showExamples ? (
+                  <>
+                    Currently showing example data for demonstration. These are sample companies including 
+                    MarketsTrendsAI, TechCorp Solutions, Forte, Servicon, Cementech, and PPI. 
+                    Toggle switches work in demo mode to show functionality.
+                  </>
+                ) : (
+                  <>
+                    Deactivating a service will immediately prevent access to the respective portal. 
+                    Use this control carefully, especially for active clients with ongoing projects.
+                    Reactivation will restore full access immediately.
+                  </>
+                )}
               </p>
             </div>
           </div>
