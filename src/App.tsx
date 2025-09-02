@@ -46,10 +46,13 @@ const App = () => {
   }, []);
 
   const handleNavigation = (path: string) => {
-    if (path === '/admin') {
+    if (path === '/admin' || path === '/tier1-sellers' || path === '/tier2-sellers' || path === '/plans' || path === '/service-control' || path === '/settings') {
       setCurrentView('admin');
-    } else if (path === '/seller-admin') {
+    } else if (path === '/seller-admin' || path === '/clients' || path === '/commissions' || path === '/client-portal') {
       setCurrentView('seller-admin');
+    } else if (path === '/dashboard') {
+      // Stay in current portal but go to dashboard tab
+      return;
     } else if (path === '/home') {
       setCurrentView('selector');
       setCurrentCompany('');
@@ -57,6 +60,9 @@ const App = () => {
     } else if (path === '/back') {
       setCurrentView('company-landing');
       setCurrentClient('');
+    } else if (path === '/project-dashboard' || path === '/user-management' || path === '/billing') {
+      // Stay in client portal but navigate to specific sections
+      return;
     } else if (path.startsWith('/')) {
       const clientName = path.substring(1);
       setCurrentClient(clientName);
