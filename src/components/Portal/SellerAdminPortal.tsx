@@ -61,11 +61,10 @@ import {
 interface SellerAdminPortalProps {
   company?: 'marketstrendai' | 'xyzseller';
   onNavigate?: (path: string) => void;
-  activeTab?: string;
 }
 
-const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'marketstrendai', onNavigate, activeTab: propActiveTab }) => {
-  const [activeTab, setActiveTab] = useState(propActiveTab || 'dashboard');
+const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'marketstrendai', onNavigate }) => {
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showAddClientForm, setShowAddClientForm] = useState(false);
   const [showIntakeForm, setShowIntakeForm] = useState(false);
@@ -135,13 +134,6 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
       fetchTier2Sellers();
     }
   }, [company, sellerData]);
-
-  // Update active tab when prop changes
-  React.useEffect(() => {
-    if (propActiveTab && propActiveTab !== activeTab) {
-      setActiveTab(propActiveTab);
-    }
-  }, [propActiveTab, activeTab]);
 
   const getCompanyData = () => {
     if (!sellerData) {

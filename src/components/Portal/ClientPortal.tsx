@@ -24,21 +24,13 @@ import {
 interface ClientPortalProps {
   client?: string;
   onNavigate?: (path: string) => void;
-  activeTab?: string;
 }
 
-const ClientPortal: React.FC<ClientPortalProps> = ({ client = 'markettrendsai', onNavigate, activeTab: propActiveTab }) => {
-  const [activeTab, setActiveTab] = useState(propActiveTab || 'projects');
+const ClientPortal: React.FC<ClientPortalProps> = ({ client = 'markettrendsai', onNavigate }) => {
+  const [activeTab, setActiveTab] = useState('projects');
   const [userRole] = useState<'client_admin' | 'client_viewer'>('client_admin');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
-
-  // Update active tab when prop changes
-  React.useEffect(() => {
-    if (propActiveTab && propActiveTab !== activeTab) {
-      setActiveTab(propActiveTab);
-    }
-  }, [propActiveTab, activeTab]);
 
   const mockUser = {
     name: 'Sarah Johnson',

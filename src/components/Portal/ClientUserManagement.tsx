@@ -130,50 +130,6 @@ const ClientUserManagement: React.FC<{ client: string }> = ({ client }) => {
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
   const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
 
-  // Mock data for tier2 sellers
-  const [tier2Sellers, setTier2Sellers] = useState([
-    {
-      id: '1',
-      name: 'TechSeller Pro',
-      company: 'TechSeller Pro',
-      email: 'admin@techseller.com',
-      commission: '15%',
-      clients: 5,
-      status: 'active',
-      joinedDate: '2023-05-15'
-    },
-    {
-      id: '2',
-      name: 'SalesBoost Solutions',
-      company: 'SalesBoost Solutions',
-      email: 'admin@salesboost.com',
-      commission: '₹5000',
-      clients: 3,
-      status: 'active',
-      joinedDate: '2023-08-10'
-    },
-    {
-      id: '3',
-      name: 'Digital Sales Hub',
-      company: 'Digital Sales Hub',
-      email: 'admin@digitalsales.com',
-      commission: '12%',
-      clients: 8,
-      status: 'inactive',
-      joinedDate: '2023-11-20'
-    }
-  ]);
-
-  const [newTier2Seller, setNewTier2Seller] = useState({
-    name: '',
-    email: '',
-    commissionType: 'percentage' as 'percentage' | 'fixed',
-    commissionValue: '',
-    status: 'active' as 'active' | 'inactive'
-  });
-
-  const [isTier2SellerDialogOpen, setIsTier2SellerDialogOpen] = useState(false);
-
   const handleAddUser = () => {
     if (newUser.name && newUser.email) {
       const user: User = {
@@ -216,47 +172,6 @@ const ClientUserManagement: React.FC<{ client: string }> = ({ client }) => {
 
   const handleDeleteProject = (id: string) => {
     setProjects(projects.filter(p => p.id !== id));
-  };
-
-  const handleAddTier2Seller = () => {
-    if (newTier2Seller.name && newTier2Seller.email) {
-      const seller = {
-        id: Date.now().toString(),
-        name: newTier2Seller.name,
-        company: newTier2Seller.name,
-        email: newTier2Seller.email,
-        commission: newTier2Seller.commissionType === 'percentage'
-          ? `${newTier2Seller.commissionValue}%`
-          : `₹${newTier2Seller.commissionValue}`,
-        clients: 0,
-        status: newTier2Seller.status,
-        joinedDate: new Date().toLocaleDateString()
-      };
-      setTier2Sellers([...tier2Sellers, seller]);
-      setNewTier2Seller({
-        name: '',
-        email: '',
-        commissionType: 'percentage',
-        commissionValue: '',
-        status: 'active'
-      });
-      setIsTier2SellerDialogOpen(false);
-    }
-  };
-
-  const handleDeleteTier2Seller = (id: string) => {
-    setTier2Sellers(tier2Sellers.filter(s => s.id !== id));
-  };
-
-  const handleEditTier2Seller = (seller: any) => {
-    setNewTier2Seller({
-      name: seller.name,
-      email: seller.email,
-      commissionType: seller.commission.includes('%') ? 'percentage' : 'fixed',
-      commissionValue: seller.commission.replace(/[%₹]/g, ''),
-      status: seller.status
-    });
-    setIsTier2SellerDialogOpen(true);
   };
 
   const getStatusColor = (status: string) => {
@@ -737,64 +652,10 @@ const ClientUserManagement: React.FC<{ client: string }> = ({ client }) => {
 
           {/* Add Tier-2 Seller Button */}
           <div className="flex justify-end">
-            <Dialog open={isTier2SellerDialogOpen} onOpenChange={setIsTier2SellerDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-primary hover:bg-primary/90">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Tier-2 Seller
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Add New Tier-2 Seller</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="sellerName">Company Name</Label>
-                    <Input
-                      id="sellerName"
-                      value={newTier2Seller.name}
-                      onChange={(e) => setNewTier2Seller({ ...newTier2Seller, name: e.target.value })}
-                      placeholder="Enter company name"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="sellerEmail">Admin Email</Label>
-                    <Input
-                      id="sellerEmail"
-                      type="email"
-                      value={newTier2Seller.email}
-                      onChange={(e) => setNewTier2Seller({ ...newTier2Seller, email: e.target.value })}
-                      placeholder="Enter admin email"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="commissionType">Commission Type</Label>
-                    <Select value={newTier2Seller.commissionType} onValueChange={(value: 'percentage' | 'fixed') => setNewTier2Seller({ ...newTier2Seller, commissionType: value })}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="percentage">Percentage</SelectItem>
-                        <SelectItem value="fixed">Fixed Amount</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="commissionValue">Commission Value</Label>
-                    <Input
-                      id="commissionValue"
-                      value={newTier2Seller.commissionValue}
-                      onChange={(e) => setNewTier2Seller({ ...newTier2Seller, commissionValue: e.target.value })}
-                      placeholder={newTier2Seller.commissionType === 'percentage' ? "Enter percentage (e.g., 15)" : "Enter amount (e.g., 5000)"}
-                    />
-                  </div>
-                  <Button onClick={handleAddTier2Seller} className="w-full">
-                    Add Tier-2 Seller
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <Button className="bg-primary hover:bg-primary/90">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Tier-2 Seller
+            </Button>
           </div>
 
           {/* Tier-2 Sellers Table */}
@@ -815,37 +676,60 @@ const ClientUserManagement: React.FC<{ client: string }> = ({ client }) => {
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
-                 <TableBody>
-                   {tier2Sellers.map((seller) => (
-                     <TableRow key={seller.id}>
-                       <TableCell className="font-medium">{seller.name}</TableCell>
-                       <TableCell>{seller.email}</TableCell>
-                       <TableCell>{seller.name.toLowerCase().replace(/\s+/g, '')}.reportingportal.ai</TableCell>
-                       <TableCell>
-                         <Badge className={getStatusColor(seller.status)}>
-                           {seller.status.charAt(0).toUpperCase() + seller.status.slice(1)}
-                         </Badge>
-                       </TableCell>
-                       <TableCell>{seller.clients}</TableCell>
-                       <TableCell>{seller.commission}</TableCell>
+                <TableBody>
+                  {[
+                    {
+                      id: '1',
+                      name: 'TechSolutions Pro',
+                      email: 'admin@techsolutions.com',
+                      subdomain: 'techsolutions',
+                      status: 'active',
+                      clients: 5,
+                      commission: '15%'
+                    },
+                    {
+                      id: '2',
+                      name: 'DataFlow Systems',
+                      email: 'admin@dataflow.com',
+                      subdomain: 'dataflow',
+                      status: 'active',
+                      clients: 3,
+                      commission: '12%'
+                    },
+                    {
+                      id: '3',
+                      name: 'Analytics Hub',
+                      email: 'admin@analytics.com',
+                      subdomain: 'analytics',
+                      status: 'inactive',
+                      clients: 4,
+                      commission: '10%'
+                    }
+                  ].map((seller) => (
+                    <TableRow key={seller.id}>
+                      <TableCell className="font-medium">{seller.name}</TableCell>
+                      <TableCell>{seller.email}</TableCell>
+                      <TableCell>{seller.subdomain}.reportingportal.ai</TableCell>
                       <TableCell>
-                    <div className="flex space-x-2">
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => handleEditTier2Seller(seller)}
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => handleDeleteTier2Seller(seller.id)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                        <Badge className={getStatusColor(seller.status)}>
+                          {seller.status.charAt(0).toUpperCase() + seller.status.slice(1)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{seller.clients}</TableCell>
+                      <TableCell>{seller.commission}</TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Button size="sm" variant="outline">
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

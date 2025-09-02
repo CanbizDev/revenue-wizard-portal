@@ -26,11 +26,10 @@ import {
 
 interface AdminPortalProps {
   onNavigate?: (path: string) => void;
-  activeTab?: string;
 }
 
-const AdminPortal: React.FC<AdminPortalProps> = ({ onNavigate, activeTab: propActiveTab }) => {
-  const [activeTab, setActiveTab] = useState(propActiveTab || 'dashboard');
+const AdminPortal: React.FC<AdminPortalProps> = ({ onNavigate }) => {
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [isAddSellerOpen, setIsAddSellerOpen] = useState(false);
   const [isAddTier2SellerOpen, setIsAddTier2SellerOpen] = useState(false);
   const [sellers, setSellers] = useState<any[]>([]);
@@ -91,13 +90,6 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onNavigate, activeTab: propAc
     loadSellers();
     loadTier2Sellers();
   }, []);
-
-  // Update active tab when prop changes
-  useEffect(() => {
-    if (propActiveTab && propActiveTab !== activeTab) {
-      setActiveTab(propActiveTab);
-    }
-  }, [propActiveTab, activeTab]);
 
   const renderDashboard = () => (
     <div className="space-y-6">

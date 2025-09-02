@@ -55,42 +55,8 @@ const Header: React.FC<HeaderProps> = ({ portalType, user, sellerName, onMenuTog
     );
   };
 
-  const getNavigationItems = () => {
-    const baseItems = [
-      { label: 'Dashboard', path: '/dashboard' },
-      { label: 'Home', path: '/home' }
-    ];
-
-    if (portalType === 'admin') {
-      return [
-        ...baseItems,
-        { label: 'Tier-1 Sellers', path: '/tier1-sellers' },
-        { label: 'Tier-2 Sellers', path: '/tier2-sellers' },
-        { label: 'Plans Management', path: '/plans' },
-        { label: 'Service Control', path: '/service-control' },
-        { label: 'Global Settings', path: '/settings' }
-      ];
-    } else if (portalType === 'seller') {
-      return [
-        ...baseItems,
-        { label: 'Client Management', path: '/clients' },
-        { label: 'Plans', path: '/plans' },
-        { label: 'Commissions', path: '/commissions' },
-        { label: 'Client Portal Access', path: '/client-portal' }
-      ];
-    } else if (portalType === 'client') {
-      return [
-        ...baseItems,
-        { label: 'Project Dashboard', path: '/project-dashboard' },
-        { label: 'User & Project Management', path: '/user-management' },
-        { label: 'Billing', path: '/billing' }
-      ];
-    }
-    return baseItems;
-  };
-
   return (
-    <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 sticky top-0 z-50">
+    <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2 sm:space-x-4">
           {isMobile && (
@@ -111,20 +77,6 @@ const Header: React.FC<HeaderProps> = ({ portalType, user, sellerName, onMenuTog
           </div>
         </div>
 
-        {/* Navigation Menu for Desktop */}
-        <nav className="hidden lg:flex items-center space-x-6">
-          {getNavigationItems().slice(0, 5).map((item) => (
-            <Button
-              key={item.path}
-              variant="ghost"
-              onClick={() => onNavigate?.(item.path)}
-              className="text-sm font-medium hover:text-primary"
-            >
-              {item.label}
-            </Button>
-          ))}
-        </nav>
-
         <div className="flex items-center space-x-2 sm:space-x-4">
           <div className="sm:hidden">
             {getPortalBadge()}
@@ -134,24 +86,6 @@ const Header: React.FC<HeaderProps> = ({ portalType, user, sellerName, onMenuTog
             <Bell className="h-4 w-4" />
             <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full"></span>
           </Button>
-
-          {/* Mobile Navigation Menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="lg:hidden">
-                <Menu className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Navigation</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {getNavigationItems().map((item) => (
-                <DropdownMenuItem key={item.path} onClick={() => onNavigate?.(item.path)}>
-                  {item.label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
