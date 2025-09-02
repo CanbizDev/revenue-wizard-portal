@@ -61,10 +61,11 @@ import {
 interface SellerAdminPortalProps {
   company?: 'marketstrendai' | 'xyzseller';
   onNavigate?: (path: string) => void;
+  activeTab?: string;
 }
 
-const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'marketstrendai', onNavigate }) => {
-  const [activeTab, setActiveTab] = useState('dashboard');
+const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'marketstrendai', onNavigate, activeTab: propActiveTab }) => {
+  const [activeTab, setActiveTab] = useState(propActiveTab || 'dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showAddClientForm, setShowAddClientForm] = useState(false);
   const [showIntakeForm, setShowIntakeForm] = useState(false);
@@ -134,6 +135,13 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
       fetchTier2Sellers();
     }
   }, [company, sellerData]);
+
+  // Update active tab when prop changes
+  React.useEffect(() => {
+    if (propActiveTab && propActiveTab !== activeTab) {
+      setActiveTab(propActiveTab);
+    }
+  }, [propActiveTab, activeTab]);
 
   const getCompanyData = () => {
     if (!sellerData) {
@@ -267,16 +275,6 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
                   );
                 })}
               </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Navigation buttons for quick access */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => onNavigate?.('/admin')}>
-            <CardContent className="p-6 text-center">
-              <h3 className="font-semibold mb-2">Access Client Portal</h3>
-              <p className="text-sm text-muted-foreground">Manage individual client accounts and projects</p>
             </CardContent>
           </Card>
         </div>
