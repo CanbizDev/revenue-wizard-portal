@@ -45,28 +45,41 @@ const App = () => {
     }
   }, []);
 
-  const handleNavigation = (path: string) => {
+  const [currentActiveTab, setCurrentActiveTab] = useState<string>('dashboard');
+
+  const handleNavigation = (path: string, tabOverride?: string) => {
+    // Handle main view navigation
     if (path === '/admin' || path === '/tier1-sellers' || path === '/tier2-sellers' || path === '/plans' || path === '/service-control' || path === '/settings') {
       setCurrentView('admin');
+      setCurrentActiveTab(path.substring(1)); // Remove leading slash
     } else if (path === '/seller-admin' || path === '/clients' || path === '/commissions' || path === '/client-portal') {
       setCurrentView('seller-admin');
+      setCurrentActiveTab(path.substring(1));
     } else if (path === '/dashboard') {
-      // Stay in current portal but go to dashboard tab
-      return;
+      setCurrentActiveTab('dashboard');
+      return; // Stay in current portal
     } else if (path === '/home') {
       setCurrentView('selector');
       setCurrentCompany('');
       setCurrentClient('');
+      setCurrentActiveTab('dashboard');
     } else if (path === '/back') {
       setCurrentView('company-landing');
       setCurrentClient('');
+      setCurrentActiveTab('dashboard');
     } else if (path === '/project-dashboard' || path === '/user-management' || path === '/billing') {
-      // Stay in client portal but navigate to specific sections
-      return;
+      setCurrentActiveTab(path.substring(1).replace('-', '_'));
+      return; // Stay in client portal
     } else if (path.startsWith('/')) {
       const clientName = path.substring(1);
       setCurrentClient(clientName);
       setCurrentView('client-login');
+      setCurrentActiveTab('dashboard');
+    }
+    
+    // Handle tab override for within-portal navigation
+    if (tabOverride) {
+      setCurrentActiveTab(tabOverride);
     }
   };
 
@@ -108,14 +121,14 @@ const App = () => {
         );
       
       case 'admin':
-        return <AdminPortal onNavigate={handleNavigation} />;
+        return <AdminPortal onNavigate={handleNavigation} activeTab={currentActiveTab} />;
       
       case 'seller-admin':
-        return <SellerAdminPortal company={currentCompany as any} onNavigate={handleNavigation} />;
+        return <SellerAdminPortal company={currentCompany as any} onNavigate={handleNavigation} activeTab={currentActiveTab} />;
       
       case 'client-admin':
       case 'client-viewer':
-        return <ClientPortal client={currentClient} onNavigate={handleNavigation} />;
+        return <ClientPortal client={currentClient} onNavigate={handleNavigation} activeTab={currentActiveTab} />;
       
       default:
         return <NotFound />;
