@@ -111,20 +111,6 @@ const Header: React.FC<HeaderProps> = ({ portalType, user, sellerName, onMenuTog
           </div>
         </div>
 
-        {/* Navigation Menu for Desktop */}
-        <nav className="hidden lg:flex items-center space-x-6">
-          {getNavigationItems().slice(0, 5).map((item) => (
-            <Button
-              key={item.path}
-              variant="ghost"
-              onClick={() => onNavigate?.(item.path)}
-              className="text-sm font-medium hover:text-primary"
-            >
-              {item.label}
-            </Button>
-          ))}
-        </nav>
-
         <div className="flex items-center space-x-2 sm:space-x-4">
           <div className="sm:hidden">
             {getPortalBadge()}
@@ -135,23 +121,6 @@ const Header: React.FC<HeaderProps> = ({ portalType, user, sellerName, onMenuTog
             <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full"></span>
           </Button>
 
-          {/* Mobile Navigation Menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="lg:hidden">
-                <Menu className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Navigation</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {getNavigationItems().map((item) => (
-                <DropdownMenuItem key={item.path} onClick={() => onNavigate?.(item.path)}>
-                  {item.label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

@@ -24,13 +24,8 @@ import {
   BarChart3
 } from 'lucide-react';
 
-interface AdminPortalProps {
-  onNavigate?: (path: string) => void;
-  activeTab?: string;
-}
-
-const AdminPortal: React.FC<AdminPortalProps> = ({ onNavigate, activeTab: propActiveTab }) => {
-  const [activeTab, setActiveTab] = useState(propActiveTab || 'dashboard');
+const AdminPortal: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [isAddSellerOpen, setIsAddSellerOpen] = useState(false);
   const [isAddTier2SellerOpen, setIsAddTier2SellerOpen] = useState(false);
   const [sellers, setSellers] = useState<any[]>([]);
@@ -92,12 +87,6 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onNavigate, activeTab: propAc
     loadTier2Sellers();
   }, []);
 
-  // Update active tab when prop changes
-  useEffect(() => {
-    if (propActiveTab && propActiveTab !== activeTab) {
-      setActiveTab(propActiveTab);
-    }
-  }, [propActiveTab, activeTab]);
 
   const renderDashboard = () => (
     <div className="space-y-6">
@@ -330,8 +319,6 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onNavigate, activeTab: propAc
         return renderTier1Sellers();
       case 'tier2-sellers':
         return renderTier2Sellers();
-      case 'clients':
-        return <div className="p-8 text-center text-gray-500">Client management coming soon...</div>;
       case 'revenue':
         return <RevenueOverview />;
       case 'settings':
@@ -343,7 +330,7 @@ const AdminPortal: React.FC<AdminPortalProps> = ({ onNavigate, activeTab: propAc
 
   return (
     <div className="h-screen flex flex-col">
-      <Header portalType="admin" user={mockUser} onMenuToggle={() => setSidebarOpen(!sidebarOpen)} onNavigate={onNavigate} />
+      <Header portalType="admin" user={mockUser} onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
       <div className="flex-1 flex relative">
         <Sidebar 
           portalType="admin" 
