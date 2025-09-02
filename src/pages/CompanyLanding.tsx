@@ -128,7 +128,7 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
 
           {/* Access Options */}
           <div className="flex justify-center max-w-4xl mx-auto">
-            {/* Admin Access - Centered */}
+            {/* Admin Access - Only for JupiterBrains */}
             {companyData.hasAdmin && company === 'jupiterbrains' && (
               <Card className={`hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br ${colors.bg} w-full max-w-md`}>
                 <CardHeader className="text-center pb-4">
@@ -158,88 +158,53 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
               </Card>
             )}
 
-            {/* For non-JupiterBrains companies, show grid layout */}
-            {company !== 'jupiterbrains' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
-                {/* Admin Access */}
-                {companyData.hasAdmin && (
-                  <Card className={`hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br ${colors.bg}`}>
-                    <CardHeader className="text-center pb-4">
-                      <div className={`w-16 h-16 ${colors.icon} rounded-full flex items-center justify-center mx-auto mb-4`}>
-                        <Shield className="w-8 h-8 text-white" />
-                      </div>
-                      <CardTitle className={`text-xl ${colors.text}`}>Admin Portal</CardTitle>
-                      <p className="text-sm text-gray-600">
-                        Full administrative access and management
-                      </p>
-                    </CardHeader>
-                    <CardContent className="text-center">
-                      <ul className="text-sm text-gray-600 mb-6 space-y-2">
-                        <li>• Manage all operations</li>
-                        <li>• View comprehensive analytics</li>
-                        <li>• Configure system settings</li>
-                        <li>• Oversee all entities</li>
-                      </ul>
-                      <Button 
-                        onClick={handleAdminAccess}
-                        className={`w-full ${colors.button}`}
-                      >
-                        Access Admin Portal
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Client Access */}
-                {companyData.clients.length > 0 && (
-                  <Card className="hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-gray-50 to-gray-100">
-                    <CardHeader className="text-center pb-4">
-                      <div className="w-16 h-16 bg-gray-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Users className="w-8 h-8 text-white" />
-                      </div>
-                      <CardTitle className="text-xl text-gray-700">Client Access</CardTitle>
-                      <p className="text-sm text-gray-600">
-                        Access client-specific reporting portals
-                      </p>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Select Client
-                        </label>
-                        <Select value={selectedClient} onValueChange={setSelectedClient}>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Choose a client..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {companyData.clients.map((client) => (
-                              <SelectItem key={client} value={client}>
-                                {client}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <Button 
-                        onClick={handleClientAccess}
-                        disabled={!selectedClient}
-                        className="w-full bg-gray-600 hover:bg-gray-700 disabled:opacity-50"
-                      >
-                        Access Client Portal
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                      
-                      {selectedClient && (
-                        <p className="text-xs text-gray-500 text-center">
-                          Will navigate to: {companyData.subdomain}/{selectedClient.toLowerCase()}
-                        </p>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
+            {/* For non-JupiterBrains companies, show only client access */}
+            {company !== 'jupiterbrains' && companyData.clients.length > 0 && (
+              <Card className="hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-gray-50 to-gray-100 w-full max-w-md">
+                <CardHeader className="text-center pb-4">
+                  <div className="w-16 h-16 bg-gray-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Users className="w-8 h-8 text-white" />
+                  </div>
+                  <CardTitle className="text-xl text-gray-700">Client Access</CardTitle>
+                  <p className="text-sm text-gray-600">
+                    Access client-specific reporting portals
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Select Client
+                    </label>
+                    <Select value={selectedClient} onValueChange={setSelectedClient}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Choose a client..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {companyData.clients.map((client) => (
+                          <SelectItem key={client} value={client}>
+                            {client}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <Button 
+                    onClick={handleClientAccess}
+                    disabled={!selectedClient}
+                    className="w-full bg-gray-600 hover:bg-gray-700 disabled:opacity-50"
+                  >
+                    Access Client Portal
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                  
+                  {selectedClient && (
+                    <p className="text-xs text-gray-500 text-center">
+                      Will navigate to: {companyData.subdomain}/{selectedClient.toLowerCase()}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
             )}
           </div>
 
