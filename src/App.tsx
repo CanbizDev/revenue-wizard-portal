@@ -2,87 +2,101 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import Index from "./pages/Index";
-import CompanyLanding from "./pages/CompanyLanding";
-import ClientLogin from "./pages/ClientLogin";
-import AdminPortal from "./components/Portal/AdminPortal";
-import SellerAdminPortal from "./components/Portal/SellerAdminPortal";
-import ClientPortal from "./components/Portal/ClientPortal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import LoginPage from "./components/Auth/LoginPage";
+import SellerDashboard from "./components/Dashboard/SellerDashboard";
+import ClientDashboard from "./components/Dashboard/ClientDashboard";
+import { apiService } from "./services/api";
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [currentView, setCurrentView] = useState<string>('selector');
-  const [currentCompany, setCurrentCompany] = useState<string>('');
-  const [currentClient, setCurrentClient] = useState<string>('');
-  const [currentActiveTab, setCurrentActiveTab] = useState<string>('dashboard');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUserType, setCurrentUserType] = useState<string>('');
+  const [loading, setLoading] = useState(true);
 
-  const handleNavigation = (path: string) => {
-    if (path === '/admin') {
-      setCurrentView('admin');
-    } else if (path === '/seller-admin') {
-      setCurrentView('seller-admin');
-    } else if (path === '/home') {
-      setCurrentView('selector');
-      setCurrentCompany('');
-      setCurrentClient('');
-    } else if (path === '/back') {
-      setCurrentView('company-landing');
-      setCurrentClient('');
-    } else if (path.startsWith('/')) {
-      const clientName = path.substring(1);
-      setCurrentClient(clientName);
-      setCurrentView('client-login');
+  useEffect(() => {
+    // Check if user is already authenticated
+    const token = localStorage.getItem('auth_token');
+    const userData = localStorage.getItem('user_data');
+    
+    if (token && userData) {
+      const user = JSON.parse(userData);
+      setIsAuthenticated(true);
+      setCurrentUserType(user.user_type);
     }
+    setLoading(false);
+  }, []);
+
+  const handleLoginSuccess = (userType: string) => {
+    setIsAuthenticated(true);
+    setCurrentUserType(userType);
   };
 
-  const handleLogin = (role: 'admin' | 'viewer') => {
-    if (role === 'admin') {
-      setCurrentView('client-admin');
-    } else {
-      setCurrentView('client-viewer');
-    }
+  const handleLogout = () => {
+    apiService.logout();
+    setIsAuthenticated(false);
+    setCurrentUserType('');
   };
 
-  const renderCurrentView = () => {
-    switch (currentView) {
-      case 'selector':
-        return <Index onCompanySelect={(company) => {
-          setCurrentCompany(company);
-          setCurrentView('company-landing');
-        }} />;
-      
-      case 'company-landing':
-        return (
-          <CompanyLanding 
-            company={currentCompany as any}
-            onNavigate={handleNavigation}
-          />
-        );
-      
-      case 'client-login':
-        return (
-          <ClientLogin
-            company={currentCompany as any}
-            client={currentClient}
-            onBack={() => setCurrentView('company-landing')}
-            onLogin={handleLogin}
-          />
-        );
-      
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      );
+    }
+
+    if (!isAuthenticated) {
+      return <LoginPage onLoginSuccess={handleLoginSuccess} />;
+    }
+
+    // Render dashboard based on user type
+    switch (currentUserType) {
+      case 'seller':
       case 'admin':
-        return <AdminPortal />;
+        return (
+          <div className="min-h-screen bg-background">
+            <header className="border-b bg-card">
+              <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+                <h1 className="text-xl font-semibold">SaaS Dashboard</h1>
+                <button
+                  onClick={handleLogout}
+                  className="text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Logout
+                </button>
+              </div>
+            </header>
+            <main className="container mx-auto px-4 py-6">
+              <SellerDashboard />
+            </main>
+          </div>
+        );
       
-      case 'seller-admin':
-        return <SellerAdminPortal company={currentCompany as any} />;
-      
-      case 'client-admin':
-      case 'client-viewer':
-        return <ClientPortal client={currentClient} />;
+      case 'client':
+        return (
+          <div className="min-h-screen bg-background">
+            <header className="border-b bg-card">
+              <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+                <h1 className="text-xl font-semibold">Client Portal</h1>
+                <button
+                  onClick={handleLogout}
+                  className="text-sm text-muted-foreground hover:text-foreground"
+                >
+                  Logout
+                </button>
+              </div>
+            </header>
+            <main className="container mx-auto px-4 py-6">
+              <ClientDashboard />
+            </main>
+          </div>
+        );
       
       default:
-        return <div>Page not found</div>;
+        return <div>Invalid user type</div>;
     }
   };
 
@@ -91,7 +105,7 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        {renderCurrentView()}
+        {renderContent()}
       </TooltipProvider>
     </QueryClientProvider>
   );
