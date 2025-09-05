@@ -61,7 +61,7 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
     return colorMap[color as keyof typeof colorMap];
   };
 
-  const colors = getColorClasses(companyData.color);
+  const colors = companyData ? getColorClasses(companyData.color) : getColorClasses('blue');
 
   const handleClientAccess = () => {
     if (selectedClient) {
