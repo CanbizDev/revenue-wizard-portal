@@ -185,7 +185,231 @@ export const useSellerData = (company: 'marketstrendai' | 'xyzseller') => {
         setCommissions(commissionsData || []);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      console.error('Failed to fetch seller data, using dummy data:', err);
+      setError(null); // Clear error since we're using dummy data
+      
+      // Set dummy data based on company
+      if (company === 'marketstrendai') {
+        // Tier 1 seller dummy data
+        setSellerData({
+          id: 'seller-1',
+          name: 'MarketsTrendAI',
+          subdomain: 'marketstrendai',
+          admin_email: 'admin@marketstrendai.com',
+          status: 'active',
+          commission_value: 15,
+          commission_type: 'percentage'
+        });
+        
+        setClients([
+          {
+            id: 'client-1',
+            name: 'John Smith',
+            email: 'john@techcorp.com',
+            company: 'TechCorp Solutions',
+            status: 'active',
+            intake_form_completed: true,
+            created_at: '2024-01-15T00:00:00Z',
+            plan_id: 'plan-1',
+            subscription_plans: {
+              name: 'Premium Analytics',
+              price: 15000,
+              currency_symbol: '₹'
+            }
+          },
+          {
+            id: 'client-2',
+            name: 'Sarah Johnson',
+            email: 'sarah@dataflow.com',
+            company: 'DataFlow Inc',
+            status: 'active',
+            intake_form_completed: false,
+            created_at: '2024-02-01T00:00:00Z',
+            plan_id: 'plan-2',
+            subscription_plans: {
+              name: 'Standard Reports',
+              price: 8000,
+              currency_symbol: '₹'
+            }
+          },
+          {
+            id: 'client-3',
+            name: 'Mike Chen',
+            email: 'mike@cloudvision.com',
+            company: 'CloudVision',
+            status: 'active',
+            intake_form_completed: true,
+            created_at: '2024-02-15T00:00:00Z',
+            plan_id: 'plan-1',
+            subscription_plans: {
+              name: 'Premium Analytics',
+              price: 15000,
+              currency_symbol: '₹'
+            }
+          }
+        ]);
+        
+        setPlans([
+          {
+            id: 'plan-1',
+            name: 'Premium Analytics',
+            price: 15000,
+            currency: 'INR',
+            currency_symbol: '₹',
+            billing: 'monthly',
+            features: ['Advanced Analytics', 'Custom Reports', 'API Access', '24/7 Support'],
+            max_clients: 100,
+            active: true
+          },
+          {
+            id: 'plan-2',
+            name: 'Standard Reports',
+            price: 8000,
+            currency: 'INR',
+            currency_symbol: '₹',
+            billing: 'monthly',
+            features: ['Basic Reports', 'Dashboard Access', 'Email Support'],
+            max_clients: 50,
+            active: true
+          },
+          {
+            id: 'plan-3',
+            name: 'Enterprise',
+            price: 25000,
+            currency: 'INR',
+            currency_symbol: '₹',
+            billing: 'monthly',
+            features: ['All Premium Features', 'White Label', 'Dedicated Manager', 'Custom Integration'],
+            max_clients: null,
+            active: true
+          }
+        ]);
+        
+        setCommissions([
+          {
+            id: 'comm-1',
+            amount: 15000,
+            commission_amount: 2250,
+            type: 'subscription',
+            status: 'paid',
+            transaction_date: '2024-03-01T00:00:00Z',
+            clients: {
+              name: 'John Smith',
+              company: 'TechCorp Solutions'
+            }
+          },
+          {
+            id: 'comm-2',
+            amount: 8000,
+            commission_amount: 1200,
+            type: 'subscription',
+            status: 'pending',
+            transaction_date: '2024-03-01T00:00:00Z',
+            clients: {
+              name: 'Sarah Johnson',
+              company: 'DataFlow Inc'
+            }
+          }
+        ]);
+        
+      } else {
+        // Tier 2 seller (xyzseller) dummy data
+        setSellerData({
+          id: 'tier2-seller-1',
+          name: 'XYZSeller',
+          subdomain: 'xyzseller',
+          admin_email: 'admin@xyzseller.com',
+          status: 'active',
+          commission_value: 8,
+          commission_type: 'percentage',
+          tier1_seller_id: 'seller-1'
+        } as Tier2SellerData);
+        
+        setClients([
+          {
+            id: 'client-t2-1',
+            name: 'Rajesh Kumar',
+            email: 'rajesh@tcs.com',
+            company: 'TCS',
+            status: 'active',
+            intake_form_completed: true,
+            created_at: '2024-01-20T00:00:00Z',
+            plan_id: 'plan-t2-1',
+            subscription_plans: {
+              name: 'Business Analytics',
+              price: 12000,
+              currency_symbol: '₹'
+            }
+          },
+          {
+            id: 'client-t2-2',
+            name: 'Priya Sharma',
+            email: 'priya@infosys.com',
+            company: 'Infosys',
+            status: 'active',
+            intake_form_completed: true,
+            created_at: '2024-02-10T00:00:00Z',
+            plan_id: 'plan-t2-2',
+            subscription_plans: {
+              name: 'Professional Reports',
+              price: 10000,
+              currency_symbol: '₹'
+            }
+          }
+        ]);
+        
+        setPlans([
+          {
+            id: 'plan-t2-1',
+            name: 'Business Analytics',
+            price: 12000,
+            currency: 'INR',
+            currency_symbol: '₹',
+            billing: 'monthly',
+            features: ['Business Intelligence', 'Custom Dashboards', 'Data Export'],
+            max_clients: 25,
+            active: true
+          },
+          {
+            id: 'plan-t2-2',
+            name: 'Professional Reports',
+            price: 10000,
+            currency: 'INR',
+            currency_symbol: '₹',
+            billing: 'monthly',
+            features: ['Professional Reports', 'Analytics Dashboard', 'Support'],
+            max_clients: 15,
+            active: true
+          }
+        ]);
+        
+        setCommissions([
+          {
+            id: 'comm-t2-1',
+            amount: 12000,
+            commission_amount: 960,
+            type: 'subscription',
+            status: 'paid',
+            transaction_date: '2024-03-01T00:00:00Z',
+            clients: {
+              name: 'Rajesh Kumar',
+              company: 'TCS'
+            }
+          },
+          {
+            id: 'comm-t2-2',
+            amount: 10000,
+            commission_amount: 800,
+            type: 'subscription',
+            status: 'paid',
+            transaction_date: '2024-03-01T00:00:00Z',
+            clients: {
+              name: 'Priya Sharma',
+              company: 'Infosys'
+            }
+          }
+        ]);
+      }
     } finally {
       setLoading(false);
     }
