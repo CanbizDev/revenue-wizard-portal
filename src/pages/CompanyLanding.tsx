@@ -78,7 +78,9 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
         badge: 'bg-green-100 text-green-800'
       }
     };
-    return colorMap[color as keyof typeof colorMap];
+    
+    // Return the matched color or default to blue if no match
+    return colorMap[color as keyof typeof colorMap] || colorMap.blue;
   };
 
   const colors = companyData ? getColorClasses(companyData.color) : getColorClasses('blue');
