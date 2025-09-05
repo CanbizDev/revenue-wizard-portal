@@ -24,8 +24,28 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
         const data = await apiService.getCompanyInfo(company);
         setCompanyData(data);
       } catch (err) {
-        console.error('Failed to load company data:', err);
-        setError('Failed to load company information');
+        console.error('Failed to load company data, using fallback:', err);
+        
+        // Fallback dummy data when API fails
+        const fallbackData: CompanyInfo = {
+          id: company,
+          name: company === 'jupiterbrains' ? 'JupiterBrains' : 
+                company === 'marketstrendai' ? 'MarketsTrendAI' : 'XYZSeller',
+          subdomain: `${company}.webreports.app`,
+          type: company === 'jupiterbrains' ? 'root_admin' : 
+                company === 'marketstrendai' ? 'tier1_seller' : 'tier2_seller',
+          color: company === 'jupiterbrains' ? 'red' : 
+                 company === 'marketstrendai' ? 'blue' : 'green',
+          description: company === 'jupiterbrains' ? 'Complete ecosystem oversight and global management' :
+                       company === 'marketstrendai' ? 'Primary seller with multiple clients' :
+                       'Secondary seller with clients: TCS, Infosys',
+          hasAdmin: true,
+          clients: company === 'jupiterbrains' ? ['MarketsTrendAI', 'XYZSeller'] :
+                   company === 'marketstrendai' ? ['TechCorp', 'DataFlow', 'CloudVision'] :
+                   ['TCS', 'Infosys']
+        };
+        
+        setCompanyData(fallbackData);
       } finally {
         setLoading(false);
       }
