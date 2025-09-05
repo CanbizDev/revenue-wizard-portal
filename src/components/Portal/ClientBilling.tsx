@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
-import { DollarSign, TrendingUp, AlertTriangle, CheckCircle, Download, Search, Filter } from 'lucide-react';
+import { DollarSign, TrendingUp, AlertTriangle, CheckCircle, Download, Search, Filter, Loader2 } from 'lucide-react';
+import { apiService } from '@/services/api';
 
 interface ProjectBilling {
   id: string;
@@ -24,92 +25,27 @@ const ClientBilling: React.FC<{ client: string }> = ({ client }) => {
   const [selectedProject, setSelectedProject] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [billingData, setBillingData] = useState<ProjectBilling[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
-  // Mock billing data based on client
-  const getClientBillingData = (): ProjectBilling[] => {
-    if (client.toLowerCase() === 'markettrendsai') {
-      return [
-        {
-          id: '1',
-          projectName: 'Forte',
-          totalBilling: 45000,
-          paidAmount: 40000,
-          pendingAmount: 5000,
-          lastPayment: '2024-01-15',
-          status: 'pending',
-          invoiceId: 'INV-MTI-2024-001',
-          dueDate: '2024-02-15',
-          clientName: 'MarketTrendsAI'
-        },
-        {
-          id: '2',
-          projectName: 'Servicon',
-          totalBilling: 32000,
-          paidAmount: 32000,
-          pendingAmount: 0,
-          lastPayment: '2024-01-10',
-          status: 'paid',
-          invoiceId: 'INV-MTI-2024-002',
-          dueDate: '2024-01-31',
-          clientName: 'MarketTrendsAI'
-        },
-        {
-          id: '3',
-          projectName: 'Cementech',
-          totalBilling: 55000,
-          paidAmount: 45000,
-          pendingAmount: 10000,
-          lastPayment: '2023-12-20',
-          status: 'overdue',
-          invoiceId: 'INV-MTI-2024-003',
-          dueDate: '2024-01-20',
-          clientName: 'MarketTrendsAI'
-        },
-        {
-          id: '4',
-          projectName: 'PPI Platform',
-          totalBilling: 28000,
-          paidAmount: 28000,
-          pendingAmount: 0,
-          lastPayment: '2024-01-08',
-          status: 'paid',
-          invoiceId: 'INV-MTI-2024-004',
-          dueDate: '2024-01-25',
-          clientName: 'MarketTrendsAI'
-        }
-      ];
-    } else if (client.toLowerCase() === 'margin') {
-      return [
-        {
-          id: '1',
-          projectName: 'Email Classifier',
-          totalBilling: 38000,
-          paidAmount: 35000,
-          pendingAmount: 3000,
-          lastPayment: '2024-01-14',
-          status: 'pending',
-          invoiceId: 'INV-MAR-2024-001',
-          dueDate: '2024-02-10',
-          clientName: 'Margin'
-        },
-        {
-          id: '2',
-          projectName: 'Document Classifier',
-          totalBilling: 42000,
-          paidAmount: 42000,
-          pendingAmount: 0,
-          lastPayment: '2024-01-13',
-          status: 'paid',
-          invoiceId: 'INV-MAR-2024-002',
-          dueDate: '2024-01-30',
-          clientName: 'Margin'
-        }
-      ];
-    }
-    return [];
-  };
+  useEffect(() => {
+    const loadBillingData = async () => {
+      try {
+        setLoading(true);
+        const data = await apiService.getProjectBilling(client);
+        setBillingData(data);
+      } catch (err) {
+        console.error('Failed to load billing data:', err);
+        setError('Failed to load billing data');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const projectBillings = getClientBillingData();
+    loadBillingData();
+  }, [client]);
+  const projectBillings = billingData;
 
   // Filter billings based on selections
   const filteredBillings = projectBillings.filter(billing => {
@@ -157,6 +93,30 @@ const ClientBilling: React.FC<{ client: string }> = ({ client }) => {
 
   const uniqueProjects = [...new Set(projectBillings.map(b => b.projectName))];
   const statuses = ['all', 'paid', 'pending', 'overdue'];
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin mr-3" />
+          <span className="text-muted-foreground">Loading billing data...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="p-12 text-center">
+            <p className="text-destructive mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()}>Try Again</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

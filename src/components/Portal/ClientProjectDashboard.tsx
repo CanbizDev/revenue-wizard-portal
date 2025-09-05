@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, FileText, Calendar, TrendingUp } from 'lucide-react';
+import { ArrowRight, FileText, Calendar, TrendingUp, Loader2 } from 'lucide-react';
+import { apiService } from '@/services/api';
 
 interface ClientProjectDashboardProps {
   client: string;
@@ -17,47 +18,28 @@ interface Project {
   type: string;
 }
 
-const CLIENT_PROJECTS: Record<string, Project[]> = {
-  'markettrendsai': [
-    {
-      id: 'forte',
-      name: 'Forte',
-      description: 'Real estate analytics and market insights platform',
-      status: 'active',
-      lastUpdated: '2024-01-15',
-      type: 'Analytics'
-    },
-    {
-      id: 'servicon',
-      name: 'Servicon',
-      description: 'Critical cleaning services management system',
-      status: 'active',
-      lastUpdated: '2024-01-12',
-      type: 'Management'
-    }
-  ],
-  'margin': [
-    {
-      id: 'email-classifier',
-      name: 'Email Classifier',
-      description: 'AI-powered email categorization and routing system',
-      status: 'active',
-      lastUpdated: '2024-01-14',
-      type: 'AI/ML'
-    },
-    {
-      id: 'document-classifier',
-      name: 'Document Classifier',
-      description: 'Document processing and classification platform',
-      status: 'active',
-      lastUpdated: '2024-01-13',
-      type: 'AI/ML'
-    }
-  ]
-};
 
 const ClientProjectDashboard: React.FC<ClientProjectDashboardProps> = ({ client }) => {
-  const projects = CLIENT_PROJECTS[client.toLowerCase()] || [];
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadProjects = async () => {
+      try {
+        setLoading(true);
+        const data = await apiService.getClientProjects(client);
+        setProjects(data);
+      } catch (err) {
+        console.error('Failed to load projects:', err);
+        setError('Failed to load projects');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProjects();
+  }, [client]);
   
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -84,6 +66,30 @@ const ClientProjectDashboard: React.FC<ClientProjectDashboardProps> = ({ client 
         return 'bg-gray-100 text-gray-800';
     }
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin mr-3" />
+          <span className="text-muted-foreground">Loading projects...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="p-12 text-center">
+            <p className="text-destructive mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()}>Try Again</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

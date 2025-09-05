@@ -1,48 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Building2, Users, Shield } from 'lucide-react';
+import { ArrowRight, Building2, Users, Shield, Loader2 } from 'lucide-react';
+import { apiService, type CompanyInfo } from '@/services/api';
 
 interface CompanyLandingProps {
   company: 'jupiterbrains' | 'marketstrendai' | 'xyzseller';
   onNavigate: (path: string) => void;
 }
 
-const COMPANY_DATA = {
-  jupiterbrains: {
-    name: 'JupiterBrains',
-    subdomain: 'jupiterbrains.webreports.app',
-    type: 'Root Admin',
-    color: 'red',
-    clients: [],
-    hasAdmin: true,
-    description: 'Complete ecosystem oversight and management'
-  },
-  marketstrendai: {
-    name: 'Tier-1 Seller',
-    subdomain: 'marketstrendai.webreports.app',
-    type: 'Tier-1 Seller',
-    color: 'blue',
-    clients: ['MarketTrendsAI', 'Margin'],
-    hasAdmin: true,
-    description: 'Primary seller with multiple clients'
-  },
-  xyzseller: {
-    name: 'XYZSeller',
-    subdomain: 'xyzseller.webreports.app',
-    type: 'Tier-2 Seller',
-    color: 'green',
-    clients: ['TCS', 'Infosys'],
-    hasAdmin: true,
-    description: 'Secondary seller managing enterprise clients'
-  }
-};
-
 const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) => {
   const [selectedClient, setSelectedClient] = useState<string>('');
-  const companyData = COMPANY_DATA[company];
+  const [companyData, setCompanyData] = useState<CompanyInfo | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadCompanyData = async () => {
+      try {
+        setLoading(true);
+        const data = await apiService.getCompanyInfo(company);
+        setCompanyData(data);
+      } catch (err) {
+        console.error('Failed to load company data:', err);
+        setError('Failed to load company information');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCompanyData();
+  }, [company]);
 
   const getColorClasses = (color: string) => {
     const colorMap = {
@@ -88,6 +78,28 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
       onNavigate('/admin'); // fallback
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading company information...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !companyData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error || 'Company not found'}</p>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">

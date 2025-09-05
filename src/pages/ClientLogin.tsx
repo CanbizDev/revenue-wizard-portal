@@ -4,8 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Shield, Users, Eye, EyeOff, Building2, Brain, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Shield, Users, Eye, EyeOff, Building2, Brain, TrendingUp, Loader2 } from 'lucide-react';
 import { applyClientTheme, getClientDisplayName, type ClientTheme } from '@/utils/theme';
+import { apiService, type ClientConfig } from '@/services/api';
+import { useToast } from '@/hooks/use-toast';
 
 interface ClientLoginProps {
   company: 'marketstrendai' | 'xyzseller';
@@ -14,65 +16,48 @@ interface ClientLoginProps {
   onLogin: (role: 'admin' | 'viewer') => void;
 }
 
-interface ClientConfig {
-  name: string;
-  icon: any;
-  tagline: string;
-  description: string;
-  bgPattern: string;
-  accentColor: string;
-  isSpaceTheme?: boolean;
-}
-
-const CLIENT_CONFIG: Record<string, ClientConfig> = {
-  servicon: {
-    name: 'Servicon',
-    icon: Building2,
-    tagline: 'Critical Cleaning Services in Complex Spaces',
-    description: 'Professional facility management solutions',
-    bgPattern: 'bg-gradient-to-br from-primary/5 via-background to-primary/10',
-    accentColor: 'from-primary to-blue-600'
-  },
-  marketstrendai: {
-    name: 'MarketTrends AI',
-    icon: TrendingUp,
-    tagline: 'Your Market Intelligence Agent',
-    description: 'AI-powered market insights and analytics',
-    bgPattern: 'bg-gradient-to-br from-primary/5 via-background to-primary/10',
-    accentColor: 'from-primary to-purple-600'
-  },
-  markettrends: {
-    name: 'MarketTrends AI', 
-    icon: TrendingUp,
-    tagline: 'Your Market Intelligence Agent',
-    description: 'AI-powered market insights and analytics',
-    bgPattern: 'bg-gradient-to-br from-primary/5 via-background to-primary/10',
-    accentColor: 'from-primary to-purple-600'
-  },
-  jupiterbrains: {
-    name: 'Jupiter Brains',
-    icon: Brain,
-    tagline: 'Agentic AI. Tuned for Your Domain.',
-    description: 'Enterprise-grade AI agents that grow with your business',
-    bgPattern: 'bg-gradient-to-br from-background via-muted/30 to-primary/10',
-    accentColor: 'from-primary to-purple-400',
-    isSpaceTheme: true
-  }
+// Icon mapping for themes
+const getIconComponent = (iconName: string) => {
+  const icons: Record<string, any> = {
+    'Building2': Building2,
+    'TrendingUp': TrendingUp,
+    'Brain': Brain,
+  };
+  return icons[iconName] || Building2;
 };
 
 const ClientLogin: React.FC<ClientLoginProps> = ({ company, client, onBack, onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [clientConfig, setClientConfig] = useState<ClientConfig | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [authenticating, setAuthenticating] = useState(false);
+  const { toast } = useToast();
   
-  
-  const normalizedClient = client.toLowerCase();
-  const clientConfig = CLIENT_CONFIG[normalizedClient as keyof typeof CLIENT_CONFIG] || CLIENT_CONFIG.servicon;
   const clientDisplayName = getClientDisplayName(client);
-  const IconComponent = clientConfig.icon;
+  const IconComponent = clientConfig ? getIconComponent(clientConfig.theme_config.icon) : Building2;
   
   useEffect(() => {
-    applyClientTheme(client);
+    const loadClientConfig = async () => {
+      try {
+        setLoading(true);
+        const config = await apiService.getClientConfig(client);
+        setClientConfig(config);
+        applyClientTheme(client);
+      } catch (err) {
+        console.error('Failed to load client config:', err);
+        toast({
+          title: "Error",
+          description: "Failed to load client configuration",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadClientConfig();
     
     return () => {
       // Clean up theme on unmount
@@ -82,20 +67,61 @@ const ClientLogin: React.FC<ClientLoginProps> = ({ company, client, onBack, onLo
         'theme-jupiterbrains'
       );
     };
-  }, [client]);
+  }, [client, toast]);
 
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email && password) {
+    if (!email || !password) return;
+
+    try {
+      setAuthenticating(true);
+      const response = await apiService.authenticateClient(client, { email, password });
+      
+      toast({
+        title: "Success",
+        description: "Successfully logged in",
+      });
+      
       onLogin('admin');
+    } catch (err) {
+      console.error('Login failed:', err);
+      toast({
+        title: "Login Failed",
+        description: "Invalid credentials or server error",
+        variant: "destructive",
+      });
+    } finally {
+      setAuthenticating(false);
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/10 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading client portal...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!clientConfig) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/10 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-destructive mb-4">Failed to load client configuration</p>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={`min-h-screen ${clientConfig.bgPattern} ${clientConfig.isSpaceTheme ? 'relative overflow-hidden' : ''}`}>
+    <div className={`min-h-screen ${clientConfig.theme_config.bgPattern} ${clientConfig.theme_config.isSpaceTheme ? 'relative overflow-hidden' : ''}`}>
       {/* Space theme background effect */}
-      {clientConfig.isSpaceTheme && (
+      {clientConfig.theme_config.isSpaceTheme && (
         <div className="absolute inset-0 opacity-30">
           <div className="absolute inset-0" style={{
             background: `
@@ -216,9 +242,16 @@ const ClientLogin: React.FC<ClientLoginProps> = ({ company, client, onBack, onLo
                 <Button 
                   type="submit" 
                   className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-lg hover:shadow-xl transition-all duration-200"
-                  disabled={!email || !password}
+                  disabled={!email || !password || authenticating}
                 >
-                  Sign In as Admin
+                  {authenticating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Signing In...
+                    </>
+                  ) : (
+                    'Sign In as Admin'
+                  )}
                 </Button>
               </form>
 

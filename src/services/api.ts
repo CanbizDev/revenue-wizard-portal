@@ -49,6 +49,31 @@ export interface DashboardData {
   }>;
 }
 
+export interface CompanyInfo {
+  id: string;
+  name: string;
+  subdomain: string;
+  type: 'root_admin' | 'tier1_seller' | 'tier2_seller';
+  color: string;
+  clients: string[];
+  hasAdmin: boolean;
+  description: string;
+}
+
+export interface ClientConfig {
+  id: string;
+  name: string;
+  company: string;
+  tagline: string;
+  description: string;
+  theme_config: {
+    bgPattern: string;
+    accentColor: string;
+    isSpaceTheme?: boolean;
+    icon: string;
+  };
+}
+
 class ApiService {
   private token: string | null = null;
 
@@ -145,6 +170,52 @@ class ApiService {
     return this.request('/seller/plans', {
       method: 'POST',
       body: JSON.stringify(planData),
+    });
+  }
+
+  // Project endpoints
+  async getClientProjects(clientName: string): Promise<any[]> {
+    return this.request<any[]>(`/client/${clientName}/projects`);
+  }
+
+  async getProjectBilling(clientName: string): Promise<any[]> {
+    return this.request<any[]>(`/client/${clientName}/billing`);
+  }
+
+  async getAllProjects(): Promise<any[]> {
+    return this.request<any[]>('/projects');
+  }
+
+  async createProject(projectData: any): Promise<any> {
+    return this.request('/projects', {
+      method: 'POST',
+      body: JSON.stringify(projectData),
+    });
+  }
+
+  async deleteProject(projectId: string): Promise<any> {
+    return this.request(`/projects/${projectId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Company and client endpoints
+  async getCompanyInfo(company: string): Promise<CompanyInfo> {
+    return this.request<CompanyInfo>(`/company/${company}/info`);
+  }
+
+  async getClientConfig(clientName: string): Promise<ClientConfig> {
+    return this.request<ClientConfig>(`/client/${clientName}/config`);
+  }
+
+  async getCompanyClients(company: string): Promise<string[]> {
+    return this.request<string[]>(`/company/${company}/clients`);
+  }
+
+  async authenticateClient(clientName: string, credentials: { email: string; password: string }): Promise<LoginResponse> {
+    return this.request<LoginResponse>(`/client/${clientName}/login`, {
+      method: 'POST',
+      body: JSON.stringify(credentials),
     });
   }
 

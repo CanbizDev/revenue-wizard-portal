@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -6,7 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Edit2, Trash2, Users, FileText, Activity } from 'lucide-react';
+import { Plus, Edit2, Trash2, Users, FileText, Activity, Loader2 } from 'lucide-react';
+import { apiService } from '@/services/api';
+import { useToast } from '@/hooks/use-toast';
 
 interface Project {
   id: string;
@@ -21,41 +23,27 @@ interface Project {
 }
 
 const ProjectManagement: React.FC = () => {
-  const [projects, setProjects] = useState<Project[]>([
-    {
-      id: '1',
-      name: 'MarketTrendsAI Core',
-      members: 8,
-      activeReports: 12,
-      status: 'active',
-      totalBilling: 25000,
-      paidAmount: 20000,
-      pendingAmount: 5000,
-      lastPayment: '2024-01-15'
-    },
-    {
-      id: '2',
-      name: 'Margin Analytics',
-      members: 5,
-      activeReports: 7,
-      status: 'active',
-      totalBilling: 18000,
-      paidAmount: 18000,
-      pendingAmount: 0,
-      lastPayment: '2024-01-10'
-    },
-    {
-      id: '3',
-      name: 'Cementech Solutions',
-      members: 10,
-      activeReports: 15,
-      status: 'inactive',
-      totalBilling: 30000,
-      paidAmount: 25000,
-      pendingAmount: 5000,
-      lastPayment: '2023-12-20'
-    }
-  ]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const loadProjects = async () => {
+      try {
+        setLoading(true);
+        const data = await apiService.getAllProjects();
+        setProjects(data);
+      } catch (err) {
+        console.error('Failed to load projects:', err);
+        setError('Failed to load projects');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProjects();
+  }, []);
 
   const [newProject, setNewProject] = useState({
     name: '',
@@ -66,27 +54,53 @@ const ProjectManagement: React.FC = () => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const handleAddProject = () => {
+  const handleAddProject = async () => {
     if (newProject.name) {
-      const project: Project = {
-        id: Date.now().toString(),
-        name: newProject.name,
-        members: parseInt(newProject.members) || 0,
-        activeReports: parseInt(newProject.activeReports) || 0,
-        status: newProject.status,
-        totalBilling: 0,
-        paidAmount: 0,
-        pendingAmount: 0,
-        lastPayment: 'N/A'
-      };
-      setProjects([...projects, project]);
-      setNewProject({ name: '', members: '', activeReports: '', status: 'active' });
-      setIsDialogOpen(false);
+      try {
+        const projectData = {
+          name: newProject.name,
+          members: parseInt(newProject.members) || 0,
+          activeReports: parseInt(newProject.activeReports) || 0,
+          status: newProject.status,
+        };
+        
+        const createdProject = await apiService.createProject(projectData);
+        setProjects([...projects, createdProject]);
+        setNewProject({ name: '', members: '', activeReports: '', status: 'active' });
+        setIsDialogOpen(false);
+        
+        toast({
+          title: "Success",
+          description: "Project created successfully",
+        });
+      } catch (err) {
+        console.error('Failed to create project:', err);
+        toast({
+          title: "Error",
+          description: "Failed to create project",
+          variant: "destructive",
+        });
+      }
     }
   };
 
-  const handleDeleteProject = (id: string) => {
-    setProjects(projects.filter(p => p.id !== id));
+  const handleDeleteProject = async (id: string) => {
+    try {
+      await apiService.deleteProject(id);
+      setProjects(projects.filter(p => p.id !== id));
+      
+      toast({
+        title: "Success",
+        description: "Project deleted successfully",
+      });
+    } catch (err) {
+      console.error('Failed to delete project:', err);
+      toast({
+        title: "Error",
+        description: "Failed to delete project",
+        variant: "destructive",
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -103,6 +117,30 @@ const ProjectManagement: React.FC = () => {
     totalProjects: projects.length,
     activeProjects: projects.filter(p => p.status === 'active').length
   }), { totalBilling: 0, totalPaid: 0, totalPending: 0, totalProjects: 0, activeProjects: 0 });
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin mr-3" />
+          <span className="text-muted-foreground">Loading projects...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="p-12 text-center">
+            <p className="text-destructive mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()}>Try Again</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
