@@ -6,6 +6,8 @@ import { useState } from "react";
 import Index from "./pages/Index";
 import CompanyLanding from "./pages/CompanyLanding";
 import ClientLogin from "./pages/ClientLogin";
+import AdminPortal from "./components/Portal/AdminPortal";
+import SellerAdminPortal from "./components/Portal/SellerAdminPortal";
 
 const queryClient = new QueryClient();
 
@@ -29,22 +31,16 @@ const App = () => {
     }
 
     // Handle navigation to different portals
-    if (currentPath === '/admin' || currentPath === '/seller-admin') {
+    if (currentPath === '/admin') {
+      return <AdminPortal />;
+    }
+    
+    if (currentPath === '/seller-admin') {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              {currentPath === '/admin' ? 'Admin Portal' : 'Seller Admin Portal'}
-            </h1>
-            <p className="text-gray-600 mb-6">Portal content will be implemented here</p>
-            <button 
-              onClick={() => setCurrentPath(`/${selectedCompany}`)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              Back to Company Landing
-            </button>
-          </div>
-        </div>
+        <SellerAdminPortal 
+          company={selectedCompany as 'marketstrendai' | 'xyzseller'}
+          onNavigate={handleNavigate}
+        />
       );
     }
 
