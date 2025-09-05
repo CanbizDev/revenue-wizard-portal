@@ -54,7 +54,8 @@ const App = () => {
           onBack={() => setCurrentPath(`/${selectedCompany}`)}
           onLogin={(role) => {
             console.log(`Logged in as ${role} for client ${clientName}`);
-            // Handle login success - could navigate to client dashboard
+            // Navigate to the appropriate seller admin portal based on company
+            setCurrentPath('/seller-admin');
           }}
         />
       );
