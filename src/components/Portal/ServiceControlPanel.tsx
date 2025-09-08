@@ -150,8 +150,18 @@ const ServiceControlPanel: React.FC = () => {
         { id: '1', name: 'Mock Tier1', admin_email: 'tier1@mock.com', subdomain: 'mock1', status: 'active' }
       ];
 
-      // Load Tier-2 Sellers
-      // Mock Tier-2 Sellers data already defined above (reusing tier2Data)
+      // Mock Tier-2 Sellers data
+      const tier2Data = [
+        { 
+          id: '2', 
+          name: 'Mock Tier2', 
+          admin_email: 'tier2@mock.com', 
+          subdomain: 'mock2', 
+          status: 'active',
+          tier1_seller_id: '1',
+          tier1_seller: { name: 'Mock Tier1' }
+        }
+      ];
 
       // Load Clients (Projects) - assuming clients table represents projects
       // Mock Clients data
