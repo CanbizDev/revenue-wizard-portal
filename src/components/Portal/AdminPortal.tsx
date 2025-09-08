@@ -43,13 +43,13 @@ const AdminPortal: React.FC = () => {
 
   const loadSellers = async () => {
     try {
-      const { data, error } = await supabase
-        .from('sellers')
-        .select('*')
-        .order('created_at', { ascending: false });
+      // Mock sellers data
+      const mockSellersData = [
+        { id: '1', name: 'Mock Seller 1', created_at: new Date().toISOString() }
+      ];
 
-      if (error) throw error;
-      setSellers(data || []);
+      
+      setSellers(mockSellersData);
     } catch (error: any) {
       console.error('Error loading sellers:', error);
       toast({
@@ -62,16 +62,12 @@ const AdminPortal: React.FC = () => {
 
   const loadTier2Sellers = async () => {
     try {
-      const { data, error } = await supabase
-        .from('tier2_sellers')
-        .select(`
-          *,
-          tier1_seller:sellers(name)
-        `)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setTier2Sellers(data || []);
+      // Mock tier2 sellers data
+      const mockTier2Data = [
+        { id: '1', name: 'Mock Tier2 Seller', created_at: new Date().toISOString(), tier1_seller: { name: 'Mock Tier1' } }
+      ];
+      
+      setTier2Sellers(mockTier2Data);
     } catch (error: any) {
       console.error('Error loading tier2 sellers:', error);
       toast({

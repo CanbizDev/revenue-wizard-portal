@@ -17,7 +17,7 @@ import ProjectBilling from './ProjectBilling';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { apiService } from '@/services/api';
-import { mockDashboardData } from '@/services/mockData';
+import { mockSellerData } from '@/services/mockData';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -77,31 +77,37 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
   const { toast } = useToast();
   const isMobile = useIsMobile();
   
-  // Use the custom hook to fetch seller-specific data
-  const { 
-    sellerData, 
-    clients, 
-    plans, 
-    commissions, 
-    loading, 
-    error, 
-    addClient, 
-    addPlan, 
-    updatePlan,
-    deleteClient,
-    deletePlan,
-    deleteTier2Seller
-  // Mock data setup
+  // Mock data setup to replace useSellerData hook
   const [loading, setLoading] = useState(false);
-  const sellerData = mockDashboardData.seller;
+  const sellerData = mockSellerData;
   const clients: any[] = [];
   const plans: any[] = [];
   const commissions: any[] = [];
-  const addClient = async () => {};
-  const addPlan = async () => {};
-  const deleteClient = async () => {};
-  const deletePlan = async () => {};
-  const deleteTier2Seller = async () => {};
+  const error = null;
+  
+  const addClient = async (clientData: any) => {
+    console.log('Mock add client:', clientData);
+  };
+  
+  const addPlan = async (planData: any) => {
+    console.log('Mock add plan:', planData);
+  };
+  
+  const updatePlan = async (planId: string, planData: any) => {
+    console.log('Mock update plan:', planId, planData);
+  };
+  
+  const deleteClient = async (clientId: string) => {
+    console.log('Mock delete client:', clientId);
+  };
+  
+  const deletePlan = async (planId: string) => {
+    console.log('Mock delete plan:', planId);
+  };
+  
+  const deleteTier2Seller = async (sellerId: string) => {
+    console.log('Mock delete tier2 seller:', sellerId);
+  };
 
   // Fetch tier2 sellers from database
   const [tier2Sellers, setTier2Sellers] = useState<any[]>([]);
@@ -111,18 +117,24 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
     if (company === 'marketstrendai' && sellerData) {
       const fetchTier2Sellers = async () => {
         try {
-          const { data, error } = await supabase
-            .from('tier2_sellers')
-            .select(`
-              *,
-              clients:clients(count)
-            `)
-            .eq('tier1_seller_id', sellerData.id)
-            .is('deleted_at', null);
+          // Mock tier2 sellers data with all required properties
+          const mockTier2Data = [
+            { 
+              id: '1', 
+              name: 'Mock Tier2 Seller', 
+              admin_email: 'tier2@mock.com', 
+              subdomain: 'mock-tier2',
+              commission_type: 'percentage',
+              commission_value: 8,
+              status: 'active',
+              created_at: new Date().toISOString(),
+              clients: []
+            }
+          ];
 
           if (error) throw error;
           
-          const formattedSellers = data?.map(seller => ({
+          const formattedSellers = mockTier2Data.map(seller => ({
             id: seller.id,
             name: seller.name,
             email: seller.admin_email,

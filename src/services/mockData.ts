@@ -56,6 +56,16 @@ export const mockDashboardData = {
   }
 };
 
+export const mockSellerData = {
+  id: 'seller-1',
+  name: 'MarketsTrendAI',
+  subdomain: 'marketstrendai',
+  admin_email: 'admin@marketstrendai.com',
+  status: 'active',
+  commission_value: 15,
+  commission_type: 'percentage'
+};
+
 export const mockCompanyInfo = {
   jupiterbrains: {
     id: 'jupiterbrains',

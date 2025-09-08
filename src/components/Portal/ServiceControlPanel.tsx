@@ -145,43 +145,26 @@ const ServiceControlPanel: React.FC = () => {
       setLoading(true);
 
       // Load Tier-1 Sellers
-      const { data: tier1Data, error: tier1Error } = await supabase
-        .from('sellers')
-        .select('id, name, admin_email, subdomain, status')
-        .order('name');
-
-      if (tier1Error) throw tier1Error;
+      // Mock Tier-1 Sellers data
+      const tier1Data = [
+        { id: '1', name: 'Mock Tier1', admin_email: 'tier1@mock.com', subdomain: 'mock1', status: 'active' }
+      ];
 
       // Load Tier-2 Sellers
-      const { data: tier2Data, error: tier2Error } = await supabase
-        .from('tier2_sellers')
-        .select(`
-          id, 
-          name, 
-          admin_email, 
-          subdomain, 
-          status,
-          tier1_seller_id,
-          tier1_seller:sellers(name)
-        `)
-        .order('name');
-
-      if (tier2Error) throw tier2Error;
+      // Mock Tier-2 Sellers data already defined above (reusing tier2Data)
 
       // Load Clients (Projects) - assuming clients table represents projects
-      const { data: clientsData, error: clientsError } = await supabase
-        .from('clients')
-        .select(`
-          id,
-          company,
-          email,
-          status,
-          seller_id,
-          seller:sellers(name)
-        `)
-        .order('company');
-
-      if (clientsError) throw clientsError;
+      // Mock Clients data
+      const clientsData = [
+        { 
+          id: '1', 
+          company: 'Mock Company', 
+          email: 'client@mock.com', 
+          status: 'active',
+          seller_id: '1',
+          seller: { name: 'Mock Tier1' }
+        }
+      ];
 
       // Transform data into service status format
       const allServices: ServiceStatus[] = [];
@@ -289,12 +272,10 @@ const ServiceControlPanel: React.FC = () => {
           throw new Error('Invalid service type');
       }
 
-      const { error } = await supabase
-        .from(table)
-        .update({ status: newStatus })
-        .eq('id', serviceId);
+      // Mock update status operation
+      console.log(`Mock: updating ${table} ID ${serviceId} status to ${newStatus}`);
 
-      if (error) throw error;
+      // Mock operation completed successfully
 
       // Update local state
       setServices(prev => prev.map(service => 

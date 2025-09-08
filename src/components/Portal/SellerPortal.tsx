@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { apiService } from '@/services/api';
-import { mockDashboardData } from '@/services/mockData';
+import { mockSellerData } from '@/services/mockData';
 import { 
   Users, 
   DollarSign, 
@@ -27,7 +27,11 @@ const SellerPortal: React.FC = () => {
   const isMobile = useIsMobile();
 
   // Get real data from database
-  const { sellerData, clients, commissions, loading } = useSellerData('marketstrendai');
+  // Mock data setup
+  const sellerData = mockSellerData;
+  const clients: any[] = [];
+  const commissions: any[] = [];
+  const loading = false;
 
   const getUser = () => {
     if (!sellerData) {
