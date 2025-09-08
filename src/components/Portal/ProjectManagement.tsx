@@ -32,7 +32,7 @@ const ProjectManagement: React.FC = () => {
     const loadProjects = async () => {
       try {
         setLoading(true);
-        const data = await apiService.getAllProjects();
+        const data = await apiService.getProjects();
         setProjects(data);
       } catch (err) {
         console.error('Failed to load projects, using dummy data:', err);

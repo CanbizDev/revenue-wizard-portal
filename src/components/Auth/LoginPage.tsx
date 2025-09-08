@@ -26,7 +26,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     setIsLoading(true);
 
     try {
-      const response = await apiService.login(credentials);
+      const response = await apiService.login(credentials.email, credentials.password, credentials.user_type);
       toast({
         title: "Login successful",
         description: `Welcome back, ${response.user.name}!`,

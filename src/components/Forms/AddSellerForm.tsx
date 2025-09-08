@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Upload, X } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { apiService } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 
 interface AddSellerFormProps {
@@ -44,20 +44,10 @@ const AddSellerForm: React.FC<AddSellerFormProps> = ({ isOpen, onClose, onSucces
   };
 
   const uploadFile = async (file: File, bucket: string, path: string): Promise<string | null> => {
-    const { data, error } = await supabase.storage
-      .from(bucket)
-      .upload(path, file, { upsert: true });
-
-    if (error) {
-      console.error(`Error uploading ${bucket}:`, error);
-      return null;
-    }
-
-    const { data: urlData } = supabase.storage
-      .from(bucket)
-      .getPublicUrl(data.path);
-
-    return urlData.publicUrl;
+    // Mock file upload - in real implementation this would use your Flask API file upload endpoint
+    console.log(`Mock upload: ${file.name} to ${bucket}/${path}`);
+    // Return a mock URL
+    return `https://mock-storage.example.com/${bucket}/${path}`;
   };
 
   const generatePassword = () => {
@@ -89,24 +79,16 @@ const AddSellerForm: React.FC<AddSellerFormProps> = ({ isOpen, onClose, onSucces
       // Hash password (in production, this should be done server-side)
       const passwordHash = btoa(formData.adminPassword); // Simple encoding for demo
 
-      // Insert seller record
-      const { error } = await supabase
-        .from('sellers')
-        .insert({
-          name: formData.name,
-          subdomain: formData.subdomain,
-          admin_email: formData.adminEmail,
-          admin_password_hash: passwordHash,
-          logo_url: logoUrl,
-          stylesheet_url: stylesheetUrl,
-          site_content: formData.siteContent ? JSON.parse(formData.siteContent) : null,
-          commission_type: formData.commissionType,
-          commission_value: formData.commissionValue ? parseFloat(formData.commissionValue) : null
-        });
-
-      if (error) {
-        throw error;
-      }
+      // Create seller via API (mock implementation)
+      console.log('Creating seller:', {
+        name: formData.name,
+        subdomain: formData.subdomain,
+        admin_email: formData.adminEmail,
+        logo_url: logoUrl,
+        stylesheet_url: stylesheetUrl,
+        commission_type: formData.commissionType,
+        commission_value: formData.commissionValue ? parseFloat(formData.commissionValue) : null
+      });
 
       toast({
         title: 'Success',

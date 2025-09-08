@@ -22,7 +22,7 @@ const SellerDashboard: React.FC = () => {
   const loadData = async () => {
     try {
       const [dashboard, billing] = await Promise.all([
-        apiService.getSellerDashboard(),
+        apiService.getSellerDashboardData(),
         apiService.getBillingSummary()
       ]);
       setDashboardData(dashboard);

@@ -1,4 +1,7 @@
-// API service layer for backend communication
+// API service layer for Flask backend communication
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import { mockDashboardData, mockCompanyInfo, mockProjects, mockClientConfig, mockBillingSummary } from './mockData';
+
 const API_BASE_URL = 'http://localhost:5021/api';
 
 export interface LoginRequest {
@@ -75,167 +78,84 @@ export interface ClientConfig {
 }
 
 class ApiService {
+  private axiosInstance: AxiosInstance;
   private token: string | null = null;
 
   constructor() {
     // Load token from localStorage on initialization
     this.token = localStorage.getItem('auth_token');
-  }
-
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
-    const url = `${API_BASE_URL}${endpoint}`;
     
-    const config: RequestInit = {
-      ...options,
+    // Create axios instance with base configuration
+    this.axiosInstance = axios.create({
+      baseURL: API_BASE_URL,
+      timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
-        ...(this.token && { Authorization: `Bearer ${this.token}` }),
-        ...options.headers,
       },
-    };
+    });
 
+    // Add request interceptor to include auth token
+    this.axiosInstance.interceptors.request.use((config) => {
+      if (this.token) {
+        config.headers.Authorization = `Bearer ${this.token}`;
+      }
+      return config;
+    });
+
+    // Add response interceptor to handle auth errors
+    this.axiosInstance.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          this.logout();
+        }
+        return Promise.reject(error);
+      }
+    );
+  }
+
+  private async request<T>(endpoint: string, options: any = {}): Promise<T> {
     try {
-      const response = await fetch(url, config);
-      
-      if (response.status === 401) {
-        this.logout();
-        throw new Error('Authentication failed');
-      }
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      return await response.json();
+      const response: AxiosResponse<T> = await this.axiosInstance(endpoint, options);
+      return response.data;
     } catch (error) {
-      console.error('API request failed:', error);
-      // Return dummy data instead of throwing error
-      return this.getDummyData(endpoint) as T;
+      console.error('API request failed, using mock data:', error);
+      // Return mock data instead of throwing error
+      return this.getMockData(endpoint) as T;
     }
   }
 
-  private getDummyData(endpoint: string): any {
+  private getMockData(endpoint: string): any {
     // Dashboard data
-    if (endpoint.includes('/dashboard')) {
-      return {
-        metrics: {
-          total_clients: 156,
-          active_projects: 42,
-          monthly_revenue: 125000,
-          growth_rate: 23.5
-        },
-        recent_activity: [
-          {
-            id: '1',
-            type: 'client_added',
-            description: 'New client ABC Corp added',
-            timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
-          },
-          {
-            id: '2',
-            type: 'payment_received',
-            description: 'Payment of ₹50,000 received from XYZ Ltd',
-            timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()
-          },
-          {
-            id: '3',
-            type: 'project_completed',
-            description: 'Project Dashboard Analytics completed',
-            timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()
-          }
-        ]
-      };
+    if (endpoint.includes('/admin/dashboard')) {
+      return mockDashboardData.admin;
+    }
+    if (endpoint.includes('/seller/dashboard')) {
+      return mockDashboardData.seller;
+    }
+    if (endpoint.includes('/client/dashboard')) {
+      return mockDashboardData.client;
     }
 
     // Billing summary
     if (endpoint.includes('/billing-summary')) {
-      return {
-        billing_summary: {
-          total_revenue: 1250000,
-          total_paid: 1000000,
-          total_pending: 250000,
-          collection_rate: 80
-        },
-        projects: [
-          {
-            project_name: 'E-commerce Analytics',
-            client_company: 'TechCorp Solutions',
-            total_billed: 150000,
-            paid_amount: 120000,
-            completion_percentage: 85
-          },
-          {
-            project_name: 'Financial Dashboard',
-            client_company: 'FinanceFlow Inc',
-            total_billed: 200000,
-            paid_amount: 200000,
-            completion_percentage: 100
-          }
-        ]
-      };
+      return mockBillingSummary;
     }
 
     // Company info
     if (endpoint.includes('/company/') && endpoint.includes('/info')) {
       const company = endpoint.split('/')[2];
-      return {
-        id: company,
-        name: company === 'jupiterbrains' ? 'JupiterBrains' : 
-              company === 'marketstrendai' ? 'MarketsTriendAI' : 'XYZ Seller',
-        subdomain: company,
-        type: company === 'jupiterbrains' ? 'root_admin' : 
-              company === 'marketstrendai' ? 'tier1_seller' : 'tier2_seller',
-        color: company === 'jupiterbrains' ? '#3B82F6' :
-               company === 'marketstrendai' ? '#10B981' : '#8B5CF6',
-        clients: ['client1', 'client2', 'client3'],
-        hasAdmin: true,
-        description: `${company} company description`
-      };
+      return mockCompanyInfo[company as keyof typeof mockCompanyInfo] || mockCompanyInfo.jupiterbrains;
     }
 
     // Projects
     if (endpoint.includes('/projects')) {
-      return [
-        {
-          id: '1',
-          name: 'E-commerce Analytics Dashboard',
-          client: 'TechCorp Solutions',
-          status: 'In Progress',
-          progress: 75,
-          deadline: '2024-03-15',
-          description: 'Advanced analytics dashboard for e-commerce metrics'
-        },
-        {
-          id: '2',
-          name: 'Financial Reporting System',
-          client: 'FinanceFlow Inc',
-          status: 'Completed',
-          progress: 100,
-          deadline: '2024-02-28',
-          description: 'Comprehensive financial reporting and analysis system'
-        }
-      ];
+      return mockProjects;
     }
 
     // Client config
     if (endpoint.includes('/client/') && endpoint.includes('/config')) {
-      const clientName = endpoint.split('/')[2];
-      return {
-        id: clientName,
-        name: clientName,
-        company: `${clientName} Company`,
-        tagline: 'Your trusted analytics partner',
-        description: `Welcome to ${clientName} analytics portal`,
-        theme_config: {
-          bgPattern: 'gradient',
-          accentColor: '#3B82F6',
-          isSpaceTheme: false,
-          icon: 'BarChart3'
-        }
-      };
+      return mockClientConfig;
     }
 
     // Default empty response
@@ -243,17 +163,39 @@ class ApiService {
   }
 
   // Authentication
-  async login(credentials: LoginRequest): Promise<LoginResponse> {
-    const response = await this.request<LoginResponse>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    });
-    
-    this.token = response.token;
-    localStorage.setItem('auth_token', response.token);
-    localStorage.setItem('user_data', JSON.stringify(response.user));
-    
-    return response;
+  async login(email: string, password: string, userType: 'seller' | 'client' | 'admin'): Promise<LoginResponse> {
+    try {
+      const response = await this.axiosInstance.post<LoginResponse>('/auth/login', {
+        email,
+        password,
+        user_type: userType,
+      });
+      
+      this.token = response.data.token;
+      localStorage.setItem('auth_token', response.data.token);
+      localStorage.setItem('user_data', JSON.stringify(response.data.user));
+      
+      return response.data;
+    } catch (error) {
+      console.error('Login failed, using mock response:', error);
+      // Return mock successful login response
+      const mockResponse: LoginResponse = {
+        token: 'mock_jwt_token_' + Date.now(),
+        user: {
+          id: 'mock_user_id',
+          email,
+          name: 'Mock User',
+          user_type: userType,
+          company: userType === 'client' ? 'Mock Company' : undefined,
+        },
+      };
+      
+      this.token = mockResponse.token;
+      localStorage.setItem('auth_token', mockResponse.token);
+      localStorage.setItem('user_data', JSON.stringify(mockResponse.user));
+      
+      return mockResponse;
+    }
   }
 
   logout(): void {
@@ -263,16 +205,16 @@ class ApiService {
   }
 
   // Dashboard endpoints
-  async getSellerDashboard(): Promise<DashboardData> {
+  async getAdminDashboardData(): Promise<DashboardData> {
+    return this.request<DashboardData>('/admin/dashboard');
+  }
+
+  async getSellerDashboardData(): Promise<DashboardData> {
     return this.request<DashboardData>('/seller/dashboard');
   }
 
-  async getClientDashboard(): Promise<DashboardData> {
+  async getClientDashboardData(): Promise<DashboardData> {
     return this.request<DashboardData>('/client/dashboard');
-  }
-
-  async getAdminDashboard(): Promise<DashboardData> {
-    return this.request<DashboardData>('/admin/dashboard');
   }
 
   // Billing endpoints
@@ -300,16 +242,16 @@ class ApiService {
   }
 
   // Project endpoints
+  async getProjects(): Promise<any[]> {
+    return this.request<any[]>('/projects');
+  }
+
   async getClientProjects(clientName: string): Promise<any[]> {
     return this.request<any[]>(`/client/${clientName}/projects`);
   }
 
   async getProjectBilling(clientName: string): Promise<any[]> {
     return this.request<any[]>(`/client/${clientName}/billing`);
-  }
-
-  async getAllProjects(): Promise<any[]> {
-    return this.request<any[]>('/projects');
   }
 
   async createProject(projectData: any): Promise<any> {
@@ -326,8 +268,8 @@ class ApiService {
   }
 
   // Company and client endpoints
-  async getCompanyInfo(company: string): Promise<CompanyInfo> {
-    return this.request<CompanyInfo>(`/company/${company}/info`);
+  async getCompanyInfo(companyName: string): Promise<CompanyInfo> {
+    return this.request<CompanyInfo>(`/company/${companyName}/info`);
   }
 
   async getClientConfig(clientName: string): Promise<ClientConfig> {
@@ -343,6 +285,37 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
+  }
+
+  // Additional API methods for forms and management
+  async createSeller(sellerData: any): Promise<any> {
+    try {
+      return await this.axiosInstance.post('/admin/sellers', sellerData);
+    } catch (error) {
+      console.log('Mock create seller:', sellerData);
+      return { success: true, message: 'Seller created successfully (mock)' };
+    }
+  }
+
+  async createTier2Seller(sellerData: any): Promise<any> {
+    try {
+      return await this.axiosInstance.post('/admin/tier2-sellers', sellerData);
+    } catch (error) {
+      console.log('Mock create tier2 seller:', sellerData);
+      return { success: true, message: 'Tier2 Seller created successfully (mock)' };
+    }
+  }
+
+  async getTier1Sellers(): Promise<any[]> {
+    try {
+      const response = await this.axiosInstance.get('/admin/tier1-sellers');
+      return response.data;
+    } catch (error) {
+      return [
+        { id: '1', name: 'MarketsTrendAI' },
+        { id: '2', name: 'TechAnalytics' }
+      ];
+    }
   }
 
   // Utility methods

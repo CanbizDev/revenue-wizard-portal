@@ -11,7 +11,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { DollarSign, TrendingUp, Clock, CheckCircle } from 'lucide-react';
-import { useSellerData } from '@/hooks/useSellerData';
+import { mockDashboardData } from '@/services/mockData';
+import { useState, useEffect } from 'react';
 
 interface CommissionsViewProps {
   userRole: 'tier1_seller' | 'tier2_seller';
@@ -19,7 +20,37 @@ interface CommissionsViewProps {
 }
 
 const CommissionsView: React.FC<CommissionsViewProps> = ({ userRole, company }) => {
-  const { commissions, loading } = useSellerData(company);
+  const [commissions, setCommissions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Mock commission data since API is not available
+    const mockCommissions = [
+      {
+        id: '1',
+        amount: 15000,
+        commission_amount: 2250,
+        type: 'client_payment',
+        status: 'paid',
+        transaction_date: new Date().toISOString(),
+        clients: { name: 'John Smith', company: 'TechCorp' }
+      },
+      {
+        id: '2',
+        amount: 8000,
+        commission_amount: 1200,
+        type: 'client_payment',
+        status: 'pending',
+        transaction_date: new Date().toISOString(),
+        clients: { name: 'Sarah Johnson', company: 'DataFlow Inc' }
+      }
+    ];
+    
+    setTimeout(() => {
+      setCommissions(mockCommissions);
+      setLoading(false);
+    }, 1000);
+  }, [company]);
 
   if (loading) {
     return (

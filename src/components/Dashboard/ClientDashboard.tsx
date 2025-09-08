@@ -71,7 +71,7 @@ const ClientDashboard: React.FC = () => {
 
   const loadData = async () => {
     try {
-      const dashboard = await apiService.getClientDashboard();
+      const dashboard = await apiService.getClientDashboardData();
       setDashboardData(dashboard);
     } catch (error) {
       toast({

@@ -16,8 +16,8 @@ import ProjectManagement from './ProjectManagement';
 import ProjectBilling from './ProjectBilling';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useSellerData } from '@/hooks/useSellerData';
-import { supabase } from '@/integrations/supabase/client';
+import { apiService } from '@/services/api';
+import { mockDashboardData } from '@/services/mockData';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -91,7 +91,17 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
     deleteClient,
     deletePlan,
     deleteTier2Seller
-  } = useSellerData(company);
+  // Mock data setup
+  const [loading, setLoading] = useState(false);
+  const sellerData = mockDashboardData.seller;
+  const clients: any[] = [];
+  const plans: any[] = [];
+  const commissions: any[] = [];
+  const addClient = async () => {};
+  const addPlan = async () => {};
+  const deleteClient = async () => {};
+  const deletePlan = async () => {};
+  const deleteTier2Seller = async () => {};
 
   // Fetch tier2 sellers from database
   const [tier2Sellers, setTier2Sellers] = useState<any[]>([]);

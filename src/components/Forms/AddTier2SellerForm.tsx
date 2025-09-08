@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Upload, X } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { apiService } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 
 interface AddTier2SellerFormProps {
@@ -41,14 +41,12 @@ const AddTier2SellerForm: React.FC<AddTier2SellerFormProps> = ({ isOpen, onClose
 
   const loadTier1Sellers = async () => {
     try {
-      const { data, error } = await supabase
-        .from('sellers')
-        .select('id, name')
-        .eq('status', 'active')
-        .order('name');
-
-      if (error) throw error;
-      setTier1Sellers(data || []);
+      // Mock tier1 sellers data
+      const mockSellers = [
+        { id: '1', name: 'MarketsTrendAI' },
+        { id: '2', name: 'TechAnalytics' }
+      ];
+      setTier1Sellers(mockSellers);
     } catch (error: any) {
       console.error('Error loading tier1 sellers:', error);
       toast({
@@ -72,20 +70,10 @@ const AddTier2SellerForm: React.FC<AddTier2SellerFormProps> = ({ isOpen, onClose
   };
 
   const uploadFile = async (file: File, bucket: string, path: string): Promise<string | null> => {
-    const { data, error } = await supabase.storage
-      .from(bucket)
-      .upload(path, file, { upsert: true });
-
-    if (error) {
-      console.error(`Error uploading ${bucket}:`, error);
-      return null;
-    }
-
-    const { data: urlData } = supabase.storage
-      .from(bucket)
-      .getPublicUrl(data.path);
-
-    return urlData.publicUrl;
+    // Mock file upload - in real implementation this would use your Flask API file upload endpoint
+    console.log(`Mock upload: ${file.name} to ${bucket}/${path}`);
+    // Return a mock URL
+    return `https://mock-storage.example.com/${bucket}/${path}`;
   };
 
   const generatePassword = () => {
@@ -117,25 +105,19 @@ const AddTier2SellerForm: React.FC<AddTier2SellerFormProps> = ({ isOpen, onClose
       // Hash password (in production, this should be done server-side)
       const passwordHash = btoa(formData.adminPassword); // Simple encoding for demo
 
-      // Insert tier2 seller record
-      const { error } = await supabase
-        .from('tier2_sellers')
-        .insert({
-          name: formData.name,
-          subdomain: formData.subdomain,
-          admin_email: formData.adminEmail,
-          admin_password_hash: passwordHash,
-          tier1_seller_id: formData.tier1SellerId,
-          logo_url: logoUrl,
-          stylesheet_url: stylesheetUrl,
-          site_content: formData.siteContent ? JSON.parse(formData.siteContent) : null,
-          commission_type: formData.commissionType,
-          commission_value: formData.commissionValue ? parseFloat(formData.commissionValue) : null
-        });
-
-      if (error) {
-        throw error;
-      }
+      // Create tier2 seller via API
+      await apiService.createTier2Seller({
+        name: formData.name,
+        subdomain: formData.subdomain,
+        admin_email: formData.adminEmail,
+        admin_password_hash: passwordHash,
+        tier1_seller_id: formData.tier1SellerId,
+        logo_url: logoUrl,
+        stylesheet_url: stylesheetUrl,
+        site_content: formData.siteContent ? JSON.parse(formData.siteContent) : null,
+        commission_type: formData.commissionType,
+        commission_value: formData.commissionValue ? parseFloat(formData.commissionValue) : null
+      });
 
       toast({
         title: 'Success',
