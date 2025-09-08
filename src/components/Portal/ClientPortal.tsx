@@ -217,7 +217,7 @@ const ClientPortal: React.FC<ClientPortalProps> = ({
       case 'reports':
         return renderReports();
       case 'users':
-        return <ClientUserManagement />;
+        return <ClientUserManagement client={client || 'defaultclient'} />;
       case 'billing':
         return <ClientBilling client={client || 'defaultclient'} />;
       default:
