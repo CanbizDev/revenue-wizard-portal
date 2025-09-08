@@ -1,10 +1,12 @@
-// API service layer for backend communication
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+
+// API service layer for Flask backend communication
 const API_BASE_URL = 'http://localhost:5021/api';
 
 export interface LoginRequest {
   email: string;
   password: string;
-  user_type: 'seller' | 'client' | 'admin';
+  userType: 'seller' | 'client' | 'admin';
 }
 
 export interface LoginResponse {
@@ -13,7 +15,7 @@ export interface LoginResponse {
     id: string;
     email: string;
     name: string;
-    user_type: 'seller' | 'client' | 'admin';
+    userType: 'seller' | 'client' | 'admin';
     company?: string;
   };
 }
@@ -74,45 +76,73 @@ export interface ClientConfig {
   };
 }
 
+export interface Project {
+  id: string;
+  name: string;
+  client: string;
+  status: string;
+  progress: number;
+  deadline: string;
+  description: string;
+}
+
 class ApiService {
+  private axiosInstance: AxiosInstance;
   private token: string | null = null;
 
   constructor() {
     // Load token from localStorage on initialization
     this.token = localStorage.getItem('auth_token');
-  }
 
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
-    const url = `${API_BASE_URL}${endpoint}`;
-    
-    const config: RequestInit = {
-      ...options,
+    // Create axios instance with base configuration
+    this.axiosInstance = axios.create({
+      baseURL: API_BASE_URL,
+      timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
-        ...(this.token && { Authorization: `Bearer ${this.token}` }),
-        ...options.headers,
       },
-    };
+    });
 
+    // Add request interceptor to include auth token
+    this.axiosInstance.interceptors.request.use(
+      (config) => {
+        if (this.token) {
+          config.headers.Authorization = `Bearer ${this.token}`;
+        }
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
+
+    // Add response interceptor to handle auth errors
+    this.axiosInstance.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          this.logout();
+        }
+        return Promise.reject(error);
+      }
+    );
+  }
+
+  private async makeRequest<T>(
+    method: string,
+    endpoint: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<T> {
     try {
-      const response = await fetch(url, config);
-      
-      if (response.status === 401) {
-        this.logout();
-        throw new Error('Authentication failed');
-      }
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      return await response.json();
+      const response = await this.axiosInstance.request({
+        method,
+        url: endpoint,
+        data,
+        ...config,
+      });
+      return response.data;
     } catch (error) {
-      console.error('API request failed:', error);
-      // Return dummy data instead of throwing error
+      console.error(`API request failed: ${method} ${endpoint}`, error);
+      // Return dummy data for development
       return this.getDummyData(endpoint) as T;
     }
   }
@@ -243,10 +273,11 @@ class ApiService {
   }
 
   // Authentication
-  async login(credentials: LoginRequest): Promise<LoginResponse> {
-    const response = await this.request<LoginResponse>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
+  async login(email: string, password: string, userType: 'seller' | 'client' | 'admin'): Promise<LoginResponse> {
+    const response = await this.makeRequest<LoginResponse>('POST', '/auth/login', {
+      email,
+      password,
+      userType,
     });
     
     this.token = response.token;
@@ -262,87 +293,92 @@ class ApiService {
     localStorage.removeItem('user_data');
   }
 
+  // Company endpoints
+  async getCompanyInfo(companyName: string): Promise<CompanyInfo> {
+    return this.makeRequest<CompanyInfo>('GET', `/company/${companyName}/info`);
+  }
+
   // Dashboard endpoints
+  async getAdminDashboardData(): Promise<DashboardData> {
+    return this.makeRequest<DashboardData>('GET', '/admin/dashboard');
+  }
+
+  async getSellerDashboardData(): Promise<DashboardData> {
+    return this.makeRequest<DashboardData>('GET', '/seller/dashboard');
+  }
+
+  async getClientDashboardData(): Promise<DashboardData> {
+    return this.makeRequest<DashboardData>('GET', '/client/dashboard');
+  }
+
+  // Project endpoints
+  async getProjects(): Promise<Project[]> {
+    return this.makeRequest<Project[]>('GET', '/projects');
+  }
+
+  // Legacy methods for compatibility
   async getSellerDashboard(): Promise<DashboardData> {
-    return this.request<DashboardData>('/seller/dashboard');
+    return this.getSellerDashboardData();
   }
 
   async getClientDashboard(): Promise<DashboardData> {
-    return this.request<DashboardData>('/client/dashboard');
+    return this.getClientDashboardData();
   }
 
   async getAdminDashboard(): Promise<DashboardData> {
-    return this.request<DashboardData>('/admin/dashboard');
+    return this.getAdminDashboardData();
   }
 
   // Billing endpoints
   async getBillingSummary(): Promise<BillingSummary> {
-    return this.request<BillingSummary>('/seller/billing-summary');
+    return this.makeRequest<BillingSummary>('GET', '/seller/billing-summary');
   }
 
   async getProjectBillingDetails(projectId: string): Promise<any> {
-    return this.request(`/seller/project/${projectId}/billing-details`);
+    return this.makeRequest('GET', `/seller/project/${projectId}/billing-details`);
   }
 
   // Management endpoints
   async addClient(clientData: any): Promise<any> {
-    return this.request('/seller/clients', {
-      method: 'POST',
-      body: JSON.stringify(clientData),
-    });
+    return this.makeRequest('POST', '/seller/clients', clientData);
   }
 
   async createPlan(planData: any): Promise<any> {
-    return this.request('/seller/plans', {
-      method: 'POST',
-      body: JSON.stringify(planData),
-    });
+    return this.makeRequest('POST', '/seller/plans', planData);
   }
 
   // Project endpoints
   async getClientProjects(clientName: string): Promise<any[]> {
-    return this.request<any[]>(`/client/${clientName}/projects`);
+    return this.makeRequest<any[]>('GET', `/client/${clientName}/projects`);
   }
 
   async getProjectBilling(clientName: string): Promise<any[]> {
-    return this.request<any[]>(`/client/${clientName}/billing`);
+    return this.makeRequest<any[]>('GET', `/client/${clientName}/billing`);
   }
 
   async getAllProjects(): Promise<any[]> {
-    return this.request<any[]>('/projects');
+    return this.makeRequest<any[]>('GET', '/projects');
   }
 
   async createProject(projectData: any): Promise<any> {
-    return this.request('/projects', {
-      method: 'POST',
-      body: JSON.stringify(projectData),
-    });
+    return this.makeRequest('POST', '/projects', projectData);
   }
 
   async deleteProject(projectId: string): Promise<any> {
-    return this.request(`/projects/${projectId}`, {
-      method: 'DELETE',
-    });
+    return this.makeRequest('DELETE', `/projects/${projectId}`);
   }
 
-  // Company and client endpoints
-  async getCompanyInfo(company: string): Promise<CompanyInfo> {
-    return this.request<CompanyInfo>(`/company/${company}/info`);
-  }
-
+  // Company and client endpoints  
   async getClientConfig(clientName: string): Promise<ClientConfig> {
-    return this.request<ClientConfig>(`/client/${clientName}/config`);
+    return this.makeRequest<ClientConfig>('GET', `/client/${clientName}/config`);
   }
 
   async getCompanyClients(company: string): Promise<string[]> {
-    return this.request<string[]>(`/company/${company}/clients`);
+    return this.makeRequest<string[]>('GET', `/company/${company}/clients`);
   }
 
   async authenticateClient(clientName: string, credentials: { email: string; password: string }): Promise<LoginResponse> {
-    return this.request<LoginResponse>(`/client/${clientName}/login`, {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    });
+    return this.makeRequest<LoginResponse>('POST', `/client/${clientName}/login`, credentials);
   }
 
   // Utility methods

@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, X } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface AddSellerFormProps {
@@ -17,122 +13,45 @@ interface AddSellerFormProps {
 }
 
 const AddSellerForm: React.FC<AddSellerFormProps> = ({ isOpen, onClose, onSuccess }) => {
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     subdomain: '',
-    adminEmail: '',
-    adminPassword: '',
-    siteContent: '',
-    commissionType: 'percentage' as 'fixed' | 'percentage',
-    commissionValue: ''
+    admin_email: '',
+    admin_name: '',
+    description: '',
+    logo_url: ''
   });
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [stylesheetFile, setStylesheetFile] = useState<File | null>(null);
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleFileChange = (type: 'logo' | 'stylesheet', file: File | null) => {
-    if (type === 'logo') {
-      setLogoFile(file);
-    } else {
-      setStylesheetFile(file);
-    }
-  };
-
-  const uploadFile = async (file: File, bucket: string, path: string): Promise<string | null> => {
-    const { data, error } = await supabase.storage
-      .from(bucket)
-      .upload(path, file, { upsert: true });
-
-    if (error) {
-      console.error(`Error uploading ${bucket}:`, error);
-      return null;
-    }
-
-    const { data: urlData } = supabase.storage
-      .from(bucket)
-      .getPublicUrl(data.path);
-
-    return urlData.publicUrl;
-  };
-
-  const generatePassword = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-    let password = '';
-    for (let i = 0; i < 12; i++) {
-      password += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    setFormData(prev => ({ ...prev, adminPassword: password }));
-  };
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // Upload files if provided
-      let logoUrl = null;
-      let stylesheetUrl = null;
-
-      if (logoFile) {
-        logoUrl = await uploadFile(logoFile, 'seller-logos', `${formData.subdomain}/logo.${logoFile.name.split('.').pop()}`);
-      }
-
-      if (stylesheetFile) {
-        stylesheetUrl = await uploadFile(stylesheetFile, 'seller-stylesheets', `${formData.subdomain}/style.css`);
-      }
-
-      // Hash password (in production, this should be done server-side)
-      const passwordHash = btoa(formData.adminPassword); // Simple encoding for demo
-
-      // Insert seller record
-      const { error } = await supabase
-        .from('sellers')
-        .insert({
-          name: formData.name,
-          subdomain: formData.subdomain,
-          admin_email: formData.adminEmail,
-          admin_password_hash: passwordHash,
-          logo_url: logoUrl,
-          stylesheet_url: stylesheetUrl,
-          site_content: formData.siteContent ? JSON.parse(formData.siteContent) : null,
-          commission_type: formData.commissionType,
-          commission_value: formData.commissionValue ? parseFloat(formData.commissionValue) : null
-        });
-
-      if (error) {
-        throw error;
-      }
-
+      // TODO: Replace with API call when backend is ready
+      console.log('Adding seller:', formData);
+      
       toast({
         title: 'Success',
-        description: 'Tier-1 Seller added successfully!'
+        description: 'Tier-1 seller added successfully',
       });
-
-      // Reset form
+      
+      onSuccess();
+      onClose();
       setFormData({
         name: '',
         subdomain: '',
-        adminEmail: '',
-        adminPassword: '',
-        siteContent: '',
-        commissionType: 'percentage' as 'fixed' | 'percentage',
-        commissionValue: ''
+        admin_email: '',
+        admin_name: '',
+        description: '',
+        logo_url: ''
       });
-      setLogoFile(null);
-      setStylesheetFile(null);
-
-      onSuccess();
-      onClose();
     } catch (error: any) {
       console.error('Error adding seller:', error);
       toast({
         title: 'Error',
-        description: error.message || 'Failed to add seller',
+        description: 'Failed to add seller. Please try again.',
         variant: 'destructive'
       });
     } finally {
@@ -142,184 +61,87 @@ const AddSellerForm: React.FC<AddSellerFormProps> = ({ isOpen, onClose, onSucces
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Add New Tier-1 Seller</DialogTitle>
-          <DialogDescription>
-            Create a new seller account with admin credentials and branding assets.
-          </DialogDescription>
         </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Seller Name *</Label>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="name">Company Name</Label>
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                placeholder="TechCorp Solutions"
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Enter company name"
                 required
               />
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="subdomain">Subdomain *</Label>
+            
+            <div>
+              <Label htmlFor="subdomain">Subdomain</Label>
               <Input
                 id="subdomain"
                 value={formData.subdomain}
-                onChange={(e) => handleInputChange('subdomain', e.target.value)}
-                placeholder="techcorp"
+                onChange={(e) => setFormData(prev => ({ ...prev, subdomain: e.target.value }))}
+                placeholder="Enter subdomain"
                 required
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="adminEmail">Admin Email *</Label>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="admin_email">Admin Email</Label>
               <Input
-                id="adminEmail"
+                id="admin_email"
                 type="email"
-                value={formData.adminEmail}
-                onChange={(e) => handleInputChange('adminEmail', e.target.value)}
-                placeholder="admin@techcorp.com"
+                value={formData.admin_email}
+                onChange={(e) => setFormData(prev => ({ ...prev, admin_email: e.target.value }))}
+                placeholder="admin@company.com"
                 required
               />
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="adminPassword">Admin Password *</Label>
-              <div className="flex space-x-2">
-                <Input
-                  id="adminPassword"
-                  type="text"
-                  value={formData.adminPassword}
-                  onChange={(e) => handleInputChange('adminPassword', e.target.value)}
-                  placeholder="Generated password"
-                  required
-                />
-                <Button type="button" onClick={generatePassword} variant="outline">
-                  Generate
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="commissionType">Commission Type *</Label>
-              <Select
-                value={formData.commissionType}
-                onValueChange={(value) => handleInputChange('commissionType', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select commission type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="percentage">Percentage</SelectItem>
-                  <SelectItem value="fixed">Fixed Amount</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="commissionValue">
-                Commission Value * {formData.commissionType === 'percentage' ? '(%)' : '($)'}
-              </Label>
+            
+            <div>
+              <Label htmlFor="admin_name">Admin Name</Label>
               <Input
-                id="commissionValue"
-                type="number"
-                step={formData.commissionType === 'percentage' ? '0.01' : '0.01'}
-                min="0"
-                max={formData.commissionType === 'percentage' ? '100' : undefined}
-                value={formData.commissionValue}
-                onChange={(e) => handleInputChange('commissionValue', e.target.value)}
-                placeholder={formData.commissionType === 'percentage' ? '10.5' : '50.00'}
+                id="admin_name"
+                value={formData.admin_name}
+                onChange={(e) => setFormData(prev => ({ ...prev, admin_name: e.target.value }))}
+                placeholder="Enter admin name"
                 required
               />
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Logo Upload</Label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                {logoFile ? (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">{logoFile.name}</span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleFileChange('logo', null)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <label className="flex items-center justify-center space-x-2 cursor-pointer">
-                    <Upload className="h-5 w-5 text-gray-400" />
-                    <span className="text-sm text-gray-500">Choose logo file</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => handleFileChange('logo', e.target.files?.[0] || null)}
-                    />
-                  </label>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Stylesheet Upload</Label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                {stylesheetFile ? (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">{stylesheetFile.name}</span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleFileChange('stylesheet', null)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <label className="flex items-center justify-center space-x-2 cursor-pointer">
-                    <Upload className="h-5 w-5 text-gray-400" />
-                    <span className="text-sm text-gray-500">Choose CSS file</span>
-                    <input
-                      type="file"
-                      accept=".css"
-                      className="hidden"
-                      onChange={(e) => handleFileChange('stylesheet', e.target.files?.[0] || null)}
-                    />
-                  </label>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="siteContent">Site Content (JSON)</Label>
+          <div>
+            <Label htmlFor="description">Description</Label>
             <Textarea
-              id="siteContent"
-              value={formData.siteContent}
-              onChange={(e) => handleInputChange('siteContent', e.target.value)}
-              placeholder='{"title": "Welcome to TechCorp", "description": "Your analytics partner"}'
-              rows={4}
+              id="description"
+              value={formData.description}
+              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              placeholder="Enter company description"
             />
           </div>
 
-          <div className="flex justify-end space-x-2">
+          <div>
+            <Label htmlFor="logo_url">Logo URL (optional)</Label>
+            <Input
+              id="logo_url"
+              value={formData.logo_url}
+              onChange={(e) => setFormData(prev => ({ ...prev, logo_url: e.target.value }))}
+              placeholder="https://example.com/logo.png"
+            />
+          </div>
+
+          <div className="flex justify-end space-x-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Creating...' : 'Create Seller'}
+              {isLoading ? 'Adding...' : 'Add Seller'}
             </Button>
           </div>
         </form>

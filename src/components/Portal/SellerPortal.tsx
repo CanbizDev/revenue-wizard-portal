@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import Header from '@/components/Layout/Header';
 import Sidebar from '@/components/Layout/Sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -9,7 +9,8 @@ import CommissionsView from '@/components/Portal/CommissionsView';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useSellerData } from '@/hooks/useSellerData';
+import { Loader2 } from 'lucide-react';
+import { apiService, type DashboardData } from '@/services/api';
 import { 
   Users, 
   DollarSign, 
@@ -25,47 +26,38 @@ const SellerPortal: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
 
-  // Get real data from database
-  const { sellerData, clients, commissions, loading } = useSellerData('marketstrendai');
-
-  const getUser = () => {
-    if (!sellerData) {
-      return {
-        name: 'Loading...',
-        email: 'loading@example.com',
-        role: 'Loading...',
-        company: 'Loading...'
-      };
-    }
-    return {
-      name: `${sellerData.name} Admin`,
-      email: sellerData.admin_email,
-      role: userRole === 'tier1_seller' ? 'Tier-1 Seller' : 'Tier-2 Seller',
-      company: sellerData.name
-    };
+  const mockUser = {
+    name: 'Seller Admin',
+    email: 'admin@marketstrendai.com',
+    role: 'Tier-1 Seller',
+    company: 'MarketsTriendAI'
   };
 
-  const mockUser = getUser();
+  // Fetch seller dashboard data using React Query
+  const { data: dashboardData, isLoading, error } = useQuery<DashboardData>({
+    queryKey: ['sellerDashboard'],
+    queryFn: apiService.getSellerDashboardData,
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
 
   const renderDashboard = () => {
-    if (loading) {
+    if (isLoading) {
       return (
         <div className="flex h-64 items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <span className="ml-2">Loading dashboard data...</span>
         </div>
       );
     }
 
-    const activeClients = clients.filter(c => c.status === 'active').length;
-    const monthlyRevenue = clients.reduce((sum, client) => {
-      if (client.subscription_plans) {
-        return sum + client.subscription_plans.price;
-      }
-      return sum;
-    }, 0);
-    const thisMonthCommissions = commissions
-      .filter(c => new Date(c.transaction_date).getMonth() === new Date().getMonth())
-      .length;
+    if (error) {
+      return (
+        <div className="text-center py-8">
+          <p className="text-red-600 mb-4">Failed to load dashboard data</p>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
+        </div>
+      );
+    }
 
     return (
       <div className="space-y-6">
@@ -76,11 +68,11 @@ const SellerPortal: React.FC = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <DashboardCard
-            title="Active Clients"
-            value={activeClients}
-            description="Paying customers"
+            title="Total Clients"
+            value={dashboardData?.metrics.total_clients || 0}
+            description="Active customers"
             icon={Users}
-            trend={{ value: 8, isPositive: true }}
+            trend={{ value: dashboardData?.metrics.growth_rate || 0, isPositive: true }}
           />
           {userRole === 'tier1_seller' && (
             <DashboardCard
@@ -93,15 +85,15 @@ const SellerPortal: React.FC = () => {
           )}
           <DashboardCard
             title="Monthly Revenue"
-            value={`₹${monthlyRevenue.toLocaleString()}`}
+            value={`₹${(dashboardData?.metrics.monthly_revenue || 0).toLocaleString()}`}
             description="This month's earnings"
             icon={DollarSign}
             trend={{ value: 15, isPositive: true }}
           />
           <DashboardCard
-            title="Reports Generated"
-            value={thisMonthCommissions}
-            description="This month"
+            title="Active Projects"
+            value={dashboardData?.metrics.active_projects || 0}
+            description="Currently running"
             icon={FileText}
             trend={{ value: 12, isPositive: true }}
           />
@@ -124,26 +116,23 @@ const SellerPortal: React.FC = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle>Recent Client Activity</CardTitle>
+              <CardTitle>Recent Activity</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {clients.slice(0, 3).map((client, index) => (
-                  <div key={client.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                {dashboardData?.recent_activity?.slice(0, 3).map((activity) => (
+                  <div key={activity.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div>
-                      <p className="text-sm font-medium text-gray-900">{client.name}</p>
-                      <p className="text-xs text-gray-500">{client.company} • {new Date(client.created_at).toLocaleDateString()}</p>
+                      <p className="text-sm font-medium text-gray-900">{activity.description}</p>
+                      <p className="text-xs text-gray-500">{activity.type} • {new Date(activity.timestamp).toLocaleDateString()}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-green-600">
-                        {client.subscription_plans ? `₹${client.subscription_plans.price.toLocaleString()}` : 'No Plan'}
-                      </p>
-                    </div>
+                    <Badge variant="secondary">
+                      {activity.type}
+                    </Badge>
                   </div>
-                ))}
-                {clients.length === 0 && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    No client activity yet.
+                )) || (
+                  <div className="text-center py-8 text-gray-500">
+                    No recent activities
                   </div>
                 )}
               </div>
@@ -172,45 +161,8 @@ const SellerPortal: React.FC = () => {
           <CardTitle>Client List</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {clients.map((client) => (
-              <div key={client.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-gray-200 rounded-lg space-y-3 sm:space-y-0">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                      <Users className="h-5 w-5 text-green-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-gray-900">{client.name}</h3>
-                      <p className="text-sm text-gray-500">{client.email}</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-6 text-sm text-gray-600 w-full sm:w-auto justify-between sm:justify-end">
-                  <div className="text-center">
-                    <p className="font-medium">{client.subscription_plans?.name || 'No Plan'}</p>
-                    <p className="text-xs">Plan</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="font-medium">
-                      {client.subscription_plans ? `₹${client.subscription_plans.price.toLocaleString()}` : '₹0'}
-                    </p>
-                    <p className="text-xs">Revenue</p>
-                  </div>
-                  <Badge 
-                    variant={client.status === 'active' ? 'default' : 'secondary'}
-                    className={client.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}
-                  >
-                    {client.status}
-                  </Badge>
-                </div>
-              </div>
-            ))}
-            {clients.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
-                No clients found. Add your first client to get started.
-              </div>
-            )}
+          <div className="text-center py-8 text-gray-500">
+            Client management - API integration pending
           </div>
         </CardContent>
       </Card>
@@ -224,15 +176,15 @@ const SellerPortal: React.FC = () => {
       case 'clients':
         return renderClients();
       case 'commissions':
-        return <CommissionsView userRole={userRole} company="marketstrendai" />;
+        return <div className="p-8 text-center text-gray-500">Commissions - API integration pending</div>;
       case 'tier2-sellers':
         return userRole === 'tier1_seller' ? 
-          <div className="p-8 text-center text-gray-500">Tier-2 Sellers management coming soon...</div> : 
+          <div className="p-8 text-center text-gray-500">Tier-2 Sellers management - API integration pending</div> : 
           renderDashboard();
       case 'billing':
-        return <div className="p-8 text-center text-gray-500">Billing & Revenue coming soon...</div>;
+        return <div className="p-8 text-center text-gray-500">Billing & Revenue - API integration pending</div>;
       case 'reports':
-        return <div className="p-8 text-center text-gray-500">Reports management coming soon...</div>;
+        return <div className="p-8 text-center text-gray-500">Reports management - API integration pending</div>;
       default:
         return renderDashboard();
     }
