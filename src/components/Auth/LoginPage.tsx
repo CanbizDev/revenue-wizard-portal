@@ -16,7 +16,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const [credentials, setCredentials] = useState<LoginRequest>({
     email: '',
     password: '',
-    userType: 'seller'
+    user_type: 'seller'
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -26,12 +26,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     setIsLoading(true);
 
     try {
-      const response = await apiService.login(credentials.email, credentials.password, credentials.userType);
+      const response = await apiService.login(credentials);
       toast({
         title: "Login successful",
         description: `Welcome back, ${response.user.name}!`,
       });
-      onLoginSuccess(response.user.userType);
+      onLoginSuccess(response.user.user_type);
     } catch (error) {
       toast({
         title: "Login failed",
@@ -44,7 +44,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   };
 
   const quickLogin = (email: string, password: string, userType: 'seller' | 'client' | 'admin') => {
-    setCredentials({ email, password, userType: userType });
+    setCredentials({ email, password, user_type: userType });
   };
 
   return (
@@ -91,9 +91,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
               <div className="space-y-2">
                 <Label htmlFor="userType">User Type</Label>
                 <Select 
-                  value={credentials.userType} 
+                  value={credentials.user_type} 
                   onValueChange={(value: 'seller' | 'client' | 'admin') => 
-                    setCredentials({ ...credentials, userType: value })
+                    setCredentials({ ...credentials, user_type: value })
                   }
                 >
                   <SelectTrigger>

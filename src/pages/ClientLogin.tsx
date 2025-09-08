@@ -76,7 +76,7 @@ const ClientLogin: React.FC<ClientLoginProps> = ({ company, client, onBack, onLo
 
     try {
       setAuthenticating(true);
-      const response = await apiService.login(email, password, 'client');
+      const response = await apiService.authenticateClient(client, { email, password });
       
       toast({
         title: "Success",
