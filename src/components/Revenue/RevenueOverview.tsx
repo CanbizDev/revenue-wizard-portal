@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { apiService } from '@/services/api';
+import { apiService, RevenueData } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { 
   DollarSign, 
@@ -30,7 +30,7 @@ interface BillingRecord {
 }
 
 const RevenueOverview: React.FC = () => {
-  const [billingData, setBillingData] = useState<BillingRecord[]>([]);
+  const [revenueData, setRevenueData] = useState<RevenueData | null>(null);
   const [filteredData, setFilteredData] = useState<BillingRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -38,61 +38,6 @@ const RevenueOverview: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const { toast } = useToast();
 
-  // Mock billing data - In real implementation, this would come from Supabase
-  const mockBillingData: BillingRecord[] = [
-    {
-      id: '1',
-      client_name: 'TechCorp Solutions',
-      invoice_id: 'INV-2024-001',
-      bill_amount: 25000,
-      due_date: '2024-02-15',
-      payment_status: 'paid',
-      payment_date: '2024-02-14',
-      tier: 'tier1',
-      currency_symbol: '₹'
-    },
-    {
-      id: '2',
-      client_name: 'DataFlow Inc',
-      invoice_id: 'INV-2024-002',
-      bill_amount: 18500,
-      due_date: '2024-02-20',
-      payment_status: 'pending',
-      tier: 'tier2',
-      currency_symbol: '₹'
-    },
-    {
-      id: '3',
-      client_name: 'Analytics Pro',
-      invoice_id: 'INV-2024-003',
-      bill_amount: 32000,
-      due_date: '2024-01-30',
-      payment_status: 'overdue',
-      tier: 'tier1',
-      currency_symbol: '₹'
-    },
-    {
-      id: '4',
-      client_name: 'CloudSync Ltd',
-      invoice_id: 'INV-2024-004',
-      bill_amount: 15000,
-      due_date: '2024-02-25',
-      payment_status: 'pending',
-      tier: 'tier2',
-      currency_symbol: '₹'
-    },
-    {
-      id: '5',
-      client_name: 'StartupHub',
-      invoice_id: 'INV-2024-005',
-      bill_amount: 42000,
-      due_date: '2024-02-10',
-      payment_status: 'paid',
-      payment_date: '2024-02-09',
-      tier: 'tier1',
-      currency_symbol: '₹'
-    }
-  ];
 
   useEffect(() => {
     loadBillingData();
@@ -100,19 +45,18 @@ const RevenueOverview: React.FC = () => {
 
   useEffect(() => {
     applyFiltersAndSort();
-  }, [billingData, statusFilter, sortBy, sortOrder]);
+  }, [revenueData, statusFilter, sortBy, sortOrder]);
 
   const loadBillingData = async () => {
     try {
       setLoading(true);
-      // In a real implementation, this would fetch from Supabase
-      // For now, using mock data
-      setBillingData(mockBillingData);
+      const data = await apiService.getRevenueData();
+      setRevenueData(data);
     } catch (error: any) {
-      console.error('Error loading billing data:', error);
+      console.error('Error loading revenue data:', error);
       toast({
         title: 'Error',
-        description: 'Failed to load billing data',
+        description: 'Failed to load revenue data',
         variant: 'destructive'
       });
     } finally {
@@ -121,7 +65,9 @@ const RevenueOverview: React.FC = () => {
   };
 
   const applyFiltersAndSort = () => {
-    let filtered = [...billingData];
+    if (!revenueData) return;
+    
+    let filtered = [...revenueData.billing_records];
 
     // Apply status filter
     if (statusFilter !== 'all') {
@@ -185,17 +131,13 @@ const RevenueOverview: React.FC = () => {
     }
   };
 
-  const calculateSummary = () => {
-    const totalBills = billingData.length;
-    const totalPaid = billingData.filter(record => record.payment_status === 'paid').length;
-    const totalPending = billingData.filter(record => record.payment_status === 'pending' || record.payment_status === 'overdue').length;
-    const totalAmount = billingData.reduce((sum, record) => sum + record.bill_amount, 0);
-    const paidAmount = billingData.filter(record => record.payment_status === 'paid').reduce((sum, record) => sum + record.bill_amount, 0);
-
-    return { totalBills, totalPaid, totalPending, totalAmount, paidAmount };
+  const summary = revenueData?.summary || {
+    total_bills: 0,
+    total_paid: 0,
+    total_pending: 0,
+    total_amount: 0,
+    paid_amount: 0
   };
-
-  const summary = calculateSummary();
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-IN', {
@@ -239,8 +181,8 @@ const RevenueOverview: React.FC = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Total Bills</p>
-                <p className="text-xl font-bold text-gray-900">{summary.totalBills}</p>
-                <p className="text-xs text-gray-500">₹{summary.totalAmount.toLocaleString('en-IN')} total value</p>
+                <p className="text-xl font-bold text-gray-900">{summary.total_bills}</p>
+                <p className="text-xs text-gray-500">₹{summary.total_amount.toLocaleString('en-IN')} total value</p>
               </div>
             </div>
           </CardContent>
@@ -254,8 +196,8 @@ const RevenueOverview: React.FC = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Paid Bills</p>
-                <p className="text-xl font-bold text-gray-900">{summary.totalPaid}</p>
-                <p className="text-xs text-gray-500">₹{summary.paidAmount.toLocaleString('en-IN')} collected</p>
+                <p className="text-xl font-bold text-gray-900">{summary.total_paid}</p>
+                <p className="text-xs text-gray-500">₹{summary.paid_amount.toLocaleString('en-IN')} collected</p>
               </div>
             </div>
           </CardContent>
@@ -269,8 +211,8 @@ const RevenueOverview: React.FC = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Pending Bills</p>
-                <p className="text-xl font-bold text-gray-900">{summary.totalPending}</p>
-                <p className="text-xs text-gray-500">₹{(summary.totalAmount - summary.paidAmount).toLocaleString('en-IN')} outstanding</p>
+                <p className="text-xl font-bold text-gray-900">{summary.total_pending}</p>
+                <p className="text-xs text-gray-500">₹{(summary.total_amount - summary.paid_amount).toLocaleString('en-IN')} outstanding</p>
               </div>
             </div>
           </CardContent>

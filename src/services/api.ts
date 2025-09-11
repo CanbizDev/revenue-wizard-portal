@@ -37,6 +37,27 @@ export interface BillingSummary {
   }>;
 }
 
+export interface RevenueData {
+  summary: {
+    total_bills: number;
+    total_paid: number;
+    total_pending: number;
+    total_amount: number;
+    paid_amount: number;
+  };
+  billing_records: Array<{
+    id: string;
+    client_name: string;
+    invoice_id: string;
+    bill_amount: number;
+    due_date: string;
+    payment_status: 'paid' | 'pending' | 'overdue';
+    payment_date?: string;
+    tier: 'tier1' | 'tier2';
+    currency_symbol: string;
+  }>;
+}
+
 export interface AdminDashboardData {
   stats: {
     total_tier1_sellers: number;
@@ -44,6 +65,27 @@ export interface AdminDashboardData {
     total_projects: number;
     monthly_revenue: number;
   };
+}
+
+export interface RevenueData {
+  summary: {
+    total_bills: number;
+    total_paid: number;
+    total_pending: number;
+    total_amount: number;
+    paid_amount: number;
+  };
+  billing_records: Array<{
+    id: string;
+    client_name: string;
+    invoice_id: string;
+    bill_amount: number;
+    due_date: string;
+    payment_status: 'paid' | 'pending' | 'overdue';
+    payment_date?: string;
+    tier: 'tier1' | 'tier2';
+    currency_symbol: string;
+  }>;
 }
 
 // Legacy interface for components that need mock data
@@ -278,6 +320,10 @@ class ApiService {
   // Billing endpoints
   async getBillingSummary(): Promise<BillingSummary> {
     return this.request<BillingSummary>('/seller/billing-summary');
+  }
+
+  async getRevenueData(): Promise<RevenueData> {
+    return this.request<RevenueData>('/billing/revenue');
   }
 
   async getProjectBillingDetails(projectId: string): Promise<any> {
