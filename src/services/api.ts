@@ -307,58 +307,58 @@ class ApiService {
 
   // Tier1 Seller Management (Admin Only)
   async createTier1Seller(sellerData: any): Promise<any> {
-    return this.request('/tier1', {
+    return this.request('/seller/tier1', {
       method: 'POST',
       data: sellerData,
     });
   }
 
   async getAllTier1Sellers(): Promise<any[]> {
-    return this.request<any[]>('/tier1');
+    return this.request<any[]>('/seller/tier1');
   }
 
   async getTier1Seller(id: string): Promise<any> {
-    return this.request(`/tier1/${id}`);
+    return this.request(`/seller/tier1/${id}`);
   }
 
   async updateTier1Seller(id: string, sellerData: any): Promise<any> {
-    return this.request(`/tier1/${id}`, {
+    return this.request(`/seller/tier1/${id}`, {
       method: 'PUT',
       data: sellerData,
     });
   }
 
   async deleteTier1Seller(id: string): Promise<any> {
-    return this.request(`/tier1/${id}`, {
+    return this.request(`/seller/tier1/${id}`, {
       method: 'DELETE',
     });
   }
 
   // Tier2 Seller Management (Admin + Tier1)
   async createTier2Seller(sellerData: any): Promise<any> {
-    return this.request('/tier2', {
+    return this.request('/seller/tier2', {
       method: 'POST',
       data: sellerData,
     });
   }
 
   async getAllTier2Sellers(): Promise<any[]> {
-    return this.request<any[]>('/tier2');
+    return this.request<any[]>('/seller/tier2');
   }
 
   async getTier2Seller(id: string): Promise<any> {
-    return this.request(`/tier2/${id}`);
+    return this.request(`/seller/tier2/${id}`);
   }
 
   async updateTier2Seller(id: string, sellerData: any): Promise<any> {
-    return this.request(`/tier2/${id}`, {
+    return this.request(`/seller/tier2/${id}`, {
       method: 'PUT',
       data: sellerData,
     });
   }
 
   async deleteTier2Seller(id: string): Promise<any> {
-    return this.request(`/tier2/${id}`, {
+    return this.request(`/seller/tier2/${id}`, {
       method: 'DELETE',
     });
   }
