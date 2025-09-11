@@ -287,23 +287,10 @@ class ApiService {
     });
   }
 
-  // Additional API methods for forms and management
+  // Legacy API methods for forms (keeping for backward compatibility)
   async createSeller(sellerData: any): Promise<any> {
-    try {
-      return await this.axiosInstance.post('/admin/sellers', sellerData);
-    } catch (error) {
-      console.log('Mock create seller:', sellerData);
-      return { success: true, message: 'Seller created successfully (mock)' };
-    }
-  }
-
-  async createTier2Seller(sellerData: any): Promise<any> {
-    try {
-      return await this.axiosInstance.post('/admin/tier2-sellers', sellerData);
-    } catch (error) {
-      console.log('Mock create tier2 seller:', sellerData);
-      return { success: true, message: 'Tier2 Seller created successfully (mock)' };
-    }
+    // Redirect to new Tier1 seller creation endpoint
+    return this.createTier1Seller(sellerData);
   }
 
   async getTier1Sellers(): Promise<any[]> {
@@ -316,6 +303,64 @@ class ApiService {
         { id: '2', name: 'TechAnalytics' }
       ];
     }
+  }
+
+  // Tier1 Seller Management (Admin Only)
+  async createTier1Seller(sellerData: any): Promise<any> {
+    return this.request('/tier1', {
+      method: 'POST',
+      data: sellerData,
+    });
+  }
+
+  async getAllTier1Sellers(): Promise<any[]> {
+    return this.request<any[]>('/tier1');
+  }
+
+  async getTier1Seller(id: string): Promise<any> {
+    return this.request(`/tier1/${id}`);
+  }
+
+  async updateTier1Seller(id: string, sellerData: any): Promise<any> {
+    return this.request(`/tier1/${id}`, {
+      method: 'PUT',
+      data: sellerData,
+    });
+  }
+
+  async deleteTier1Seller(id: string): Promise<any> {
+    return this.request(`/tier1/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Tier2 Seller Management (Admin + Tier1)
+  async createTier2Seller(sellerData: any): Promise<any> {
+    return this.request('/tier2', {
+      method: 'POST',
+      data: sellerData,
+    });
+  }
+
+  async getAllTier2Sellers(): Promise<any[]> {
+    return this.request<any[]>('/tier2');
+  }
+
+  async getTier2Seller(id: string): Promise<any> {
+    return this.request(`/tier2/${id}`);
+  }
+
+  async updateTier2Seller(id: string, sellerData: any): Promise<any> {
+    return this.request(`/tier2/${id}`, {
+      method: 'PUT',
+      data: sellerData,
+    });
+  }
+
+  async deleteTier2Seller(id: string): Promise<any> {
+    return this.request(`/tier2/${id}`, {
+      method: 'DELETE',
+    });
   }
 
   // Utility methods
