@@ -218,40 +218,18 @@ class ApiService {
 
   // Authentication
   async login(email: string, password: string, userType: 'admin' | 'tier1_seller' | 'tier2_seller'): Promise<LoginResponse> {
-    try {
-      const response = await this.axiosInstance.post<LoginResponse>('/auth/login', {
-        email,
-        password,
-        user_type: userType,
-      });
-      
-      this.token = response.data.access_token;
-      localStorage.setItem('auth_token', response.data.access_token);
-      localStorage.setItem('refresh_token', response.data.refresh_token);
-      localStorage.setItem('user_data', JSON.stringify(response.data.user));
-      
-      return response.data;
-    } catch (error) {
-      console.error('Login failed, using mock response:', error);
-      // Return mock successful login response
-      const mockResponse: LoginResponse = {
-        access_token: 'mock_jwt_token_' + Date.now(),
-        refresh_token: 'mock_refresh_token_' + Date.now(),
-        user: {
-          id: 'mock_user_id',
-          email,
-          name: 'Mock User',
-          role: userType,
-        },
-      };
-      
-      this.token = mockResponse.access_token;
-      localStorage.setItem('auth_token', mockResponse.access_token);
-      localStorage.setItem('refresh_token', mockResponse.refresh_token);
-      localStorage.setItem('user_data', JSON.stringify(mockResponse.user));
-      
-      return mockResponse;
-    }
+    const response = await this.axiosInstance.post<LoginResponse>('/auth/login', {
+      email,
+      password,
+      user_type: userType,
+    });
+    
+    this.token = response.data.access_token;
+    localStorage.setItem('auth_token', response.data.access_token);
+    localStorage.setItem('refresh_token', response.data.refresh_token);
+    localStorage.setItem('user_data', JSON.stringify(response.data.user));
+    
+    return response.data;
   }
 
   logout(): void {
