@@ -119,23 +119,18 @@ class ApiService {
       const response: AxiosResponse<T> = await this.axiosInstance(endpoint, options);
       return response.data;
     } catch (error) {
-      console.error('API request failed, using mock data:', error);
-      // Return mock data instead of throwing error
+      console.error('API request failed:', error);
+      // For dashboard endpoints, throw the error instead of returning mock data
+      if (endpoint.includes('/dashboard')) {
+        throw error;
+      }
+      // Return mock data for other endpoints
       return this.getMockData(endpoint) as T;
     }
   }
 
   private getMockData(endpoint: string): any {
-    // Dashboard data
-    if (endpoint.includes('/admin/dashboard')) {
-      return mockDashboardData.admin;
-    }
-    if (endpoint.includes('/seller/dashboard')) {
-      return mockDashboardData.seller;
-    }
-    if (endpoint.includes('/client/dashboard')) {
-      return mockDashboardData.client;
-    }
+    // Dashboard endpoints now throw errors instead of returning mock data
 
     // Billing summary
     if (endpoint.includes('/billing-summary')) {
