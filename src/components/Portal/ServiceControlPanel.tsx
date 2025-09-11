@@ -386,34 +386,6 @@ const ServiceControlPanel: React.FC = () => {
             {showExamples && <span className="text-orange-600"> • Showing example data</span>}
           </p>
         </div>
-        <div className="flex items-center space-x-2">
-          {!showExamples && (
-            <Button 
-              variant="outline" 
-              onClick={loadServicesData}
-              className="flex items-center space-x-2"
-            >
-              <Settings className="h-4 w-4" />
-              <span>Refresh</span>
-            </Button>
-          )}
-          <Button 
-            variant={showExamples ? "default" : "outline"}
-            onClick={() => {
-              if (showExamples) {
-                loadServicesData();
-                setShowExamples(false);
-              } else {
-                setServices(getExampleServices());
-                setShowExamples(true);
-              }
-            }}
-            className="flex items-center space-x-2"
-          >
-            <Shield className="h-4 w-4" />
-            <span>{showExamples ? 'Load Real Data' : 'Show Examples'}</span>
-          </Button>
-        </div>
       </div>
 
       {/* Service Control Table */}
@@ -458,19 +430,24 @@ const ServiceControlPanel: React.FC = () => {
                     >
                       {item.status ? 'Active' : 'Inactive'}
                     </Badge>
-                    <Switch
-                      checked={item.status}
-                      onCheckedChange={() => {
-                        if (item.service === 'Doc' || item.service === 'Email') {
-                          // Use independent toggle for Doc/Email services
-                          toggleIndependentService(item.id);
-                        } else {
-                          // Use regular toggle for project services
-                          toggleService(item.id, item.status, item.type);
-                        }
-                      }}
-                      className="data-[state=checked]:bg-green-600"
-                    />
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant={item.status ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => {
+                          if (item.service === 'Doc' || item.service === 'Email') {
+                            // Use independent toggle for Doc/Email services
+                            toggleIndependentService(item.id);
+                          } else {
+                            // Use regular toggle for project services
+                            toggleService(item.id, item.status, item.type);
+                          }
+                        }}
+                        className={item.status ? "bg-green-600 hover:bg-green-700" : ""}
+                      >
+                        {item.status ? 'Active' : 'Inactive'}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}

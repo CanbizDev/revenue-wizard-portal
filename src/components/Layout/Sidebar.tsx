@@ -36,7 +36,6 @@ const Sidebar: React.FC<SidebarProps> = ({ portalType, userRole, activeTab, onTa
           { id: 'tier1-sellers', label: 'Tier-1 Sellers', icon: Building2 },
           { id: 'tier2-sellers', label: 'Tier-2 Sellers', icon: Users },
           { id: 'revenue', label: 'Revenue Overview', icon: DollarSign },
-          { id: 'settings', label: 'Global Settings', icon: Settings },
         ];
       
       case 'seller':
