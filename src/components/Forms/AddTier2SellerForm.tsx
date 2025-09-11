@@ -172,13 +172,12 @@ const AddTier2SellerForm: React.FC<AddTier2SellerFormProps> = ({ isOpen, onClose
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="subdomain">Subdomain *</Label>
+              <Label htmlFor="subdomain">Subdomain</Label>
               <Input
                 id="subdomain"
                 value={formData.subdomain}
                 onChange={(e) => handleInputChange('subdomain', e.target.value)}
                 placeholder="analyticspro"
-                required
               />
             </div>
           </div>
@@ -230,113 +229,6 @@ const AddTier2SellerForm: React.FC<AddTier2SellerFormProps> = ({ isOpen, onClose
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="commissionType">Commission Type *</Label>
-              <Select
-                value={formData.commissionType}
-                onValueChange={(value) => handleInputChange('commissionType', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select commission type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="percentage">Percentage</SelectItem>
-                  <SelectItem value="fixed">Fixed Amount</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="commissionValue">
-                Commission Value * {formData.commissionType === 'percentage' ? '(%)' : '($)'}
-              </Label>
-              <Input
-                id="commissionValue"
-                type="number"
-                step={formData.commissionType === 'percentage' ? '0.01' : '0.01'}
-                min="0"
-                max={formData.commissionType === 'percentage' ? '100' : undefined}
-                value={formData.commissionValue}
-                onChange={(e) => handleInputChange('commissionValue', e.target.value)}
-                placeholder={formData.commissionType === 'percentage' ? '10.5' : '50.00'}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Logo Upload</Label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                {logoFile ? (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">{logoFile.name}</span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleFileChange('logo', null)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <label className="flex items-center justify-center space-x-2 cursor-pointer">
-                    <Upload className="h-5 w-5 text-gray-400" />
-                    <span className="text-sm text-gray-500">Choose logo file</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => handleFileChange('logo', e.target.files?.[0] || null)}
-                    />
-                  </label>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Stylesheet Upload</Label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                {stylesheetFile ? (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">{stylesheetFile.name}</span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleFileChange('stylesheet', null)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <label className="flex items-center justify-center space-x-2 cursor-pointer">
-                    <Upload className="h-5 w-5 text-gray-400" />
-                    <span className="text-sm text-gray-500">Choose CSS file</span>
-                    <input
-                      type="file"
-                      accept=".css"
-                      className="hidden"
-                      onChange={(e) => handleFileChange('stylesheet', e.target.files?.[0] || null)}
-                    />
-                  </label>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="siteContent">Site Content (JSON)</Label>
-            <Textarea
-              id="siteContent"
-              value={formData.siteContent}
-              onChange={(e) => handleInputChange('siteContent', e.target.value)}
-              placeholder='{"title": "Welcome to Analytics Pro", "description": "Advanced analytics solutions"}'
-              rows={4}
-            />
-          </div>
 
           <div className="flex justify-end space-x-2">
             <Button type="button" variant="outline" onClick={onClose}>

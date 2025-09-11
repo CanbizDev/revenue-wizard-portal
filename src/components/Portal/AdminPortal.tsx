@@ -151,53 +151,6 @@ const AdminPortal: React.FC = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <TrendingUp className="h-5 w-5" />
-              <span>Revenue Growth</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
-              <p className="text-gray-500">Revenue chart placeholder</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activities</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                { action: 'New Tier-1 Seller registered', company: 'TechCorp Solutions', time: '2 hours ago', status: 'pending' },
-                { action: 'Client payment received', company: 'DataFlow Inc', time: '4 hours ago', status: 'completed' },
-                { action: 'Tier-2 Seller approved', company: 'Analytics Pro', time: '6 hours ago', status: 'approved' },
-              ].map((activity, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{activity.action}</p>
-                    <p className="text-xs text-gray-500">{activity.company} • {activity.time}</p>
-                  </div>
-                  <Badge 
-                    variant={activity.status === 'completed' ? 'default' : 'secondary'}
-                    className={
-                      activity.status === 'completed' ? 'bg-green-100 text-green-800' :
-                      activity.status === 'approved' ? 'bg-blue-100 text-blue-800' :
-                      'bg-yellow-100 text-yellow-800'
-                    }
-                  >
-                    {activity.status}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 
