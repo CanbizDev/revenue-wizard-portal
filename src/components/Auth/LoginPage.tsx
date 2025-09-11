@@ -16,7 +16,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const [credentials, setCredentials] = useState<LoginRequest>({
     email: '',
     password: '',
-    user_type: 'seller'
+    user_type: 'tier1_seller'
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -31,7 +31,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         title: "Login successful",
         description: `Welcome back, ${response.user.name}!`,
       });
-      onLoginSuccess(response.user.user_type);
+      onLoginSuccess(response.user.role);
     } catch (error) {
       toast({
         title: "Login failed",
@@ -43,7 +43,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     }
   };
 
-  const quickLogin = (email: string, password: string, userType: 'seller' | 'client' | 'admin') => {
+  const quickLogin = (email: string, password: string, userType: 'admin' | 'tier1_seller' | 'tier2_seller') => {
     setCredentials({ email, password, user_type: userType });
   };
 
@@ -92,7 +92,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 <Label htmlFor="userType">User Type</Label>
                 <Select 
                   value={credentials.user_type} 
-                  onValueChange={(value: 'seller' | 'client' | 'admin') => 
+                  onValueChange={(value: 'admin' | 'tier1_seller' | 'tier2_seller') => 
                     setCredentials({ ...credentials, user_type: value })
                   }
                 >
@@ -100,9 +100,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                     <SelectValue placeholder="Select user type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="seller">Seller</SelectItem>
-                    <SelectItem value="client">Client</SelectItem>
                     <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="tier1_seller">Tier-1 Seller</SelectItem>
+                    <SelectItem value="tier2_seller">Tier-2 Seller</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -128,42 +128,34 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => quickLogin('admin@marketstrendai.com', 'admin123', 'seller')}
+                  onClick={() => quickLogin('admin@jupiterbrains.com', 'admin123', 'admin')}
                   className="text-xs"
                 >
-                  MarketTrends Seller
+                  Admin Login
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => quickLogin('admin@xyzseller.com', 'admin123', 'seller')}
+                  onClick={() => quickLogin('admin@marketstrendai.com', 'admin123', 'tier1_seller')}
                   className="text-xs"
                 >
-                  XYZ Seller
+                  MarketTrends Tier-1 Seller
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => quickLogin('admin@datainsightspro.com', 'admin123', 'seller')}
+                  onClick={() => quickLogin('admin@xyzseller.com', 'admin123', 'tier1_seller')}
                   className="text-xs"
                 >
-                  Tier2 Seller
+                  XYZ Tier-1 Seller
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => quickLogin('john@forte.com', 'client123', 'client')}
+                  onClick={() => quickLogin('admin@datainsightspro.com', 'admin123', 'tier2_seller')}
                   className="text-xs"
                 >
-                  Forte Client
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => quickLogin('sarah@servicon.com', 'client123', 'client')}
-                  className="text-xs"
-                >
-                  Servicon Client
+                  DataInsights Tier-2 Seller
                 </Button>
               </div>
             </div>

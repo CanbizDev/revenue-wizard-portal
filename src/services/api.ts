@@ -7,17 +7,17 @@ const API_BASE_URL = 'http://localhost:5021/api';
 export interface LoginRequest {
   email: string;
   password: string;
-  user_type: 'seller' | 'client' | 'admin';
+  user_type: 'admin' | 'tier1_seller' | 'tier2_seller';
 }
 
 export interface LoginResponse {
-  token: string;
+  access_token: string;
+  refresh_token: string;
   user: {
     id: string;
     email: string;
     name: string;
-    user_type: 'seller' | 'client' | 'admin';
-    company?: string;
+    role: 'admin' | 'tier1_seller' | 'tier2_seller';
   };
 }
 
@@ -217,7 +217,7 @@ class ApiService {
   }
 
   // Authentication
-  async login(email: string, password: string, userType: 'seller' | 'client' | 'admin'): Promise<LoginResponse> {
+  async login(email: string, password: string, userType: 'admin' | 'tier1_seller' | 'tier2_seller'): Promise<LoginResponse> {
     try {
       const response = await this.axiosInstance.post<LoginResponse>('/auth/login', {
         email,
@@ -225,8 +225,9 @@ class ApiService {
         user_type: userType,
       });
       
-      this.token = response.data.token;
-      localStorage.setItem('auth_token', response.data.token);
+      this.token = response.data.access_token;
+      localStorage.setItem('auth_token', response.data.access_token);
+      localStorage.setItem('refresh_token', response.data.refresh_token);
       localStorage.setItem('user_data', JSON.stringify(response.data.user));
       
       return response.data;
@@ -234,18 +235,19 @@ class ApiService {
       console.error('Login failed, using mock response:', error);
       // Return mock successful login response
       const mockResponse: LoginResponse = {
-        token: 'mock_jwt_token_' + Date.now(),
+        access_token: 'mock_jwt_token_' + Date.now(),
+        refresh_token: 'mock_refresh_token_' + Date.now(),
         user: {
           id: 'mock_user_id',
           email,
           name: 'Mock User',
-          user_type: userType,
-          company: userType === 'client' ? 'Mock Company' : undefined,
+          role: userType,
         },
       };
       
-      this.token = mockResponse.token;
-      localStorage.setItem('auth_token', mockResponse.token);
+      this.token = mockResponse.access_token;
+      localStorage.setItem('auth_token', mockResponse.access_token);
+      localStorage.setItem('refresh_token', mockResponse.refresh_token);
       localStorage.setItem('user_data', JSON.stringify(mockResponse.user));
       
       return mockResponse;
