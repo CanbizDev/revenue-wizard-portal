@@ -158,8 +158,62 @@ class ApiService {
       return mockClientConfig;
     }
 
-    // Default empty response
-    return {};
+    // Tier1 sellers mock data
+    if (endpoint.includes('/seller/tier1')) {
+      return [
+        {
+          id: '1',
+          name: 'TechSolutions Inc',
+          admin_email: 'admin@techsolutions.com',
+          subdomain: 'techsolutions',
+          logo_url: null,
+          client_count: 15,
+          revenue: 75000,
+          status: 'active'
+        },
+        {
+          id: '2',
+          name: 'DataFlow Corp',
+          admin_email: 'admin@dataflow.com',
+          subdomain: 'dataflow',
+          logo_url: null,
+          client_count: 8,
+          revenue: 45000,
+          status: 'active'
+        }
+      ];
+    }
+
+    // Tier2 sellers mock data
+    if (endpoint.includes('/seller/tier2')) {
+      return [
+        {
+          id: '1',
+          name: 'Analytics Pro',
+          admin_email: 'admin@analyticspro.com',
+          subdomain: 'analyticspro',
+          logo_url: null,
+          client_count: 5,
+          revenue: 25000,
+          status: 'active',
+          tier1_seller: { name: 'TechSolutions Inc' }
+        },
+        {
+          id: '2',
+          name: 'ReportMaster',
+          admin_email: 'admin@reportmaster.com',
+          subdomain: 'reportmaster',
+          logo_url: null,
+          client_count: 3,
+          revenue: 15000,
+          status: 'active',
+          tier1_seller: { name: 'DataFlow Corp' }
+        }
+      ];
+    }
+
+    // Default empty array for endpoints that should return arrays
+    return [];
   }
 
   // Authentication
