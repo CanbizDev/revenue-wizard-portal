@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -24,33 +23,32 @@ interface ServiceStatus {
   isActive: boolean;
   email?: string;
   subdomain?: string;
-  serviceType?: 'doc' | 'email' | 'project'; // Track specific service type
+  serviceType?: 'doc' | 'email' | 'project';
 }
 
 const ServiceControlPanel: React.FC = () => {
   const [services, setServices] = useState<ServiceStatus[]>([]);
-  const [serviceStates, setServiceStates] = useState<{[key: string]: boolean}>({});
   const [loading, setLoading] = useState(true);
   const [showExamples, setShowExamples] = useState(false);
+  const [serviceStatuses, setServiceStatuses] = useState<{[key: string]: boolean}>({});
   const { toast } = useToast();
 
   useEffect(() => {
     loadServicesData();
   }, []);
 
-  // Initialize service states for independent control
+  // Initialize service statuses when services load
   useEffect(() => {
-    const initialStates: {[key: string]: boolean} = {};
+    const statuses: {[key: string]: boolean} = {};
     services.forEach(service => {
       if (service.type === 'tier1') {
-        // Create independent states for Doc and Email services
-        initialStates[`${service.id}-doc`] = service.isActive;
-        initialStates[`${service.id}-email`] = service.isActive;
+        statuses[`${service.id}-doc`] = service.isActive;
+        statuses[`${service.id}-email`] = service.isActive;
       } else if (service.type === 'project') {
-        initialStates[service.id] = service.isActive;
+        statuses[service.id] = service.isActive;
       }
     });
-    setServiceStates(initialStates);
+    setServiceStatuses(statuses);
   }, [services]);
 
   // Example data for demonstration
@@ -79,27 +77,6 @@ const ServiceControlPanel: React.FC = () => {
       isActive: false,
       email: 'admin@dataflow.com',
       subdomain: 'dataflow'
-    },
-    // Tier-2 Sellers
-    {
-      id: 'example-tier2-1',
-      name: 'Analytics Pro',
-      type: 'tier2',
-      parentId: 'example-tier1-1',
-      parentName: 'MarketsTrendsAI',
-      isActive: true,
-      email: 'admin@analyticspro.com',
-      subdomain: 'analyticspro'
-    },
-    {
-      id: 'example-tier2-2',
-      name: 'Business Intelligence Corp',
-      type: 'tier2',
-      parentId: 'example-tier1-2',
-      parentName: 'Margin',
-      isActive: true,
-      email: 'admin@bicorp.com',
-      subdomain: 'bicorp'
     },
     // Projects
     {
@@ -145,26 +122,11 @@ const ServiceControlPanel: React.FC = () => {
       setLoading(true);
 
       // Load Tier-1 Sellers
-      // Mock Tier-1 Sellers data
       const tier1Data = [
         { id: '1', name: 'Mock Tier1', admin_email: 'tier1@mock.com', subdomain: 'mock1', status: 'active' }
       ];
 
-      // Mock Tier-2 Sellers data
-      const tier2Data = [
-        { 
-          id: '2', 
-          name: 'Mock Tier2', 
-          admin_email: 'tier2@mock.com', 
-          subdomain: 'mock2', 
-          status: 'active',
-          tier1_seller_id: '1',
-          tier1_seller: { name: 'Mock Tier1' }
-        }
-      ];
-
-      // Load Clients (Projects) - assuming clients table represents projects
-      // Mock Clients data
+      // Load Clients (Projects)
       const clientsData = [
         { 
           id: '1', 
@@ -185,20 +147,6 @@ const ServiceControlPanel: React.FC = () => {
           id: seller.id,
           name: seller.name,
           type: 'tier1',
-          isActive: seller.status === 'active',
-          email: seller.admin_email,
-          subdomain: seller.subdomain
-        });
-      });
-
-      // Add Tier-2 Sellers
-      tier2Data?.forEach(seller => {
-        allServices.push({
-          id: seller.id,
-          name: seller.name,
-          type: 'tier2',
-          parentId: seller.tier1_seller_id,
-          parentName: seller.tier1_seller?.name,
           isActive: seller.status === 'active',
           email: seller.admin_email,
           subdomain: seller.subdomain
@@ -236,88 +184,17 @@ const ServiceControlPanel: React.FC = () => {
     }
   };
 
-  // New toggle function for independent services
-  const toggleIndependentService = (serviceKey: string) => {
-    setServiceStates(prev => {
-      const newState = {
-        ...prev,
-        [serviceKey]: !prev[serviceKey]
-      };
-      
-      toast({
-        title: 'Service Updated',
-        description: `Service ${!prev[serviceKey] ? 'activated' : 'deactivated'} successfully`,
-      });
-      
-      return newState;
+  // Toggle individual service status
+  const toggleServiceStatus = (serviceKey: string) => {
+    setServiceStatuses(prev => ({
+      ...prev,
+      [serviceKey]: !prev[serviceKey]
+    }));
+    
+    toast({
+      title: 'Service Updated',
+      description: `Service ${!serviceStatuses[serviceKey] ? 'activated' : 'deactivated'} successfully`,
     });
-  };
-
-  const toggleService = async (serviceId: string, currentStatus: boolean, type: string) => {
-    // If showing examples, just update local state
-    if (showExamples || serviceId.startsWith('example-')) {
-      setServices(prev => prev.map(service => 
-        service.id === serviceId 
-          ? { ...service, isActive: !currentStatus }
-          : service
-      ));
-      
-      // Also update serviceStates for project services
-      if (type === 'project') {
-        setServiceStates(prev => ({
-          ...prev,
-          [serviceId]: !currentStatus
-        }));
-      }
-      
-      toast({
-        title: 'Service Updated',
-        description: `Service ${!currentStatus ? 'activated' : 'deactivated'} successfully`,
-      });
-      return;
-    }
-    try {
-      const newStatus = currentStatus ? 'inactive' : 'active';
-      
-      let table: 'sellers' | 'tier2_sellers' | 'clients';
-      switch (type) {
-        case 'tier1':
-          table = 'sellers';
-          break;
-        case 'tier2':
-          table = 'tier2_sellers';
-          break;
-        case 'project':
-          table = 'clients';
-          break;
-        default:
-          throw new Error('Invalid service type');
-      }
-
-      // Mock update status operation
-      console.log(`Mock: updating ${table} ID ${serviceId} status to ${newStatus}`);
-
-      // Mock operation completed successfully
-
-      // Update local state
-      setServices(prev => prev.map(service => 
-        service.id === serviceId 
-          ? { ...service, isActive: !currentStatus }
-          : service
-      ));
-
-      toast({
-        title: 'Success',
-        description: `Service ${newStatus === 'active' ? 'activated' : 'deactivated'} successfully`,
-      });
-    } catch (error: any) {
-      console.error('Error toggling service:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update service status',
-        variant: 'destructive'
-      });
-    }
   };
 
   // Flatten services for table view
@@ -332,12 +209,12 @@ const ServiceControlPanel: React.FC = () => {
 
   services.forEach(service => {
     if (service.type === 'tier1') {
-      // Add Doc and Email services for Tier 1 using independent states
+      // Add Doc and Email services for Tier 1 using independent statuses
       flattenedServices.push({
         company: service.name,
         tier: 'Tier 1',
         service: 'Doc',
-        status: serviceStates[`${service.id}-doc`] ?? service.isActive,
+        status: serviceStatuses[`${service.id}-doc`] ?? service.isActive,
         id: `${service.id}-doc`,
         type: service.type
       });
@@ -345,17 +222,17 @@ const ServiceControlPanel: React.FC = () => {
         company: service.name,
         tier: 'Tier 1',
         service: 'Email',
-        status: serviceStates[`${service.id}-email`] ?? service.isActive,
+        status: serviceStatuses[`${service.id}-email`] ?? service.isActive,
         id: `${service.id}-email`,
         type: service.type
       });
     } else if (service.type === 'project') {
-      // Add project as service
+      // Add project as service using independent status
       flattenedServices.push({
         company: service.parentName || 'Unknown Parent',
         tier: 'Tier 1',
         service: service.name,
-        status: serviceStates[service.id] ?? service.isActive,
+        status: serviceStatuses[service.id] ?? service.isActive,
         id: service.id,
         type: service.type
       });
@@ -446,15 +323,7 @@ const ServiceControlPanel: React.FC = () => {
                       <Button
                         variant={item.status ? "default" : "outline"}
                         size="sm"
-                        onClick={() => {
-                          if (item.service === 'Doc' || item.service === 'Email') {
-                            // Use independent toggle for Doc/Email services
-                            toggleIndependentService(item.id);
-                          } else {
-                            // Use regular toggle for project services
-                            toggleService(item.id, item.status, item.type);
-                          }
-                        }}
+                        onClick={() => toggleServiceStatus(item.id)}
                         className={item.status ? "bg-green-600 hover:bg-green-700" : ""}
                       >
                         {item.status ? 'Active' : 'Inactive'}
@@ -467,7 +336,7 @@ const ServiceControlPanel: React.FC = () => {
                 <div className="text-center py-8 text-gray-500">
                   <AlertCircle className="h-8 w-8 mx-auto mb-2" />
                   <p>No services found</p>
-                  <p className="text-sm">Click "Show Examples" to see demo data</p>
+                  <p className="text-sm">Add some companies to see services here</p>
                 </div>
               )}
             </div>
@@ -487,7 +356,7 @@ const ServiceControlPanel: React.FC = () => {
                   <>
                     Currently showing example data for demonstration. These are sample companies including 
                     MarketsTrendsAI, Margin, Forte, Servicon, Cementech, and PPI. 
-                    Toggle switches work in demo mode to show functionality.
+                    Toggle buttons work in demo mode to show functionality.
                   </>
                 ) : (
                   <>
