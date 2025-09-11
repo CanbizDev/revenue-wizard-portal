@@ -3,7 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { ArrowRight, Building2, Users, Shield, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { apiService, type CompanyInfo } from '@/services/api';
 
 interface CompanyLandingProps {
@@ -16,6 +19,12 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
   const [companyData, setCompanyData] = useState<CompanyInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [loginCredentials, setLoginCredentials] = useState({
+    email: '',
+    password: ''
+  });
+  const [loginLoading, setLoginLoading] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const loadCompanyData = async () => {
@@ -101,6 +110,28 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
     }
   };
 
+  const handleAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginLoading(true);
+
+    try {
+      const response = await apiService.login(loginCredentials.email, loginCredentials.password, 'admin');
+      toast({
+        title: "Login successful",
+        description: `Welcome back, ${response.user.name}!`,
+      });
+      onNavigate('/admin');
+    } catch (error) {
+      toast({
+        title: "Login failed",
+        description: "Please check your credentials and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center">
@@ -162,32 +193,72 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
 
           {/* Access Options */}
           <div className="flex justify-center max-w-4xl mx-auto">
-            {/* Admin Access - Centered */}
+            {/* Admin Login - Centered */}
             {companyData.hasAdmin && company === 'jupiterbrains' && (
               <Card className={`hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br ${colors.bg} w-full max-w-md`}>
                 <CardHeader className="text-center pb-4">
                   <div className={`w-16 h-16 ${colors.icon} rounded-full flex items-center justify-center mx-auto mb-4`}>
                     <Shield className="w-8 h-8 text-white" />
                   </div>
-                  <CardTitle className={`text-xl ${colors.text}`}>Admin Portal</CardTitle>
+                  <CardTitle className={`text-xl ${colors.text}`}>Admin Login</CardTitle>
                   <p className="text-sm text-gray-600">
-                    Full administrative access and management
+                    Sign in to access administrative portal
                   </p>
                 </CardHeader>
-                <CardContent className="text-center">
-                  <ul className="text-sm text-gray-600 mb-6 space-y-2">
-                    <li>• Manage all operations</li>
-                    <li>• View comprehensive analytics</li>
-                    <li>• Configure system settings</li>
-                    <li>• Oversee all entities</li>
-                  </ul>
-                  <Button 
-                    onClick={handleAdminAccess}
-                    className={`w-full ${colors.button}`}
-                  >
-                    Access Admin Portal
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
+                <CardContent>
+                  <form onSubmit={handleAdminLogin} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="admin-email">Email</Label>
+                      <Input
+                        id="admin-email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={loginCredentials.email}
+                        onChange={(e) => setLoginCredentials({ ...loginCredentials, email: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="admin-password">Password</Label>
+                      <Input
+                        id="admin-password"
+                        type="password"
+                        placeholder="Enter your password"
+                        value={loginCredentials.password}
+                        onChange={(e) => setLoginCredentials({ ...loginCredentials, password: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="user-type">User Type</Label>
+                      <Input
+                        id="user-type"
+                        value="admin"
+                        disabled
+                        className="bg-gray-50"
+                      />
+                    </div>
+
+                    <Button 
+                      type="submit" 
+                      className={`w-full ${colors.button}`}
+                      disabled={loginLoading}
+                    >
+                      {loginLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Signing in...
+                        </>
+                      ) : (
+                        <>
+                          Access Admin Portal
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </>
+                      )}
+                    </Button>
+                  </form>
                 </CardContent>
               </Card>
             )}
