@@ -115,106 +115,10 @@ class ApiService {
   }
 
   private async request<T>(endpoint: string, options: any = {}): Promise<T> {
-    try {
-      const response: AxiosResponse<T> = await this.axiosInstance(endpoint, options);
-      return response.data;
-    } catch (error) {
-      console.error('API request failed, using mock data:', error);
-      // Return mock data instead of throwing error
-      return this.getMockData(endpoint) as T;
-    }
+    const response: AxiosResponse<T> = await this.axiosInstance(endpoint, options);
+    return response.data;
   }
 
-  private getMockData(endpoint: string): any {
-    // Dashboard data
-    if (endpoint.includes('/admin/dashboard')) {
-      return mockDashboardData.admin;
-    }
-    if (endpoint.includes('/seller/dashboard')) {
-      return mockDashboardData.seller;
-    }
-    if (endpoint.includes('/client/dashboard')) {
-      return mockDashboardData.client;
-    }
-
-    // Billing summary
-    if (endpoint.includes('/billing-summary')) {
-      return mockBillingSummary;
-    }
-
-    // Company info
-    if (endpoint.includes('/company/') && endpoint.includes('/info')) {
-      const company = endpoint.split('/')[2];
-      return mockCompanyInfo[company as keyof typeof mockCompanyInfo] || mockCompanyInfo.jupiterbrains;
-    }
-
-    // Projects
-    if (endpoint.includes('/projects')) {
-      return mockProjects;
-    }
-
-    // Client config
-    if (endpoint.includes('/client/') && endpoint.includes('/config')) {
-      return mockClientConfig;
-    }
-
-    // Tier1 sellers mock data
-    if (endpoint.includes('/seller/tier1')) {
-      return [
-        {
-          id: '1',
-          name: 'TechSolutions Inc',
-          admin_email: 'admin@techsolutions.com',
-          subdomain: 'techsolutions',
-          logo_url: null,
-          client_count: 15,
-          revenue: 75000,
-          status: 'active'
-        },
-        {
-          id: '2',
-          name: 'DataFlow Corp',
-          admin_email: 'admin@dataflow.com',
-          subdomain: 'dataflow',
-          logo_url: null,
-          client_count: 8,
-          revenue: 45000,
-          status: 'active'
-        }
-      ];
-    }
-
-    // Tier2 sellers mock data
-    if (endpoint.includes('/seller/tier2')) {
-      return [
-        {
-          id: '1',
-          name: 'Analytics Pro',
-          admin_email: 'admin@analyticspro.com',
-          subdomain: 'analyticspro',
-          logo_url: null,
-          client_count: 5,
-          revenue: 25000,
-          status: 'active',
-          tier1_seller: { name: 'TechSolutions Inc' }
-        },
-        {
-          id: '2',
-          name: 'ReportMaster',
-          admin_email: 'admin@reportmaster.com',
-          subdomain: 'reportmaster',
-          logo_url: null,
-          client_count: 3,
-          revenue: 15000,
-          status: 'active',
-          tier1_seller: { name: 'DataFlow Corp' }
-        }
-      ];
-    }
-
-    // Default empty array for endpoints that should return arrays
-    return [];
-  }
 
   // Authentication
   async login(email: string, password: string, userType: 'admin' | 'tier1_seller' | 'tier2_seller'): Promise<LoginResponse> {
@@ -328,15 +232,8 @@ class ApiService {
   }
 
   async getTier1Sellers(): Promise<any[]> {
-    try {
-      const response = await this.axiosInstance.get('/admin/tier1-sellers');
-      return response.data;
-    } catch (error) {
-      return [
-        { id: '1', name: 'MarketsTrendAI' },
-        { id: '2', name: 'TechAnalytics' }
-      ];
-    }
+    const response = await this.axiosInstance.get('/admin/tier1-sellers');
+    return response.data;
   }
 
   // Tier1 Seller Management (Admin Only)
