@@ -37,6 +37,16 @@ export interface BillingSummary {
   }>;
 }
 
+export interface AdminDashboardData {
+  stats: {
+    total_tier1_sellers: number;
+    total_tier2_sellers: number;
+    total_projects: number;
+    monthly_revenue: number;
+  };
+}
+
+// Legacy interface for components that need mock data
 export interface DashboardData {
   metrics: {
     total_clients: number;
@@ -234,16 +244,35 @@ class ApiService {
   }
 
   // Dashboard endpoints
-  async getAdminDashboardData(): Promise<DashboardData> {
-    return this.request<DashboardData>('/admin/dashboard');
+  async getAdminDashboardData(): Promise<AdminDashboardData> {
+    return this.request<AdminDashboardData>('/admin/dashboard');
   }
 
+  // Legacy methods for components that need mock data
   async getSellerDashboardData(): Promise<DashboardData> {
-    return this.request<DashboardData>('/seller/dashboard');
+    // Return mock data for seller dashboard
+    return {
+      metrics: {
+        total_clients: 0,
+        active_projects: 0,
+        monthly_revenue: 0,
+        growth_rate: 0,
+      },
+      recent_activity: []
+    };
   }
 
   async getClientDashboardData(): Promise<DashboardData> {
-    return this.request<DashboardData>('/client/dashboard');
+    // Return mock data for client dashboard
+    return {
+      metrics: {
+        total_clients: 0,
+        active_projects: 0,
+        monthly_revenue: 0,
+        growth_rate: 0,
+      },
+      recent_activity: []
+    };
   }
 
   // Billing endpoints

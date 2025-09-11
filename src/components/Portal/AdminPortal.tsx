@@ -12,7 +12,7 @@ import ServiceControlPanel from '@/components/Portal/ServiceControlPanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { apiService } from '@/services/api';
+import { apiService, AdminDashboardData } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Users, 
@@ -32,6 +32,7 @@ const AdminPortal: React.FC = () => {
   const [isAddTier2SellerOpen, setIsAddTier2SellerOpen] = useState(false);
   const [sellers, setSellers] = useState<any[]>([]);
   const [tier2Sellers, setTier2Sellers] = useState<any[]>([]);
+  const [dashboardData, setDashboardData] = useState<AdminDashboardData | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -66,6 +67,20 @@ const AdminPortal: React.FC = () => {
       toast({
         title: 'Error',
         description: 'Failed to load Tier-2 sellers',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const loadDashboardData = async () => {
+    try {
+      const data = await apiService.getAdminDashboardData();
+      setDashboardData(data);
+    } catch (error: any) {
+      console.error('Error loading dashboard data:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load dashboard data',
         variant: 'destructive'
       });
     }
@@ -110,6 +125,7 @@ const AdminPortal: React.FC = () => {
   useEffect(() => {
     loadSellers();
     loadTier2Sellers();
+    loadDashboardData();
   }, []);
 
 
@@ -123,31 +139,27 @@ const AdminPortal: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <DashboardCard
           title="Total Tier-1 Sellers"
-          value={24}
+          value={dashboardData?.stats.total_tier1_sellers || 0}
           description="Active seller accounts"
           icon={Building2}
-          trend={{ value: 12, isPositive: true }}
         />
         <DashboardCard
           title="Total Tier-2 Sellers"
-          value={156}
+          value={dashboardData?.stats.total_tier2_sellers || 0}
           description="Managed by Tier-1s"
           icon={Users}
-          trend={{ value: 8, isPositive: true }}
         />
         <DashboardCard
-          title="Active Clients"
-          value={892}
-          description="Paying customers"
+          title="Total Projects"
+          value={dashboardData?.stats.total_projects || 0}
+          description="Active projects"
           icon={UserPlus}
-          trend={{ value: 15, isPositive: true }}
         />
         <DashboardCard
           title="Monthly Revenue"
-          value="₹12,45,000"
+          value={`₹${dashboardData?.stats.monthly_revenue?.toLocaleString('en-IN') || '0'}`}
           description="Total platform revenue"
           icon={DollarSign}
-          trend={{ value: 23, isPositive: true }}
         />
       </div>
 
