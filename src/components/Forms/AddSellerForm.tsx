@@ -79,13 +79,15 @@ const AddSellerForm: React.FC<AddSellerFormProps> = ({ isOpen, onClose, onSucces
       // Hash password (in production, this should be done server-side)
       const passwordHash = btoa(formData.adminPassword); // Simple encoding for demo
 
-      // Create seller via API (mock implementation)
-      console.log('Creating seller:', {
+      // Create seller via API
+      await apiService.createTier1Seller({
         name: formData.name,
         subdomain: formData.subdomain,
         admin_email: formData.adminEmail,
+        admin_password_hash: passwordHash,
         logo_url: logoUrl,
         stylesheet_url: stylesheetUrl,
+        site_content: formData.siteContent ? JSON.parse(formData.siteContent) : null,
         commission_type: formData.commissionType,
         commission_value: formData.commissionValue ? parseFloat(formData.commissionValue) : null
       });

@@ -41,12 +41,8 @@ const AddTier2SellerForm: React.FC<AddTier2SellerFormProps> = ({ isOpen, onClose
 
   const loadTier1Sellers = async () => {
     try {
-      // Mock tier1 sellers data
-      const mockSellers = [
-        { id: '1', name: 'MarketsTrendAI' },
-        { id: '2', name: 'TechAnalytics' }
-      ];
-      setTier1Sellers(mockSellers);
+      const sellers = await apiService.getAllTier1Sellers();
+      setTier1Sellers(sellers);
     } catch (error: any) {
       console.error('Error loading tier1 sellers:', error);
       toast({

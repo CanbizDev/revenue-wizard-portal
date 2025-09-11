@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 interface SidebarProps {
-  portalType: 'admin' | 'seller' | 'client';
+  portalType: 'admin' | 'seller' | 'client' | 'tier1-seller';
   userRole?: string;
   activeTab: string;
   onTabChange: (tab: string) => void;
@@ -55,6 +55,16 @@ const Sidebar: React.FC<SidebarProps> = ({ portalType, userRole, activeTab, onTa
         }
         
         return sellerItems;
+      
+      case 'tier1-seller':
+        return [
+          { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+          { id: 'tier2-sellers', label: 'Tier-2 Sellers', icon: Users },
+          { id: 'clients', label: 'Clients', icon: Users },
+          { id: 'projects', label: 'Projects', icon: Building2 },
+          { id: 'revenue', label: 'Revenue', icon: DollarSign },
+          { id: 'settings', label: 'Settings', icon: Settings },
+        ];
       
       case 'client':
         const clientItems = [
