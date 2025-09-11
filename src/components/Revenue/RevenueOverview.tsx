@@ -65,7 +65,10 @@ const RevenueOverview: React.FC = () => {
   };
 
   const applyFiltersAndSort = () => {
-    if (!revenueData) return;
+    if (!revenueData || !revenueData.billing_records || !Array.isArray(revenueData.billing_records)) {
+      setFilteredData([]);
+      return;
+    }
     
     let filtered = [...revenueData.billing_records];
 
