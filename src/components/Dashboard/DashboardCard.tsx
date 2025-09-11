@@ -33,7 +33,7 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
       </CardHeader>
       <CardContent>
         <div className="text-lg sm:text-2xl font-bold text-gray-900 mb-1">
-          {typeof value === 'number' ? value.toLocaleString() : value}
+          {typeof value === 'number' && value !== undefined && value !== null ? value.toLocaleString() : (value || '0')}
         </div>
         {description && (
           <p className="text-xs text-gray-500 mb-2">

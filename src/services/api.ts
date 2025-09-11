@@ -37,26 +37,6 @@ export interface BillingSummary {
   }>;
 }
 
-export interface RevenueData {
-  summary: {
-    total_bills: number;
-    total_paid: number;
-    total_pending: number;
-    total_amount: number;
-    paid_amount: number;
-  };
-  billing_records: Array<{
-    id: string;
-    client_name: string;
-    invoice_id: string;
-    bill_amount: number;
-    due_date: string;
-    payment_status: 'paid' | 'pending' | 'overdue';
-    payment_date?: string;
-    tier: 'tier1' | 'tier2';
-    currency_symbol: string;
-  }>;
-}
 
 export interface AdminDashboardData {
   stats: {
@@ -70,21 +50,21 @@ export interface AdminDashboardData {
 export interface RevenueData {
   summary: {
     total_bills: number;
-    total_paid: number;
-    total_pending: number;
-    total_amount: number;
-    paid_amount: number;
+    paid_bills: number;
+    pending_bills: number;
+    overdue_bills: number;
+    total_value: number;
+    collected_amount: number;
+    outstanding_amount: number;
   };
-  billing_records: Array<{
-    id: string;
+  billing_details: Array<{
     client_name: string;
     invoice_id: string;
     bill_amount: number;
     due_date: string;
-    payment_status: 'paid' | 'pending' | 'overdue';
     payment_date?: string;
-    tier: 'tier1' | 'tier2';
-    currency_symbol: string;
+    status: 'Paid' | 'Pending' | 'Overdue';
+    tier: string;
   }>;
 }
 
