@@ -238,14 +238,18 @@ const ServiceControlPanel: React.FC = () => {
 
   // New toggle function for independent services
   const toggleIndependentService = (serviceKey: string) => {
-    setServiceStates(prev => ({
-      ...prev,
-      [serviceKey]: !prev[serviceKey]
-    }));
-    
-    toast({
-      title: 'Demo Mode',
-      description: `Service ${!serviceStates[serviceKey] ? 'activated' : 'deactivated'} independently`,
+    setServiceStates(prev => {
+      const newState = {
+        ...prev,
+        [serviceKey]: !prev[serviceKey]
+      };
+      
+      toast({
+        title: 'Service Updated',
+        description: `Service ${!prev[serviceKey] ? 'activated' : 'deactivated'} successfully`,
+      });
+      
+      return newState;
     });
   };
 
@@ -258,9 +262,17 @@ const ServiceControlPanel: React.FC = () => {
           : service
       ));
       
+      // Also update serviceStates for project services
+      if (type === 'project') {
+        setServiceStates(prev => ({
+          ...prev,
+          [serviceId]: !currentStatus
+        }));
+      }
+      
       toast({
-        title: 'Demo Mode',
-        description: `Service ${!currentStatus ? 'activated' : 'deactivated'} in demo mode`,
+        title: 'Service Updated',
+        description: `Service ${!currentStatus ? 'activated' : 'deactivated'} successfully`,
       });
       return;
     }
