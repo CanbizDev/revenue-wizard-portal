@@ -183,14 +183,19 @@ const AddTier2SellerForm: React.FC<AddTier2SellerFormProps> = ({ isOpen, onClose
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="tier1Seller">Tier-1 Seller Name *</Label>
-            <Input
-              id="tier1Seller"
-              value={formData.tier1SellerId}
-              onChange={(e) => handleInputChange('tier1SellerId', e.target.value)}
-              placeholder="Enter Tier-1 Seller name"
-              required
-            />
+            <Label htmlFor="tier1Seller">Tier-1 Seller *</Label>
+            <Select value={formData.tier1SellerId} onValueChange={(value) => handleInputChange('tier1SellerId', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a Tier-1 seller" />
+              </SelectTrigger>
+              <SelectContent>
+                {tier1Sellers.map((seller) => (
+                  <SelectItem key={seller.id} value={seller.id}>
+                    {seller.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
