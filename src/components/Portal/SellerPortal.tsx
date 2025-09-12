@@ -5,12 +5,12 @@ import Sidebar from '@/components/Layout/Sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import DashboardCard from '@/components/Dashboard/DashboardCard';
-import CommissionsView from '@/components/Portal/CommissionsView';
+import RevenueOverview from '@/components/Revenue/RevenueOverview';
+import Tier2SellerManagement from '@/components/Portal/Tier2SellerManagement';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { apiService } from '@/services/api';
-import { mockSellerData } from '@/services/mockData';
 import { 
   Users, 
   DollarSign, 
@@ -24,33 +24,31 @@ const SellerPortal: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [userRole] = useState<'tier1_seller' | 'tier2_seller'>('tier1_seller');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [tier2Sellers, setTier2Sellers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
 
-  // Get real data from database
-  // Mock data setup
-  const sellerData = mockSellerData;
-  const clients: any[] = [];
-  const commissions: any[] = [];
-  const loading = false;
-
-  const getUser = () => {
-    if (!sellerData) {
-      return {
-        name: 'Loading...',
-        email: 'loading@example.com',
-        role: 'Loading...',
-        company: 'Loading...'
-      };
-    }
-    return {
-      name: `${sellerData.name} Admin`,
-      email: sellerData.admin_email,
-      role: userRole === 'tier1_seller' ? 'Tier-1 Seller' : 'Tier-2 Seller',
-      company: sellerData.name
-    };
+  const mockUser = {
+    name: 'Tier1 Seller Admin',
+    email: 'admin@tier1seller.com',
+    role: userRole === 'tier1_seller' ? 'Tier-1 Seller' : 'Tier-2 Seller',
+    company: 'MarketsTrendAI'
   };
 
-  const mockUser = getUser();
+  // Load data on component mount
+  React.useEffect(() => {
+    const loadData = async () => {
+      try {
+        const tier2Data = await apiService.getAllTier2Sellers();
+        setTier2Sellers(tier2Data);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
 
   const renderDashboard = () => {
     if (loading) {
@@ -61,10 +59,10 @@ const SellerPortal: React.FC = () => {
       );
     }
 
-    // Mock data for tier1 seller metrics
-    const totalTier2Sellers = 5;
-    const totalProjects = 12;
-    const monthlyRevenue = 150000;
+    // Real data for tier1 seller metrics
+    const totalTier2Sellers = tier2Sellers.length;
+    const totalProjects = tier2Sellers.reduce((sum, seller) => sum + (seller.project_count || 0), 0);
+    const monthlyRevenue = tier2Sellers.reduce((sum, seller) => sum + (seller.revenue || 0), 0);
 
     return (
       <div className="space-y-6">
@@ -134,12 +132,12 @@ const SellerPortal: React.FC = () => {
         return renderDashboard();
       case 'tier2-sellers':
         return userRole === 'tier1_seller' ? 
-          <div className="p-8 text-center text-gray-500">Tier-2 Sellers management coming soon...</div> : 
+          <Tier2SellerManagement /> : 
           renderDashboard();
       case 'projects':
         return <div className="p-8 text-center text-gray-500">Project Management coming soon...</div>;
       case 'billing':
-        return <div className="p-8 text-center text-gray-500">Billing & Revenue coming soon...</div>;
+        return <RevenueOverview />;
       case 'reports':
         return <div className="p-8 text-center text-gray-500">Reports management coming soon...</div>;
       default:
