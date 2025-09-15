@@ -24,6 +24,7 @@ interface ServiceStatus {
   email?: string;
   subdomain?: string;
   serviceType?: 'doc' | 'email' | 'project';
+  tierLevel?: 'Tier 1' | 'Tier 2';
 }
 
 const ServiceControlPanel: React.FC = () => {
@@ -41,7 +42,7 @@ const ServiceControlPanel: React.FC = () => {
   useEffect(() => {
     const statuses: {[key: string]: boolean} = {};
     services.forEach(service => {
-      if (service.type === 'tier1') {
+      if (service.type === 'tier1' || service.type === 'tier2') {
         statuses[`${service.id}-doc`] = service.isActive;
         statuses[`${service.id}-email`] = service.isActive;
       } else if (service.type === 'project') {
@@ -123,6 +124,9 @@ const ServiceControlPanel: React.FC = () => {
 
       // Load Tier-1 Sellers from API
       const tier1Data = await apiService.getAllTier1Sellers();
+      
+      // Load Tier-2 Sellers from API
+      const tier2Data = await apiService.getAllTier2Sellers();
 
       // Load Projects from API
       const projectsData = await apiService.getProjects();
@@ -138,20 +142,49 @@ const ServiceControlPanel: React.FC = () => {
           type: 'tier1',
           isActive: seller.status === 'active',
           email: seller.admin_email,
-          subdomain: seller.subdomain
+          subdomain: seller.subdomain,
+          tierLevel: 'Tier 1'
+        });
+      });
+
+      // Add Tier-2 Sellers
+      tier2Data?.forEach(seller => {
+        allServices.push({
+          id: seller.id,
+          name: seller.name,
+          type: 'tier2',
+          isActive: seller.status === 'active',
+          email: seller.admin_email,
+          subdomain: seller.subdomain,
+          tierLevel: 'Tier 2'
         });
       });
 
       // Add Projects
       projectsData?.forEach(project => {
+        let parentName = 'Unknown Seller';
+        let tierLevel: 'Tier 1' | 'Tier 2' = 'Tier 1';
+        let parentId = project.tier1_seller_id;
+
+        // Check if project belongs to Tier 2 seller
+        if (project.tier2_seller_id) {
+          parentId = project.tier2_seller_id;
+          tierLevel = 'Tier 2';
+          parentName = tier2Data.find(seller => seller.id === project.tier2_seller_id)?.name || 'Unknown Tier 2 Seller';
+        } else if (project.tier1_seller_id) {
+          // Project belongs to Tier 1 seller
+          parentName = tier1Data.find(seller => seller.id === project.tier1_seller_id)?.name || 'Unknown Tier 1 Seller';
+        }
+
         allServices.push({
           id: project.id,
           name: project.name,
           type: 'project',
-          parentId: project.tier1_seller_id,
-          parentName: tier1Data.find(seller => seller.id === project.tier1_seller_id)?.name || 'Unknown Seller',
+          parentId: parentId,
+          parentName: parentName,
           isActive: project.status === 'active',
-          email: project.clients?.[0]?.company || 'No client assigned'
+          email: project.clients?.[0]?.company || 'No client assigned',
+          tierLevel: tierLevel
         });
       });
 
@@ -230,11 +263,29 @@ const ServiceControlPanel: React.FC = () => {
         id: `${service.id}-email`,
         type: service.type
       });
+    } else if (service.type === 'tier2') {
+      // Add Doc and Email services for Tier 2 using independent statuses
+      flattenedServices.push({
+        company: service.name,
+        tier: 'Tier 2',
+        service: 'Doc',
+        status: serviceStatuses[`${service.id}-doc`] ?? service.isActive,
+        id: `${service.id}-doc`,
+        type: service.type
+      });
+      flattenedServices.push({
+        company: service.name,
+        tier: 'Tier 2',
+        service: 'Email',
+        status: serviceStatuses[`${service.id}-email`] ?? service.isActive,
+        id: `${service.id}-email`,
+        type: service.type
+      });
     } else if (service.type === 'project') {
-      // Add project as service using independent status
+      // Add project as service using independent status and correct tier level
       flattenedServices.push({
         company: service.parentName || 'Unknown Parent',
-        tier: 'Tier 1',
+        tier: service.tierLevel || 'Tier 1',
         service: service.name,
         status: serviceStatuses[service.id] ?? service.isActive,
         id: service.id,
