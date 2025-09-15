@@ -5,6 +5,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import DashboardCard from '@/components/Dashboard/DashboardCard';
 import AddTier2SellerForm from '@/components/Forms/AddTier2SellerForm';
+import { EditSellerForm } from '@/components/Forms/EditSellerForm';
 import RevenueOverview from '@/components/Revenue/RevenueOverview';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,6 +27,8 @@ import {
 const Tier1SellerPortal: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isAddTier2SellerOpen, setIsAddTier2SellerOpen] = useState(false);
+  const [isEditTier2SellerOpen, setIsEditTier2SellerOpen] = useState(false);
+  const [editingTier2Seller, setEditingTier2Seller] = useState<any>(null);
   const [tier2Sellers, setTier2Sellers] = useState<any[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { toast } = useToast();
@@ -216,7 +219,10 @@ const Tier1SellerPortal: React.FC = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => console.log('Edit tier2 seller:', seller.id)}
+                        onClick={() => {
+                          setEditingTier2Seller(seller);
+                          setIsEditTier2SellerOpen(true);
+                        }}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -276,6 +282,21 @@ const Tier1SellerPortal: React.FC = () => {
         isOpen={isAddTier2SellerOpen}
         onClose={() => setIsAddTier2SellerOpen(false)}
         onSuccess={loadTier2Sellers}
+      />
+
+      <EditSellerForm
+        isOpen={isEditTier2SellerOpen}
+        onClose={() => {
+          setIsEditTier2SellerOpen(false);
+          setEditingTier2Seller(null);
+        }}
+        seller={editingTier2Seller}
+        sellerType="tier2"
+        onSuccess={() => {
+          setIsEditTier2SellerOpen(false);
+          setEditingTier2Seller(null);
+          loadTier2Sellers();
+        }}
       />
     </div>
   );

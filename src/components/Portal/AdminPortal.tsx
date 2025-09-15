@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import DashboardCard from '@/components/Dashboard/DashboardCard';
 import AddSellerForm from '@/components/Forms/AddSellerForm';
 import AddTier2SellerForm from '@/components/Forms/AddTier2SellerForm';
+import { EditSellerForm } from '@/components/Forms/EditSellerForm';
 import RevenueOverview from '@/components/Revenue/RevenueOverview';
 import ServiceControlPanel from '@/components/Portal/ServiceControlPanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,6 +31,9 @@ const AdminPortal: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isAddSellerOpen, setIsAddSellerOpen] = useState(false);
   const [isAddTier2SellerOpen, setIsAddTier2SellerOpen] = useState(false);
+  const [isEditSellerOpen, setIsEditSellerOpen] = useState(false);
+  const [editingSeller, setEditingSeller] = useState<any>(null);
+  const [editingSellerType, setEditingSellerType] = useState<'tier1' | 'tier2'>('tier1');
   const [sellers, setSellers] = useState<any[]>([]);
   const [tier2Sellers, setTier2Sellers] = useState<any[]>([]);
   const [dashboardData, setDashboardData] = useState<AdminDashboardData | null>(null);
@@ -227,7 +231,11 @@ const AdminPortal: React.FC = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => console.log('Edit seller:', seller.id)}
+                        onClick={() => {
+                          setEditingSeller(seller);
+                          setEditingSellerType('tier1');
+                          setIsEditSellerOpen(true);
+                        }}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -311,7 +319,11 @@ const AdminPortal: React.FC = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => console.log('Edit tier2 seller:', seller.id)}
+                        onClick={() => {
+                          setEditingSeller(seller);
+                          setEditingSellerType('tier2');
+                          setIsEditSellerOpen(true);
+                        }}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -379,6 +391,25 @@ const AdminPortal: React.FC = () => {
         isOpen={isAddTier2SellerOpen}
         onClose={() => setIsAddTier2SellerOpen(false)}
         onSuccess={loadTier2Sellers}
+      />
+
+      <EditSellerForm
+        isOpen={isEditSellerOpen}
+        onClose={() => {
+          setIsEditSellerOpen(false);
+          setEditingSeller(null);
+        }}
+        seller={editingSeller}
+        sellerType={editingSellerType}
+        onSuccess={() => {
+          setIsEditSellerOpen(false);
+          setEditingSeller(null);
+          if (editingSellerType === 'tier1') {
+            loadSellers();
+          } else {
+            loadTier2Sellers();
+          }
+        }}
       />
     </div>
   );
