@@ -121,22 +121,11 @@ const ServiceControlPanel: React.FC = () => {
     try {
       setLoading(true);
 
-      // Load Tier-1 Sellers
-      const tier1Data = [
-        { id: '1', name: 'Mock Tier1', admin_email: 'tier1@mock.com', subdomain: 'mock1', status: 'active' }
-      ];
+      // Load Tier-1 Sellers from API
+      const tier1Data = await apiService.getAllTier1Sellers();
 
-      // Load Clients (Projects)
-      const clientsData = [
-        { 
-          id: '1', 
-          company: 'Mock Company', 
-          email: 'client@mock.com', 
-          status: 'active',
-          seller_id: '1',
-          seller: { name: 'Mock Tier1' }
-        }
-      ];
+      // Load Projects from API
+      const projectsData = await apiService.getProjects();
 
       // Transform data into service status format
       const allServices: ServiceStatus[] = [];
@@ -153,16 +142,16 @@ const ServiceControlPanel: React.FC = () => {
         });
       });
 
-      // Add Projects (Clients)
-      clientsData?.forEach(client => {
+      // Add Projects
+      projectsData?.forEach(project => {
         allServices.push({
-          id: client.id,
-          name: client.company,
+          id: project.id,
+          name: project.name || project.company || project.client_name,
           type: 'project',
-          parentId: client.seller_id,
-          parentName: client.seller?.name,
-          isActive: client.status === 'active',
-          email: client.email
+          parentId: project.seller_id || project.tier1_seller_id,
+          parentName: project.seller?.name || project.tier1_seller?.name,
+          isActive: project.status === 'active',
+          email: project.email || project.contact_email
         });
       });
 
@@ -185,16 +174,31 @@ const ServiceControlPanel: React.FC = () => {
   };
 
   // Toggle individual service status
-  const toggleServiceStatus = (serviceKey: string) => {
-    setServiceStatuses(prev => ({
-      ...prev,
-      [serviceKey]: !prev[serviceKey]
-    }));
-    
-    toast({
-      title: 'Service Updated',
-      description: `Service ${!serviceStatuses[serviceKey] ? 'activated' : 'deactivated'} successfully`,
-    });
+  const toggleServiceStatus = async (serviceKey: string, serviceType: string) => {
+    try {
+      // For projects, call the API to toggle status
+      if (serviceType === 'project') {
+        await apiService.toggleProjectStatus(serviceKey);
+      }
+      
+      // Update local state
+      setServiceStatuses(prev => ({
+        ...prev,
+        [serviceKey]: !prev[serviceKey]
+      }));
+      
+      toast({
+        title: 'Service Updated',
+        description: `Service ${!serviceStatuses[serviceKey] ? 'activated' : 'deactivated'} successfully`,
+      });
+    } catch (error: any) {
+      console.error('Error toggling service status:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update service status',
+        variant: 'destructive'
+      });
+    }
   };
 
   // Flatten services for table view
@@ -323,7 +327,7 @@ const ServiceControlPanel: React.FC = () => {
                       <Button
                         variant={item.status ? "default" : "outline"}
                         size="sm"
-                        onClick={() => toggleServiceStatus(item.id)}
+                        onClick={() => toggleServiceStatus(item.id, item.type)}
                         className={item.status ? "bg-green-600 hover:bg-green-700" : ""}
                       >
                         {item.status ? 'Active' : 'Inactive'}

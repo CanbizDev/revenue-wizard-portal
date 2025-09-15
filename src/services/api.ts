@@ -327,7 +327,13 @@ class ApiService {
 
   // Project endpoints
   async getProjects(): Promise<any[]> {
-    return this.request<any[]>('/projects');
+    return this.request<any[]>('/projects/');
+  }
+
+  async toggleProjectStatus(projectId: string): Promise<any> {
+    return this.request(`/services/${projectId}/toggle`, {
+      method: 'POST',
+    });
   }
 
   async getClientProjects(clientName: string): Promise<any[]> {
