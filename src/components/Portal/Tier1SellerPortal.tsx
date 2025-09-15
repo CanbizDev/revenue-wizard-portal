@@ -43,15 +43,8 @@ const Tier1SellerPortal: React.FC = () => {
 
   const loadTier2Sellers = async () => {
     try {
-      const currentUser = apiService.getCurrentUser();
       const tier2Data = await apiService.getAllTier2Sellers();
-      
-      // Filter tier2 sellers to only show those belonging to the current tier1 seller
-      const filteredTier2Sellers = tier2Data.filter(seller => 
-        seller.tier1_seller_id === currentUser?.id
-      );
-      
-      setTier2Sellers(filteredTier2Sellers);
+      setTier2Sellers(tier2Data);
     } catch (error: any) {
       console.error('Error loading tier2 sellers:', error);
       toast({
