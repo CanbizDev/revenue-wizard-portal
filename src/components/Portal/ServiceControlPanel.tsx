@@ -146,12 +146,12 @@ const ServiceControlPanel: React.FC = () => {
       projectsData?.forEach(project => {
         allServices.push({
           id: project.id,
-          name: project.name || project.company || project.client_name,
+          name: project.name,
           type: 'project',
-          parentId: project.seller_id || project.tier1_seller_id,
-          parentName: project.seller?.name || project.tier1_seller?.name,
+          parentId: project.tier1_seller_id,
+          parentName: tier1Data.find(seller => seller.id === project.tier1_seller_id)?.name || 'Unknown Seller',
           isActive: project.status === 'active',
-          email: project.email || project.contact_email
+          email: project.clients?.[0]?.company || 'No client assigned'
         });
       });
 
