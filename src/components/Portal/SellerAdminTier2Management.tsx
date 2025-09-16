@@ -14,6 +14,7 @@ import {
 import { apiService } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 import SellerAdminAddTier2SellerForm from '@/components/Forms/SellerAdminAddTier2SellerForm';
+import { EditSellerForm } from '@/components/Forms/EditSellerForm';
 import { 
   UserPlus,
   Edit,
@@ -34,6 +35,8 @@ const SellerAdminTier2Management: React.FC<SellerAdminTier2ManagementProps> = ({
   const [filteredSellers, setFilteredSellers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAddTier2SellerOpen, setIsAddTier2SellerOpen] = useState(false);
+  const [isEditSellerOpen, setIsEditSellerOpen] = useState(false);
+  const [editingSeller, setEditingSeller] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
 
@@ -205,7 +208,10 @@ const SellerAdminTier2Management: React.FC<SellerAdminTier2ManagementProps> = ({
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => console.log('Edit tier2 seller:', seller.id)}
+                            onClick={() => {
+                              setEditingSeller(seller);
+                              setIsEditSellerOpen(true);
+                            }}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -233,6 +239,21 @@ const SellerAdminTier2Management: React.FC<SellerAdminTier2ManagementProps> = ({
         onSuccess={loadTier2Sellers}
         currentTier1SellerId={currentTier1SellerId}
         currentTier1SellerName={currentTier1SellerName}
+      />
+
+      <EditSellerForm
+        isOpen={isEditSellerOpen}
+        onClose={() => {
+          setIsEditSellerOpen(false);
+          setEditingSeller(null);
+        }}
+        seller={editingSeller}
+        sellerType="tier2"
+        onSuccess={() => {
+          setIsEditSellerOpen(false);
+          setEditingSeller(null);
+          loadTier2Sellers();
+        }}
       />
     </div>
   );
