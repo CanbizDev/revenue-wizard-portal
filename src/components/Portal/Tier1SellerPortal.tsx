@@ -10,6 +10,7 @@ import RevenueOverview from '@/components/Revenue/RevenueOverview';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { apiService } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -21,7 +22,8 @@ import {
   Settings,
   BarChart3,
   Trash2,
-  Edit
+  Edit,
+  Eye
 } from 'lucide-react';
 
 const Tier1SellerPortal: React.FC = () => {
@@ -173,72 +175,86 @@ const Tier1SellerPortal: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Active Tier-2 Sellers</CardTitle>
+          <CardTitle>All Tier-2 Sellers</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {tier2Sellers.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                No Tier-2 sellers found. Add your first Tier-2 seller to get started.
-              </div>
-            ) : (
-              tier2Sellers.map((seller) => (
-                <div key={seller.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                        {seller.logo_url ? (
-                          <img src={seller.logo_url} alt={seller.name} className="w-8 h-8 rounded-full object-cover" />
-                        ) : (
-                          <Building2 className="h-5 w-5 text-purple-600" />
-                        )}
+          {tier2Sellers.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              No Tier-2 sellers found. Add your first Tier-2 seller to get started.
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Subdomain</TableHead>
+                  <TableHead>Admin Email</TableHead>
+                  <TableHead>Commission</TableHead>
+                  <TableHead>Clients</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {tier2Sellers.map((seller) => (
+                  <TableRow key={seller.id}>
+                    <TableCell>
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                          {seller.logo_url ? (
+                            <img src={seller.logo_url} alt={seller.name} className="w-6 h-6 rounded-full object-cover" />
+                          ) : (
+                            <Building2 className="h-4 w-4 text-purple-600" />
+                          )}
+                        </div>
+                        <span className="font-medium text-gray-900">{seller.name}</span>
                       </div>
-                      <div>
-                        <h3 className="font-medium text-gray-900">{seller.name}</h3>
-                        <p className="text-sm text-gray-500">{seller.admin_email}</p>
-                        <p className="text-xs text-gray-400">{seller.subdomain}.reportingportal.ai</p>
+                    </TableCell>
+                    <TableCell className="text-gray-600">{seller.subdomain}</TableCell>
+                    <TableCell className="text-gray-600">{seller.admin_email}</TableCell>
+                    <TableCell className="text-gray-600">{seller.commission_rate || '8'}%</TableCell>
+                    <TableCell className="text-gray-600">{seller.client_count || 0}</TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant={seller.status === 'active' ? 'default' : 'secondary'}
+                        className={seller.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}
+                      >
+                        {seller.status || 'active'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => console.log('View tier2 seller:', seller.id)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setEditingTier2Seller(seller);
+                            setIsEditTier2SellerOpen(true);
+                          }}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteTier2Seller(seller.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-6 text-sm text-gray-600 w-full sm:w-auto justify-between sm:justify-end">
-                    <div className="text-center">
-                      <p className="font-medium">{seller.client_count || 0}</p>
-                      <p className="text-xs">Clients</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="font-medium">₹{seller.revenue || 0}</p>
-                      <p className="text-xs">Revenue</p>
-                    </div>
-                    <Badge 
-                      variant={seller.status === 'active' ? 'default' : 'secondary'}
-                      className={seller.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}
-                    >
-                      {seller.status || 'active'}
-                    </Badge>
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setEditingTier2Seller(seller);
-                          setIsEditTier2SellerOpen(true);
-                        }}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDeleteTier2Seller(seller.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>
