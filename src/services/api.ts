@@ -270,6 +270,11 @@ class ApiService {
     return this.request<AdminDashboardData>('/admin/dashboard');
   }
 
+  // Tier1 seller dashboard endpoint
+  async getTier1DashboardData(tier1Id: string): Promise<any> {
+    return this.request<any>(`/dashboard/tier1/${tier1Id}`);
+  }
+
   // Legacy methods for components that need mock data
   async getSellerDashboardData(): Promise<DashboardData> {
     // Return mock data for seller dashboard

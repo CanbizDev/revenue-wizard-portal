@@ -78,8 +78,9 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
   const { toast } = useToast();
   const isMobile = useIsMobile();
   
-  // Mock data setup to replace useSellerData hook
+  // Dashboard data state
   const [loading, setLoading] = useState(false);
+  const [dashboardData, setDashboardData] = useState<any>(null);
   const sellerData = mockSellerData;
   const clients: any[] = [];
   const plans: any[] = [];
@@ -113,9 +114,19 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
   // Fetch tier2 sellers from database
   const [tier2Sellers, setTier2Sellers] = useState<any[]>([]);
 
-  // Fetch tier2 sellers if this is a tier1 seller
+  // Fetch dashboard data and tier2 sellers if this is a tier1 seller
   React.useEffect(() => {
     if (company === 'marketstrendai' && sellerData) {
+      const fetchDashboardData = async () => {
+        try {
+          // Fetch tier1 dashboard data
+          const dashboardResponse = await apiService.getTier1DashboardData(sellerData.id);
+          setDashboardData(dashboardResponse.stats);
+        } catch (error) {
+          console.error('Error fetching dashboard data:', error);
+        }
+      };
+
       const fetchTier2Sellers = async () => {
         try {
           // Mock tier2 sellers data with all required properties
@@ -132,8 +143,6 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
               clients: []
             }
           ];
-
-          if (error) throw error;
           
           const formattedSellers = mockTier2Data.map(seller => ({
             id: seller.id,
@@ -155,6 +164,7 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
         }
       };
 
+      fetchDashboardData();
       fetchTier2Sellers();
     }
   }, [company, sellerData]);
@@ -217,21 +227,13 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
   }
 
   const renderDashboard = () => {
-    // Calculate total projects under this tier1 seller (direct + tier2 sellers' projects)
-    const directProjects = clients.length; // Projects directly under tier1 seller
-    const tier2Projects = tier2Sellers.reduce((sum, seller) => sum + (seller.clients || 0), 0); // Projects under tier2 sellers
-    const totalProjects = directProjects + tier2Projects;
+    // Use data from API if available, otherwise fallback to mock calculations
+    const totalProjects = dashboardData?.total_projects || 0;
+    const myTier2Sellers = dashboardData?.total_tier2_sellers || tier2Sellers.length;
+    const monthlyRevenue = dashboardData?.monthly_revenue || 0;
     
-    const monthlyRevenue = clients.reduce((sum, client) => {
-      if (client.subscription_plans) {
-        return sum + client.subscription_plans.price;
-      }
-      return sum;
-    }, 0);
     const activePlans = plans.filter(plan => plan.active).length;
     const totalCommissions = commissions.reduce((sum, commission) => sum + commission.commission_amount, 0);
-    // Filter tier-2 sellers for current tier-1 seller only
-    const myTier2Sellers = tier2Sellers.length;
 
     return (
       <div className="space-y-6">
