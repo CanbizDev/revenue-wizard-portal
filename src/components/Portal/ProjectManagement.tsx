@@ -349,12 +349,12 @@ const ProjectManagement: React.FC = () => {
               </div>
               <div>
                 <Label htmlFor="tier2_seller_id">Tier 2 Seller (Optional)</Label>
-                <Select value={newProject.tier2_seller_id} onValueChange={(value) => setNewProject({ ...newProject, tier2_seller_id: value })}>
+                <Select value={newProject.tier2_seller_id || "none"} onValueChange={(value) => setNewProject({ ...newProject, tier2_seller_id: value === "none" ? "" : value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a Tier 2 seller" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No Tier 2 Seller</SelectItem>
+                    <SelectItem value="none">No Tier 2 Seller</SelectItem>
                     {tier2Sellers.map((seller) => (
                       <SelectItem key={seller.id} value={seller.id}>
                         {seller.name}
@@ -588,12 +588,12 @@ const ProjectManagement: React.FC = () => {
             </div>
             <div>
               <Label htmlFor="edit-tier2_seller_id">Tier 2 Seller (Optional)</Label>
-              <Select value={editProjectData.tier2_seller_id} onValueChange={(value) => setEditProjectData({ ...editProjectData, tier2_seller_id: value })}>
+              <Select value={editProjectData.tier2_seller_id || "none"} onValueChange={(value) => setEditProjectData({ ...editProjectData, tier2_seller_id: value === "none" ? "" : value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a Tier 2 seller" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No Tier 2 Seller</SelectItem>
+                  <SelectItem value="none">No Tier 2 Seller</SelectItem>
                   {tier2Sellers.map((seller) => (
                     <SelectItem key={seller.id} value={seller.id}>
                       {seller.name}
