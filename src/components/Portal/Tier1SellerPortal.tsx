@@ -42,8 +42,10 @@ const Tier1SellerPortal: React.FC = () => {
   };
 
   const loadTier2Sellers = async () => {
+    console.log('Loading Tier2 sellers...');
     try {
       const tier2Data = await apiService.getTier2SellersByTier1();
+      console.log('Tier2 sellers loaded:', tier2Data);
       setTier2Sellers(tier2Data);
     } catch (error: any) {
       console.error('Error loading tier2 sellers:', error);
