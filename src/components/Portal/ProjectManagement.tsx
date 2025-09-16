@@ -38,6 +38,20 @@ const ProjectManagement: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
+  // Edit project state
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [editProjectData, setEditProjectData] = useState({
+    name: '',
+    description: '',
+    project_type: '',
+    status: 'active' as 'active' | 'inactive',
+    project_value: '',
+    hourly_budget: '',
+    hours_used: '',
+    tier2_seller_id: ''
+  });
+
   useEffect(() => {
     const loadProjects = async () => {
       try {
@@ -127,6 +141,80 @@ const ProjectManagement: React.FC = () => {
       toast({
         title: "Error",
         description: "Failed to delete project",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const openEditDialog = (project: Project) => {
+    setEditingProject(project);
+    setEditProjectData({
+      name: project.name,
+      description: project.description,
+      project_type: project.project_type,
+      status: project.status,
+      project_value: project.project_value?.toString() || '',
+      hourly_budget: project.hourly_budget?.toString() || '',
+      hours_used: project.hours_used?.toString() || '',
+      tier2_seller_id: project.tier2_seller_id || ''
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const closeEditDialog = () => {
+    setIsEditDialogOpen(false);
+    setEditingProject(null);
+    setEditProjectData({
+      name: '',
+      description: '',
+      project_type: '',
+      status: 'active',
+      project_value: '',
+      hourly_budget: '',
+      hours_used: '',
+      tier2_seller_id: ''
+    });
+  };
+
+  const handleEditProject = async () => {
+    if (!editingProject || !editProjectData.name.trim()) {
+      toast({
+        title: "Error",
+        description: "Project name is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const projectData = {
+        name: editProjectData.name,
+        description: editProjectData.description,
+        project_type: editProjectData.project_type,
+        status: editProjectData.status,
+        project_value: editProjectData.project_value ? parseFloat(editProjectData.project_value) : null,
+        hourly_budget: editProjectData.hourly_budget ? parseFloat(editProjectData.hourly_budget) : null,
+        hours_used: editProjectData.hours_used ? parseFloat(editProjectData.hours_used) : null,
+        tier2_seller_id: editProjectData.tier2_seller_id || null
+      };
+
+      await apiService.updateProject(editingProject.id, projectData);
+      
+      // Refresh the projects list to get the updated data
+      const updatedProjects = await apiService.getProjects();
+      setProjects(updatedProjects);
+      
+      closeEditDialog();
+      
+      toast({
+        title: "Success",
+        description: "Project updated successfully",
+      });
+    } catch (err) {
+      console.error('Failed to update project:', err);
+      toast({
+        title: "Error",
+        description: "Failed to update project",
         variant: "destructive",
       });
     }
@@ -395,7 +483,12 @@ const ProjectManagement: React.FC = () => {
                   >
                     <Users className="h-4 w-4" />
                   </Button>
-                  <Button size="sm" variant="ghost">
+                  <Button 
+                    size="sm" 
+                    variant="ghost"
+                    onClick={() => openEditDialog(project)}
+                    title="Edit Project"
+                  >
                     <Edit2 className="h-4 w-4" />
                   </Button>
                   <Button 
@@ -441,6 +534,108 @@ const ProjectManagement: React.FC = () => {
           </Card>
         ))}
       </div>
+
+      {/* Edit Project Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Project</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="edit-name">Project Name</Label>
+              <Input
+                id="edit-name"
+                value={editProjectData.name}
+                onChange={(e) => setEditProjectData({ ...editProjectData, name: e.target.value })}
+                placeholder="Enter project name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                value={editProjectData.description}
+                onChange={(e) => setEditProjectData({ ...editProjectData, description: e.target.value })}
+                placeholder="Enter project description"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-project_type">Project Type</Label>
+              <Input
+                id="edit-project_type"
+                value={editProjectData.project_type}
+                onChange={(e) => setEditProjectData({ ...editProjectData, project_type: e.target.value })}
+                placeholder="Enter project type"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-status">Status</Label>
+              <Select
+                value={editProjectData.status}
+                onValueChange={(value: 'active' | 'inactive') => 
+                  setEditProjectData({ ...editProjectData, status: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="edit-project_value">Project Value</Label>
+              <Input
+                id="edit-project_value"
+                type="number"
+                value={editProjectData.project_value}
+                onChange={(e) => setEditProjectData({ ...editProjectData, project_value: e.target.value })}
+                placeholder="Enter project value"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-hourly_budget">Hourly Budget</Label>
+              <Input
+                id="edit-hourly_budget"
+                type="number"
+                value={editProjectData.hourly_budget}
+                onChange={(e) => setEditProjectData({ ...editProjectData, hourly_budget: e.target.value })}
+                placeholder="Enter hourly budget"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-hours_used">Hours Used</Label>
+              <Input
+                id="edit-hours_used"
+                type="number"
+                value={editProjectData.hours_used}
+                onChange={(e) => setEditProjectData({ ...editProjectData, hours_used: e.target.value })}
+                placeholder="Enter hours used"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-tier2_seller_id">Tier 2 Seller ID (Optional)</Label>
+              <Input
+                id="edit-tier2_seller_id"
+                value={editProjectData.tier2_seller_id}
+                onChange={(e) => setEditProjectData({ ...editProjectData, tier2_seller_id: e.target.value })}
+                placeholder="Enter tier 2 seller ID"
+              />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={closeEditDialog}>
+                Cancel
+              </Button>
+              <Button onClick={handleEditProject}>
+                Update Project
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

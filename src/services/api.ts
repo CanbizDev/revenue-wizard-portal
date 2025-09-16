@@ -466,6 +466,13 @@ class ApiService {
     });
   }
 
+  async updateProject(projectId: string, projectData: any): Promise<any> {
+    return this.request(`/projects/${projectId}`, {
+      method: 'PUT',
+      data: projectData,
+    });
+  }
+
   // Utility methods
   isAuthenticated(): boolean {
     return !!this.token;
