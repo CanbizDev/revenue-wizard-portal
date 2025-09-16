@@ -83,8 +83,12 @@ const ProjectManagement: React.FC = () => {
           tier2_seller_id: newProject.tier2_seller_id || null
         };
         
-        const createdProject = await apiService.createProject(projectData);
-        setProjects([...projects, createdProject]);
+        await apiService.createProject(projectData);
+        
+        // Refresh the projects list to get the complete project data
+        const updatedProjects = await apiService.getProjects();
+        setProjects(updatedProjects);
+        
         setNewProject({ 
           name: '', 
           description: '', 
