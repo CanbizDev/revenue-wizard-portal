@@ -55,7 +55,8 @@ import {
   Eye,
   Edit,
   Trash2,
-  Plus
+  Plus,
+  Building2
 } from 'lucide-react';
 
 interface SellerAdminPortalProps {
@@ -225,35 +226,44 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
     }, 0);
     const activePlans = plans.filter(plan => plan.active).length;
     const totalCommissions = commissions.reduce((sum, commission) => sum + commission.commission_amount, 0);
+    // Filter tier-2 sellers for current tier-1 seller only
+    const myTier2Sellers = tier2Sellers.length;
 
     return (
       <div className="space-y-6">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            {company === 'xyzseller' ? 'Tier-2 Seller Dashboard' : 'Tier-1 Seller Dashboard'}
+          </h2>
+          <p className="text-gray-600">Overview of your business operations</p>
+        </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <DashboardCard
             title="Total Clients"
             value={totalClients.toString()}
+            description="Active client accounts"
             icon={Users}
-            trend={{ value: 12, isPositive: true }}
+          />
+          {company === 'marketstrendai' && (
+            <DashboardCard
+              title="Total Tier-2 Sellers"
+              value={myTier2Sellers.toString()}
+              description="Managed by you"
+              icon={Building2}
+            />
+          )}
+          <DashboardCard
+            title="Active Plans"
+            value={activePlans.toString()}
+            description="Subscription plans"
+            icon={BarChart3}
           />
           <DashboardCard
             title="Monthly Revenue"
             value={`₹${monthlyRevenue.toLocaleString()}`}
+            description="Total revenue"
             icon={DollarSign}
-            trend={{ value: 8, isPositive: true }}
-          />
-          <DashboardCard
-            title="Active Plans"
-            value={activePlans.toString()}
-            icon={BarChart3}
-            trend={{ value: 0, isPositive: true }}
-          />
-          <DashboardCard
-            title="Commission Earned"
-            value={`₹${totalCommissions.toLocaleString()}`}
-            icon={TrendingUp}
-            trend={{ value: 15, isPositive: true }}
           />
         </div>
 
