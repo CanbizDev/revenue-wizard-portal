@@ -43,7 +43,7 @@ const Tier1SellerPortal: React.FC = () => {
 
   const loadTier2Sellers = async () => {
     try {
-      const tier2Data = await apiService.getAllTier2Sellers();
+      const tier2Data = await apiService.getTier2SellersByTier1();
       setTier2Sellers(tier2Data);
     } catch (error: any) {
       console.error('Error loading tier2 sellers:', error);
@@ -183,7 +183,7 @@ const Tier1SellerPortal: React.FC = () => {
               </div>
             ) : (
               tier2Sellers.map((seller) => (
-                <div key={seller.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border border-gray-200 rounded-lg space-y-3 sm:space-y-0">
+                <div key={seller.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                   <div className="flex-1">
                     <div className="flex items-center space-x-4">
                       <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
@@ -200,7 +200,7 @@ const Tier1SellerPortal: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-6 text-sm text-gray-600 w-full sm:w-auto justify-between sm:justify-end">
+                  <div className="flex items-center space-x-6 text-sm text-gray-600">
                     <div className="text-center">
                       <p className="font-medium">{seller.client_count || 0}</p>
                       <p className="text-xs">Clients</p>

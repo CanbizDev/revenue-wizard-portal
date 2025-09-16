@@ -466,6 +466,10 @@ class ApiService {
     });
   }
 
+  async getTier2SellersByTier1(): Promise<any[]> {
+    return this.request('/seller/tier2/by-tier1');
+  }
+
   async updateProject(projectId: string, projectData: any): Promise<any> {
     return this.request(`/projects/${projectId}`, {
       method: 'PUT',
