@@ -45,10 +45,6 @@ const ProjectManagement: React.FC = () => {
     name: '',
     description: '',
     project_type: '',
-    status: 'active' as 'active' | 'inactive',
-    project_value: '',
-    hourly_budget: '',
-    hours_used: '',
     tier2_seller_id: ''
   });
 
@@ -152,10 +148,6 @@ const ProjectManagement: React.FC = () => {
       name: project.name,
       description: project.description,
       project_type: project.project_type,
-      status: project.status,
-      project_value: project.project_value?.toString() || '',
-      hourly_budget: project.hourly_budget?.toString() || '',
-      hours_used: project.hours_used?.toString() || '',
       tier2_seller_id: project.tier2_seller_id || ''
     });
     setIsEditDialogOpen(true);
@@ -168,10 +160,6 @@ const ProjectManagement: React.FC = () => {
       name: '',
       description: '',
       project_type: '',
-      status: 'active',
-      project_value: '',
-      hourly_budget: '',
-      hours_used: '',
       tier2_seller_id: ''
     });
   };
@@ -191,10 +179,6 @@ const ProjectManagement: React.FC = () => {
         name: editProjectData.name,
         description: editProjectData.description,
         project_type: editProjectData.project_type,
-        status: editProjectData.status,
-        project_value: editProjectData.project_value ? parseFloat(editProjectData.project_value) : null,
-        hourly_budget: editProjectData.hourly_budget ? parseFloat(editProjectData.hourly_budget) : null,
-        hours_used: editProjectData.hours_used ? parseFloat(editProjectData.hours_used) : null,
         tier2_seller_id: editProjectData.tier2_seller_id || null
       };
 
@@ -567,53 +551,6 @@ const ProjectManagement: React.FC = () => {
                 value={editProjectData.project_type}
                 onChange={(e) => setEditProjectData({ ...editProjectData, project_type: e.target.value })}
                 placeholder="Enter project type"
-              />
-            </div>
-            <div>
-              <Label htmlFor="edit-status">Status</Label>
-              <Select
-                value={editProjectData.status}
-                onValueChange={(value: 'active' | 'inactive') => 
-                  setEditProjectData({ ...editProjectData, status: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="edit-project_value">Project Value</Label>
-              <Input
-                id="edit-project_value"
-                type="number"
-                value={editProjectData.project_value}
-                onChange={(e) => setEditProjectData({ ...editProjectData, project_value: e.target.value })}
-                placeholder="Enter project value"
-              />
-            </div>
-            <div>
-              <Label htmlFor="edit-hourly_budget">Hourly Budget</Label>
-              <Input
-                id="edit-hourly_budget"
-                type="number"
-                value={editProjectData.hourly_budget}
-                onChange={(e) => setEditProjectData({ ...editProjectData, hourly_budget: e.target.value })}
-                placeholder="Enter hourly budget"
-              />
-            </div>
-            <div>
-              <Label htmlFor="edit-hours_used">Hours Used</Label>
-              <Input
-                id="edit-hours_used"
-                type="number"
-                value={editProjectData.hours_used}
-                onChange={(e) => setEditProjectData({ ...editProjectData, hours_used: e.target.value })}
-                placeholder="Enter hours used"
               />
             </div>
             <div>
