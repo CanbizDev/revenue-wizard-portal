@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { DollarSign, TrendingUp, AlertTriangle, CheckCircle, Download, Clock, AlertCircle } from 'lucide-react';
+import { DollarSign, TrendingUp, AlertTriangle, CheckCircle, Download } from 'lucide-react';
 import { apiService, RevenueData } from '@/services/api';
 
 interface BillingRecord {
