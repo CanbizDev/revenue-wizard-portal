@@ -307,11 +307,8 @@ class ApiService {
     return this.request<BillingSummary>('/seller/billing-summary');
   }
 
-  async getRevenueData(tier1Id: string): Promise<RevenueData> {
-    console.log('API: Making revenue request with tier1Id:', tier1Id);
-    const url = `/billing/revenue?tier1_id=${tier1Id}`;
-    console.log('API: Revenue request URL:', url);
-    return this.request<RevenueData>(url);
+  async getRevenueData(): Promise<RevenueData> {
+    return this.request<RevenueData>('/billing/revenue');
   }
 
   async getProjectBillingDetails(projectId: string): Promise<any> {
@@ -488,9 +485,7 @@ class ApiService {
 
   getCurrentUser(): any {
     const userData = localStorage.getItem('user_data');
-    const user = userData ? JSON.parse(userData) : null;
-    console.log('getCurrentUser returning:', user);
-    return user;
+    return userData ? JSON.parse(userData) : null;
   }
 }
 
