@@ -90,7 +90,7 @@ const ProjectManagement: React.FC = () => {
           description: newProject.description,
           project_type: newProject.project_type,
           status: newProject.status,
-          tier2_seller_id: newProject.tier2_seller_id || null
+          tier2_seller_id: newProject.tier2_seller_id.trim() || null
         };
         
         await apiService.createProject(projectData);
@@ -179,7 +179,7 @@ const ProjectManagement: React.FC = () => {
         name: editProjectData.name,
         description: editProjectData.description,
         project_type: editProjectData.project_type,
-        tier2_seller_id: editProjectData.tier2_seller_id || null
+        tier2_seller_id: editProjectData.tier2_seller_id.trim() || null
       };
 
       await apiService.updateProject(editingProject.id, projectData);
@@ -513,6 +513,13 @@ const ProjectManagement: React.FC = () => {
                   <p className="text-sm font-medium text-muted-foreground">Description</p>
                   <p className="text-sm text-foreground">{project.description || 'No description available'}</p>
                 </div>
+                
+                {project.tier2_seller_id && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Tier 2 Seller ID</p>
+                    <p className="text-sm text-foreground">{project.tier2_seller_id}</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
