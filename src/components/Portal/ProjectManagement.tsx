@@ -168,6 +168,7 @@ const ProjectManagement: React.FC = () => {
   };
 
   const getStatusColor = (status: string) => {
+    if (!status) return 'bg-gray-100 text-gray-800';
     return status === 'active' 
       ? 'bg-green-100 text-green-800' 
       : 'bg-gray-100 text-gray-800';
@@ -378,7 +379,7 @@ const ProjectManagement: React.FC = () => {
                     {project.name}
                   </CardTitle>
                   <Badge className={getStatusColor(project.status)}>
-                    {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+                    {project.status ? project.status.charAt(0).toUpperCase() + project.status.slice(1) : 'Unknown'}
                   </Badge>
                 </div>
                 <div className="flex space-x-1">
