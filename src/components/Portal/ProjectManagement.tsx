@@ -60,9 +60,8 @@ const ProjectManagement: React.FC = () => {
     name: '',
     description: '',
     project_type: '',
-    billing_frequency: 'milestone',
-    hourly_budget: '',
-    status: 'active' as 'active' | 'inactive'
+    status: 'active' as 'active' | 'inactive',
+    tier2_seller_id: ''
   });
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -70,16 +69,12 @@ const ProjectManagement: React.FC = () => {
   const handleAddProject = async () => {
     if (newProject.name && newProject.description && newProject.project_type) {
       try {
-        // Get current user to set tier1_seller_id
-        const currentUser = apiService.getCurrentUser();
-        
         const projectData = {
           name: newProject.name,
           description: newProject.description,
           project_type: newProject.project_type,
-          billing_frequency: newProject.billing_frequency,
-          hourly_budget: parseFloat(newProject.hourly_budget) || 0,
-          status: newProject.status
+          status: newProject.status,
+          tier2_seller_id: newProject.tier2_seller_id || null
         };
         
         const createdProject = await apiService.createProject(projectData);
@@ -88,9 +83,8 @@ const ProjectManagement: React.FC = () => {
           name: '', 
           description: '', 
           project_type: '', 
-          billing_frequency: 'milestone', 
-          hourly_budget: '', 
-          status: 'active' 
+          status: 'active',
+          tier2_seller_id: ''
         });
         setIsDialogOpen(false);
         
@@ -205,42 +199,21 @@ const ProjectManagement: React.FC = () => {
               </div>
               <div>
                 <Label htmlFor="project_type">Project Type</Label>
-                <Select value={newProject.project_type} onValueChange={(value) => setNewProject({ ...newProject, project_type: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select project type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Web Development">Web Development</SelectItem>
-                    <SelectItem value="Report Generation">Report Generation</SelectItem>
-                    <SelectItem value="Data Analytics">Data Analytics</SelectItem>
-                    <SelectItem value="Consulting">Consulting</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Input
+                  id="project_type"
+                  value={newProject.project_type}
+                  onChange={(e) => setNewProject({ ...newProject, project_type: e.target.value })}
+                  placeholder="Enter project type"
+                />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="billing_frequency">Billing Frequency</Label>
-                  <Select value={newProject.billing_frequency} onValueChange={(value) => setNewProject({ ...newProject, billing_frequency: value })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select billing frequency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="milestone">Milestone</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                      <SelectItem value="weekly">Weekly</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="hourly_budget">Hourly Budget</Label>
-                  <Input
-                    id="hourly_budget"
-                    type="number"
-                    value={newProject.hourly_budget}
-                    onChange={(e) => setNewProject({ ...newProject, hourly_budget: e.target.value })}
-                    placeholder="0"
-                  />
-                </div>
+              <div>
+                <Label htmlFor="tier2_seller_id">Tier 2 Seller ID (Optional)</Label>
+                <Input
+                  id="tier2_seller_id"
+                  value={newProject.tier2_seller_id}
+                  onChange={(e) => setNewProject({ ...newProject, tier2_seller_id: e.target.value })}
+                  placeholder="Enter tier2 seller ID if applicable"
+                />
               </div>
               <div>
                 <Label htmlFor="status">Status</Label>
