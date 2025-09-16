@@ -147,43 +147,22 @@ class ApiService {
   }
 
   private async request<T>(endpoint: string, options: any = {}): Promise<T> {
-    console.log(`Making API request to: ${endpoint}`);
     try {
       const response: AxiosResponse<T> = await this.axiosInstance(endpoint, options);
-      console.log(`API success for ${endpoint}:`, response.data);
       return response.data;
     } catch (error) {
-      console.error(`API request failed for ${endpoint}:`, error);
-      // Return mock data for all endpoints when API fails
-      const mockData = this.getMockData(endpoint);
-      console.log(`Returning mock data for ${endpoint}:`, mockData);
-      return mockData as T;
+      console.error('API request failed:', error);
+      // For dashboard endpoints, throw the error instead of returning mock data
+      if (endpoint.includes('/dashboard')) {
+        throw error;
+      }
+      // Return mock data for other endpoints
+      return this.getMockData(endpoint) as T;
     }
   }
 
   private getMockData(endpoint: string): any {
-    // Dashboard endpoints - provide mock data for testing
-    if (endpoint.includes('/admin/dashboard')) {
-      return {
-        stats: {
-          total_tier1_sellers: 3,
-          total_tier2_sellers: 5,
-          total_projects: 24,
-          monthly_revenue: 156000
-        }
-      };
-    }
-
-    if (endpoint.includes('/seller/dashboard')) {
-      return {
-        metrics: {
-          total_clients: 8,
-          active_projects: 12,
-          monthly_revenue: 85000,
-          completion_rate: 94
-        }
-      };
-    }
+    // Dashboard endpoints now throw errors instead of returning mock data
 
     // Billing summary
     if (endpoint.includes('/billing-summary')) {
@@ -234,33 +213,6 @@ class ApiService {
 
     // Tier2 sellers mock data
     if (endpoint.includes('/seller/tier2')) {
-      // For the new filtered endpoint, return only some sellers
-      if (endpoint.includes('/by-tier1')) {
-        return [
-          {
-            id: '1',
-            name: 'Analytics Pro',
-            admin_email: 'admin@analyticspro.com',
-            subdomain: 'analyticspro',
-            logo_url: null,
-            client_count: 5,
-            revenue: 25000,
-            status: 'active'
-          },
-          {
-            id: '3',
-            name: 'DataInsights',
-            admin_email: 'admin@datainsights.com',
-            subdomain: 'datainsights',
-            logo_url: null,
-            client_count: 8,
-            revenue: 35000,
-            status: 'active'
-          }
-        ];
-      }
-      
-      // For the full list endpoint
       return [
         {
           id: '1',
@@ -512,10 +464,6 @@ class ApiService {
     return this.request(`/seller/tier2/${id}`, {
       method: 'DELETE',
     });
-  }
-
-  async getTier2SellersByTier1(): Promise<any[]> {
-    return this.request('/seller/tier2/by-tier1');
   }
 
   async updateProject(projectId: string, projectData: any): Promise<any> {
