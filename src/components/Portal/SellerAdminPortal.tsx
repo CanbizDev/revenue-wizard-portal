@@ -119,8 +119,12 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
     if (company === 'marketstrendai' && sellerData) {
       const fetchDashboardData = async () => {
         try {
+          // Get current user data to get the actual tier1 seller UUID
+          const currentUser = apiService.getCurrentUser();
+          const tier1Id = currentUser?.id || sellerData.id;
+          
           // Fetch tier1 dashboard data
-          const dashboardResponse = await apiService.getTier1DashboardData(sellerData.id);
+          const dashboardResponse = await apiService.getTier1DashboardData(tier1Id);
           setDashboardData(dashboardResponse.stats);
         } catch (error) {
           console.error('Error fetching dashboard data:', error);
