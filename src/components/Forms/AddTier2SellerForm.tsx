@@ -14,9 +14,10 @@ interface AddTier2SellerFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  tier1SellerName?: string; // When provided, skip the tier1 seller dropdown
 }
 
-const AddTier2SellerForm: React.FC<AddTier2SellerFormProps> = ({ isOpen, onClose, onSuccess }) => {
+const AddTier2SellerForm: React.FC<AddTier2SellerFormProps> = ({ isOpen, onClose, onSuccess, tier1SellerName }) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [tier1Sellers, setTier1Sellers] = useState<any[]>([]);
@@ -34,10 +35,10 @@ const AddTier2SellerForm: React.FC<AddTier2SellerFormProps> = ({ isOpen, onClose
   const [stylesheetFile, setStylesheetFile] = useState<File | null>(null);
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !tier1SellerName) {
       loadTier1Sellers();
     }
-  }, [isOpen]);
+  }, [isOpen, tier1SellerName]);
 
   const loadTier1Sellers = async () => {
     try {
@@ -107,7 +108,7 @@ const AddTier2SellerForm: React.FC<AddTier2SellerFormProps> = ({ isOpen, onClose
         subdomain: formData.subdomain,
         admin_email: formData.adminEmail,
         admin_password_hash: passwordHash,
-        tier1_seller_id: formData.tier1SellerId,
+        tier1_seller_id: tier1SellerName ? tier1SellerName : formData.tier1SellerId,
         logo_url: logoUrl,
         stylesheet_url: stylesheetUrl,
         site_content: formData.siteContent ? JSON.parse(formData.siteContent) : null,
@@ -182,21 +183,23 @@ const AddTier2SellerForm: React.FC<AddTier2SellerFormProps> = ({ isOpen, onClose
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="tier1Seller">Tier-1 Seller *</Label>
-            <Select value={formData.tier1SellerId} onValueChange={(value) => handleInputChange('tier1SellerId', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a Tier-1 seller" />
-              </SelectTrigger>
-              <SelectContent>
-                {tier1Sellers.map((seller) => (
-                  <SelectItem key={seller.id} value={seller.id}>
-                    {seller.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {!tier1SellerName && (
+            <div className="space-y-2">
+              <Label htmlFor="tier1Seller">Tier-1 Seller *</Label>
+              <Select value={formData.tier1SellerId} onValueChange={(value) => handleInputChange('tier1SellerId', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a Tier-1 seller" />
+                </SelectTrigger>
+                <SelectContent>
+                  {tier1Sellers.map((seller) => (
+                    <SelectItem key={seller.id} value={seller.id}>
+                      {seller.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
