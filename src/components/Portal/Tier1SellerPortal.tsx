@@ -200,7 +200,7 @@ const Tier1SellerPortal: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-6 text-sm text-gray-600">
+                  <div className="flex items-center space-x-6 text-sm text-gray-600 w-full sm:w-auto justify-between sm:justify-end">
                     <div className="text-center">
                       <p className="font-medium">{seller.client_count || 0}</p>
                       <p className="text-xs">Clients</p>
