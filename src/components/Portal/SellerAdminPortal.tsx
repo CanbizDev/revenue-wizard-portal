@@ -14,6 +14,7 @@ import AddPlanForm from '@/components/Forms/AddPlanForm';
 import CommissionsView from './CommissionsView';
 import ProjectManagement from './ProjectManagement';
 import ProjectBilling from './ProjectBilling';
+import RevenueOverview from '@/components/Revenue/RevenueOverview';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { apiService } from '@/services/api';
@@ -563,7 +564,7 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
       case 'commissions':
         return <CommissionsView userRole={company === 'xyzseller' ? 'tier2_seller' : 'tier1_seller'} company={company} />;
       case 'billing':
-        return <ProjectBilling />;
+        return <RevenueOverview />;
       case 'reports':
         return <div className="p-8 text-center text-gray-500">Reports coming soon...</div>;
       default:
