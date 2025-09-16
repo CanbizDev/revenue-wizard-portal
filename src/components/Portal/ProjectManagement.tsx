@@ -65,6 +65,12 @@ const ProjectManagement: React.FC = () => {
   });
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isClientDialogOpen, setIsClientDialogOpen] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+  const [newClient, setNewClient] = useState({
+    name: '',
+    company: ''
+  });
 
   const handleAddProject = async () => {
     if (newProject.name && newProject.description && newProject.project_type) {
@@ -122,6 +128,45 @@ const ProjectManagement: React.FC = () => {
     }
   };
 
+  const handleAddClient = async () => {
+    if (newClient.name && selectedProjectId) {
+      try {
+        const clientData = {
+          name: newClient.name,
+          company: newClient.company || '',
+          project_id: selectedProjectId
+        };
+        
+        await apiService.createProjectClient(clientData);
+        
+        // Refresh projects to show the new client
+        const updatedProjects = await apiService.getProjects();
+        setProjects(updatedProjects);
+        
+        setNewClient({ name: '', company: '' });
+        setIsClientDialogOpen(false);
+        setSelectedProjectId('');
+        
+        toast({
+          title: "Success",
+          description: "Client added successfully",
+        });
+      } catch (err) {
+        console.error('Failed to add client:', err);
+        toast({
+          title: "Error",
+          description: "Failed to add client",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const openAddClientDialog = (projectId: string) => {
+    setSelectedProjectId(projectId);
+    setIsClientDialogOpen(true);
+  };
+
   const getStatusColor = (status: string) => {
     return status === 'active' 
       ? 'bg-green-100 text-green-800' 
@@ -130,7 +175,7 @@ const ProjectManagement: React.FC = () => {
 
   // Calculate totals
   const totals = projects.reduce((acc, project) => ({
-    totalClients: acc.totalClients + project.clients.length,
+    totalClients: acc.totalClients + (project.clients?.length || 0),
     totalProjects: projects.length,
     activeProjects: projects.filter(p => p.status === 'active').length
   }), { totalClients: 0, totalProjects: 0, activeProjects: 0 });
@@ -233,6 +278,38 @@ const ProjectManagement: React.FC = () => {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Add Client Dialog */}
+        <Dialog open={isClientDialogOpen} onOpenChange={setIsClientDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Client to Project</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="clientName">Client Name</Label>
+                <Input
+                  id="clientName"
+                  value={newClient.name}
+                  onChange={(e) => setNewClient({ ...newClient, name: e.target.value })}
+                  placeholder="Enter client name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="clientCompany">Company (Optional)</Label>
+                <Input
+                  id="clientCompany"
+                  value={newClient.company}
+                  onChange={(e) => setNewClient({ ...newClient, company: e.target.value })}
+                  placeholder="Enter company name"
+                />
+              </div>
+              <Button onClick={handleAddClient} className="w-full">
+                Add Client
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Summary Cards */}
@@ -305,6 +382,14 @@ const ProjectManagement: React.FC = () => {
                   </Badge>
                 </div>
                 <div className="flex space-x-1">
+                  <Button 
+                    size="sm" 
+                    variant="ghost"
+                    onClick={() => openAddClientDialog(project.id)}
+                    title="Add Client"
+                  >
+                    <Users className="h-4 w-4" />
+                  </Button>
                   <Button size="sm" variant="ghost">
                     <Edit2 className="h-4 w-4" />
                   </Button>
@@ -330,8 +415,8 @@ const ProjectManagement: React.FC = () => {
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Clients</p>
                   <p className="text-sm text-foreground">
-                    {project.clients.length > 0 
-                      ? project.clients.map(client => client.name).join(', ')
+                    {(project.clients || []).length > 0 
+                      ? (project.clients || []).map(client => client.name).join(', ')
                       : 'No clients assigned'
                     }
                   </p>

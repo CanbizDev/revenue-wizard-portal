@@ -360,6 +360,16 @@ class ApiService {
     });
   }
 
+  async createProjectClient(clientData: any): Promise<any> {
+    try {
+      const response = await this.axiosInstance.post('/projects/clients', clientData);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to create project client:', error);
+      throw error;
+    }
+  }
+
   // Company and client endpoints
   async getCompanyInfo(companyName: string): Promise<CompanyInfo> {
     return this.request<CompanyInfo>(`/company/${companyName}/info`);
