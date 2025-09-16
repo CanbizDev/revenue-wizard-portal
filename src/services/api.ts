@@ -307,8 +307,8 @@ class ApiService {
     return this.request<BillingSummary>('/seller/billing-summary');
   }
 
-  async getRevenueData(): Promise<RevenueData> {
-    return this.request<RevenueData>('/billing/revenue');
+  async getRevenueData(tier1Id: string): Promise<RevenueData> {
+    return this.request<RevenueData>(`/billing/revenue?tier1_id=${tier1Id}`);
   }
 
   async getProjectBillingDetails(projectId: string): Promise<any> {

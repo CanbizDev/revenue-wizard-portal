@@ -31,7 +31,16 @@ const RevenueOverview: React.FC = () => {
   const loadBillingData = async () => {
     try {
       setLoading(true);
-      const data = await apiService.getRevenueData();
+      // Get current user data to get the tier1 seller ID
+      const currentUser = apiService.getCurrentUser();
+      const tier1Id = currentUser?.id;
+      
+      if (!tier1Id) {
+        console.error('No tier1 seller ID found');
+        return;
+      }
+      
+      const data = await apiService.getRevenueData(tier1Id);
       setRevenueData(data);
     } catch (error) {
       console.error('Failed to load billing data:', error);
