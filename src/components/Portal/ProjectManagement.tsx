@@ -60,7 +60,7 @@ const ProjectManagement: React.FC = () => {
     name: '',
     description: '',
     project_type: '',
-    project_value: '',
+    billing_frequency: 'milestone',
     hourly_budget: '',
     status: 'active' as 'active' | 'inactive'
   });
@@ -77,14 +77,9 @@ const ProjectManagement: React.FC = () => {
           name: newProject.name,
           description: newProject.description,
           project_type: newProject.project_type,
-          project_value: parseFloat(newProject.project_value) || 0,
+          billing_frequency: newProject.billing_frequency,
           hourly_budget: parseFloat(newProject.hourly_budget) || 0,
-          hours_used: 0,
-          completion_percentage: 0,
-          status: newProject.status,
-          tier1_seller_id: currentUser?.id || '',
-          tier2_seller_id: null,
-          clients: []
+          status: newProject.status
         };
         
         const createdProject = await apiService.createProject(projectData);
@@ -93,7 +88,7 @@ const ProjectManagement: React.FC = () => {
           name: '', 
           description: '', 
           project_type: '', 
-          project_value: '', 
+          billing_frequency: 'milestone', 
           hourly_budget: '', 
           status: 'active' 
         });
@@ -141,11 +136,10 @@ const ProjectManagement: React.FC = () => {
 
   // Calculate totals
   const totals = projects.reduce((acc, project) => ({
-    totalValue: acc.totalValue + (project.project_value || 0),
     totalClients: acc.totalClients + project.clients.length,
     totalProjects: projects.length,
     activeProjects: projects.filter(p => p.status === 'active').length
-  }), { totalValue: 0, totalClients: 0, totalProjects: 0, activeProjects: 0 });
+  }), { totalClients: 0, totalProjects: 0, activeProjects: 0 });
 
   if (loading) {
     return (
@@ -225,14 +219,17 @@ const ProjectManagement: React.FC = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="project_value">Project Value</Label>
-                  <Input
-                    id="project_value"
-                    type="number"
-                    value={newProject.project_value}
-                    onChange={(e) => setNewProject({ ...newProject, project_value: e.target.value })}
-                    placeholder="0"
-                  />
+                  <Label htmlFor="billing_frequency">Billing Frequency</Label>
+                  <Select value={newProject.billing_frequency} onValueChange={(value) => setNewProject({ ...newProject, billing_frequency: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select billing frequency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="milestone">Milestone</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label htmlFor="hourly_budget">Hourly Budget</Label>
@@ -310,9 +307,9 @@ const ProjectManagement: React.FC = () => {
             <div className="flex items-center space-x-2">
               <FileText className="h-5 w-5 text-orange-600" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Value</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Projects</p>
                 <p className="text-2xl font-bold text-foreground">
-                  ₹{totals.totalValue.toLocaleString()}
+                  {totals.totalProjects}
                 </p>
               </div>
             </div>
@@ -351,42 +348,30 @@ const ProjectManagement: React.FC = () => {
             </CardHeader>
             
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="flex items-center space-x-2">
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Clients:</span>
-                  <span className="font-medium">{project.clients.length}</span>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Project Name</p>
+                  <p className="text-base font-semibold text-foreground">{project.name}</p>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Type:</span>
-                  <span className="font-medium">{project.project_type}</span>
+                
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Clients</p>
+                  <p className="text-sm text-foreground">
+                    {project.clients.length > 0 
+                      ? project.clients.map(client => client.name).join(', ')
+                      : 'No clients assigned'
+                    }
+                  </p>
                 </div>
-              </div>
-              
-              <div className="border-t pt-3">
-                <h4 className="text-sm font-medium text-muted-foreground mb-2">Project Description</h4>
-                <p className="text-sm text-foreground">{project.description || 'No description available'}</p>
-              </div>
-              
-              <div className="border-t pt-3">
-                <div className="grid grid-cols-2 gap-4 text-xs">
-                  <div className="flex justify-between">
-                    <span>Project Value:</span>
-                    <span className="font-medium">₹{(project.project_value || 0).toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Hourly Budget:</span>
-                    <span className="font-medium">₹{(project.hourly_budget || 0).toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Hours Used:</span>
-                    <span className="font-medium">{project.hours_used || 0}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Completion:</span>
-                    <span className="font-medium">{project.completion_percentage || 0}%</span>
-                  </div>
+                
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Type</p>
+                  <p className="text-sm text-foreground">{project.project_type}</p>
+                </div>
+                
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Description</p>
+                  <p className="text-sm text-foreground">{project.description || 'No description available'}</p>
                 </div>
               </div>
             </CardContent>
