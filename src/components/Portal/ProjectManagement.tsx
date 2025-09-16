@@ -17,6 +17,13 @@ interface Client {
   company?: string;
 }
 
+interface Tier2Seller {
+  id: string;
+  name: string;
+  email: string;
+  company?: string;
+}
+
 interface Project {
   id: string;
   name: string;
@@ -34,6 +41,7 @@ interface Project {
 
 const ProjectManagement: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [tier2Sellers, setTier2Sellers] = useState<Tier2Seller[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -49,21 +57,26 @@ const ProjectManagement: React.FC = () => {
   });
 
   useEffect(() => {
-    const loadProjects = async () => {
+    const loadData = async () => {
       try {
         setLoading(true);
-        const data = await apiService.getProjects();
-        setProjects(data);
+        const [projectsData, tier2Data] = await Promise.all([
+          apiService.getProjects(),
+          apiService.getAllTier2Sellers()
+        ]);
+        setProjects(projectsData);
+        setTier2Sellers(tier2Data);
       } catch (err) {
-        console.error('Failed to load projects:', err);
-        setError('Failed to load projects. Please try again.');
+        console.error('Failed to load data:', err);
+        setError('Failed to load data. Please try again.');
         setProjects([]);
+        setTier2Sellers([]);
       } finally {
         setLoading(false);
       }
     };
 
-    loadProjects();
+    loadData();
   }, []);
 
   const [newProject, setNewProject] = useState({
@@ -250,6 +263,12 @@ const ProjectManagement: React.FC = () => {
       : 'bg-gray-100 text-gray-800';
   };
 
+  const getTier2SellerName = (sellerId: string | null): string => {
+    if (!sellerId) return '';
+    const seller = tier2Sellers.find(s => s.id === sellerId);
+    return seller ? seller.name : `Unknown Seller (ID: ${sellerId})`;
+  };
+
   // Calculate totals
   const totals = projects.reduce((acc, project) => ({
     totalClients: acc.totalClients + (project.clients?.length || 0),
@@ -329,13 +348,20 @@ const ProjectManagement: React.FC = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="tier2_seller_id">Tier 2 Seller ID (Optional)</Label>
-                <Input
-                  id="tier2_seller_id"
-                  value={newProject.tier2_seller_id}
-                  onChange={(e) => setNewProject({ ...newProject, tier2_seller_id: e.target.value })}
-                  placeholder="Enter tier2 seller ID if applicable"
-                />
+                <Label htmlFor="tier2_seller_id">Tier 2 Seller (Optional)</Label>
+                <Select value={newProject.tier2_seller_id} onValueChange={(value) => setNewProject({ ...newProject, tier2_seller_id: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a Tier 2 seller" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No Tier 2 Seller</SelectItem>
+                    {tier2Sellers.map((seller) => (
+                      <SelectItem key={seller.id} value={seller.id}>
+                        {seller.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <Label htmlFor="status">Status</Label>
@@ -516,8 +542,8 @@ const ProjectManagement: React.FC = () => {
                 
                 {project.tier2_seller_id && (
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Tier 2 Seller ID</p>
-                    <p className="text-sm text-foreground">{project.tier2_seller_id}</p>
+                    <p className="text-sm font-medium text-muted-foreground">Tier 2 Seller</p>
+                    <p className="text-sm text-foreground">{getTier2SellerName(project.tier2_seller_id)}</p>
                   </div>
                 )}
               </div>
@@ -561,13 +587,20 @@ const ProjectManagement: React.FC = () => {
               />
             </div>
             <div>
-              <Label htmlFor="edit-tier2_seller_id">Tier 2 Seller ID (Optional)</Label>
-              <Input
-                id="edit-tier2_seller_id"
-                value={editProjectData.tier2_seller_id}
-                onChange={(e) => setEditProjectData({ ...editProjectData, tier2_seller_id: e.target.value })}
-                placeholder="Enter tier 2 seller ID"
-              />
+              <Label htmlFor="edit-tier2_seller_id">Tier 2 Seller (Optional)</Label>
+              <Select value={editProjectData.tier2_seller_id} onValueChange={(value) => setEditProjectData({ ...editProjectData, tier2_seller_id: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a Tier 2 seller" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">No Tier 2 Seller</SelectItem>
+                  {tier2Sellers.map((seller) => (
+                    <SelectItem key={seller.id} value={seller.id}>
+                      {seller.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={closeEditDialog}>
