@@ -59,23 +59,42 @@ const RevenueOverview: React.FC = () => {
     
     let filtered = [...revenueData.billing_details];
 
-    // Additional tier1 filtering (as backup if backend doesn't filter properly)
+    // Explicit frontend filtering by tier1 seller
     const currentUser = apiService.getCurrentUser();
     const currentTier1Id = currentUser?.id;
-    console.log('Frontend filtering - Current tier1 ID:', currentTier1Id);
+    const currentTier1Name = currentUser?.name;
     
-    if (currentTier1Id && filtered.length > 0) {
-      // If the backend didn't filter properly, we'll filter here
-      // This assumes there might be a tier1_id field in the billing records
-      console.log('Sample billing record:', filtered[0]);
+    console.log('Frontend filtering - Current tier1 ID:', currentTier1Id);
+    console.log('Frontend filtering - Current tier1 Name:', currentTier1Name);
+    console.log('Total billing records before filtering:', filtered.length);
+    
+    if (currentTier1Id || currentTier1Name) {
+      // Filter records that belong to the current tier1 seller
+      // This can be done by checking if the tier field matches the tier1 seller name
+      // or if there's a tier1_seller_id field in the records
+      filtered = filtered.filter(record => {
+        // Check multiple possible ways the tier1 seller might be identified
+        const belongsToCurrentTier1 = 
+          record.tier === currentTier1Name || // tier field matches tier1 seller name
+          record.tier === currentTier1Id ||   // tier field matches tier1 seller ID
+          (record as any).tier1_seller_id === currentTier1Id || // direct tier1_seller_id field
+          (record as any).tier1_seller_name === currentTier1Name; // direct tier1_seller_name field
+        
+        console.log(`Record ${record.invoice_id}: tier="${record.tier}", belongs to current tier1: ${belongsToCurrentTier1}`);
+        
+        return belongsToCurrentTier1;
+      });
     }
+    
+    console.log('Billing records after tier1 filtering:', filtered.length);
 
-    // Apply project filter
+    // Apply client/project filter
     if (selectedProject !== 'all') {
       filtered = filtered.filter(record => record.client_name.toLowerCase().includes(selectedProject.toLowerCase()));
+      console.log('Billing records after client filtering:', filtered.length);
     }
 
-    console.log('Filtered billing data:', filtered);
+    console.log('Final filtered billing data:', filtered);
     setFilteredData(filtered);
   };
 
@@ -120,14 +139,14 @@ const RevenueOverview: React.FC = () => {
     return `${symbol}${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
   };
 
-  // Calculate totals from filtered data
+  // Calculate totals from filtered data (only current tier1 seller's records)
   const totals = filteredData.reduce((acc, record) => ({
     totalBilled: acc.totalBilled + record.bill_amount,
     totalPaid: acc.totalPaid + (record.status === 'Paid' ? record.bill_amount : 0),
     totalPending: acc.totalPending + (record.status !== 'Paid' ? record.bill_amount : 0)
   }), { totalBilled: 0, totalPaid: 0, totalPending: 0 });
 
-  const uniqueClients = [...new Set(revenueData?.billing_details?.map(b => b.client_name) || [])];
+  const uniqueClients = [...new Set(filteredData.map(b => b.client_name))];
 
   if (loading) {
     return (
