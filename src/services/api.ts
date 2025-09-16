@@ -147,13 +147,17 @@ class ApiService {
   }
 
   private async request<T>(endpoint: string, options: any = {}): Promise<T> {
+    console.log(`Making API request to: ${endpoint}`);
     try {
       const response: AxiosResponse<T> = await this.axiosInstance(endpoint, options);
+      console.log(`API success for ${endpoint}:`, response.data);
       return response.data;
     } catch (error) {
-      console.error('API request failed:', error);
+      console.error(`API request failed for ${endpoint}:`, error);
       // Return mock data for all endpoints when API fails
-      return this.getMockData(endpoint) as T;
+      const mockData = this.getMockData(endpoint);
+      console.log(`Returning mock data for ${endpoint}:`, mockData);
+      return mockData as T;
     }
   }
 
