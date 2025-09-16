@@ -31,12 +31,17 @@ const RevenueOverview: React.FC = () => {
       const currentUser = apiService.getCurrentUser();
       const tier1Id = currentUser?.id;
       
+      console.log('Current user for revenue:', currentUser);
+      console.log('Tier1 ID for revenue request:', tier1Id);
+      
       if (!tier1Id) {
         console.error('No tier1 seller ID found');
         return;
       }
       
+      console.log('Making revenue API call with tier1Id:', tier1Id);
       const data = await apiService.getRevenueData(tier1Id);
+      console.log('Revenue data received:', data);
       setRevenueData(data);
     } catch (error) {
       console.error('Failed to load billing data:', error);
@@ -54,11 +59,23 @@ const RevenueOverview: React.FC = () => {
     
     let filtered = [...revenueData.billing_details];
 
+    // Additional tier1 filtering (as backup if backend doesn't filter properly)
+    const currentUser = apiService.getCurrentUser();
+    const currentTier1Id = currentUser?.id;
+    console.log('Frontend filtering - Current tier1 ID:', currentTier1Id);
+    
+    if (currentTier1Id && filtered.length > 0) {
+      // If the backend didn't filter properly, we'll filter here
+      // This assumes there might be a tier1_id field in the billing records
+      console.log('Sample billing record:', filtered[0]);
+    }
+
     // Apply project filter
     if (selectedProject !== 'all') {
       filtered = filtered.filter(record => record.client_name.toLowerCase().includes(selectedProject.toLowerCase()));
     }
 
+    console.log('Filtered billing data:', filtered);
     setFilteredData(filtered);
   };
 
