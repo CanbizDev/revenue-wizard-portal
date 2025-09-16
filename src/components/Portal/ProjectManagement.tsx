@@ -6,20 +6,30 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { Plus, Edit2, Trash2, Users, FileText, Activity, Loader2 } from 'lucide-react';
 import { apiService } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 
+interface Client {
+  id: string;
+  name: string;
+  company?: string;
+}
+
 interface Project {
   id: string;
   name: string;
-  members: number;
-  activeReports: number;
+  description: string;
+  project_type: string;
+  project_value: number;
+  hourly_budget: number;
+  hours_used: number;
+  completion_percentage: number;
   status: 'active' | 'inactive';
-  totalBilling: number;
-  paidAmount: number;
-  pendingAmount: number;
-  lastPayment: string;
+  tier1_seller_id: string;
+  tier2_seller_id: string | null;
+  clients: Client[];
 }
 
 const ProjectManagement: React.FC = () => {
@@ -35,47 +45,9 @@ const ProjectManagement: React.FC = () => {
         const data = await apiService.getProjects();
         setProjects(data);
       } catch (err) {
-        console.error('Failed to load projects, using dummy data:', err);
-        
-        // Use dummy data when API fails
-        const dummyProjects: Project[] = [
-          {
-            id: 'proj-1',
-            name: 'E-commerce Analytics Dashboard',
-            members: 8,
-            activeReports: 15,
-            status: 'active',
-            totalBilling: 150000,
-            paidAmount: 120000,
-            pendingAmount: 30000,
-            lastPayment: '2024-02-15'
-          },
-          {
-            id: 'proj-2',
-            name: 'Financial Reporting System',
-            members: 12,
-            activeReports: 22,
-            status: 'active',
-            totalBilling: 250000,
-            paidAmount: 250000,
-            pendingAmount: 0,
-            lastPayment: '2024-03-01'
-          },
-          {
-            id: 'proj-3',
-            name: 'Customer Insights Platform',
-            members: 6,
-            activeReports: 8,
-            status: 'inactive',
-            totalBilling: 80000,
-            paidAmount: 60000,
-            pendingAmount: 20000,
-            lastPayment: '2024-01-20'
-          }
-        ];
-        
-        setProjects(dummyProjects);
-        setError(null); // Clear error since we have dummy data
+        console.error('Failed to load projects:', err);
+        setError('Failed to load projects. Please try again.');
+        setProjects([]);
       } finally {
         setLoading(false);
       }
@@ -86,26 +58,45 @@ const ProjectManagement: React.FC = () => {
 
   const [newProject, setNewProject] = useState({
     name: '',
-    members: '',
-    activeReports: '',
+    description: '',
+    project_type: '',
+    project_value: '',
+    hourly_budget: '',
     status: 'active' as 'active' | 'inactive'
   });
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleAddProject = async () => {
-    if (newProject.name) {
+    if (newProject.name && newProject.description && newProject.project_type) {
       try {
+        // Get current user to set tier1_seller_id
+        const currentUser = apiService.getCurrentUser();
+        
         const projectData = {
           name: newProject.name,
-          members: parseInt(newProject.members) || 0,
-          activeReports: parseInt(newProject.activeReports) || 0,
+          description: newProject.description,
+          project_type: newProject.project_type,
+          project_value: parseFloat(newProject.project_value) || 0,
+          hourly_budget: parseFloat(newProject.hourly_budget) || 0,
+          hours_used: 0,
+          completion_percentage: 0,
           status: newProject.status,
+          tier1_seller_id: currentUser?.id || '',
+          tier2_seller_id: null,
+          clients: []
         };
         
         const createdProject = await apiService.createProject(projectData);
         setProjects([...projects, createdProject]);
-        setNewProject({ name: '', members: '', activeReports: '', status: 'active' });
+        setNewProject({ 
+          name: '', 
+          description: '', 
+          project_type: '', 
+          project_value: '', 
+          hourly_budget: '', 
+          status: 'active' 
+        });
         setIsDialogOpen(false);
         
         toast({
@@ -150,12 +141,11 @@ const ProjectManagement: React.FC = () => {
 
   // Calculate totals
   const totals = projects.reduce((acc, project) => ({
-    totalBilling: acc.totalBilling + project.totalBilling,
-    totalPaid: acc.totalPaid + project.paidAmount,
-    totalPending: acc.totalPending + project.pendingAmount,
+    totalValue: acc.totalValue + (project.project_value || 0),
+    totalClients: acc.totalClients + project.clients.length,
     totalProjects: projects.length,
     activeProjects: projects.filter(p => p.status === 'active').length
-  }), { totalBilling: 0, totalPaid: 0, totalPending: 0, totalProjects: 0, activeProjects: 0 });
+  }), { totalValue: 0, totalClients: 0, totalProjects: 0, activeProjects: 0 });
 
   if (loading) {
     return (
@@ -211,24 +201,49 @@ const ProjectManagement: React.FC = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="members">Number of Members</Label>
-                <Input
-                  id="members"
-                  type="number"
-                  value={newProject.members}
-                  onChange={(e) => setNewProject({ ...newProject, members: e.target.value })}
-                  placeholder="Enter number of members"
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={newProject.description}
+                  onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
+                  placeholder="Enter project description"
                 />
               </div>
               <div>
-                <Label htmlFor="reports">Active Reports</Label>
-                <Input
-                  id="reports"
-                  type="number"
-                  value={newProject.activeReports}
-                  onChange={(e) => setNewProject({ ...newProject, activeReports: e.target.value })}
-                  placeholder="Enter number of active reports"
-                />
+                <Label htmlFor="project_type">Project Type</Label>
+                <Select value={newProject.project_type} onValueChange={(value) => setNewProject({ ...newProject, project_type: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select project type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Web Development">Web Development</SelectItem>
+                    <SelectItem value="Report Generation">Report Generation</SelectItem>
+                    <SelectItem value="Data Analytics">Data Analytics</SelectItem>
+                    <SelectItem value="Consulting">Consulting</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="project_value">Project Value</Label>
+                  <Input
+                    id="project_value"
+                    type="number"
+                    value={newProject.project_value}
+                    onChange={(e) => setNewProject({ ...newProject, project_value: e.target.value })}
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="hourly_budget">Hourly Budget</Label>
+                  <Input
+                    id="hourly_budget"
+                    type="number"
+                    value={newProject.hourly_budget}
+                    onChange={(e) => setNewProject({ ...newProject, hourly_budget: e.target.value })}
+                    placeholder="0"
+                  />
+                </div>
               </div>
               <div>
                 <Label htmlFor="status">Status</Label>
@@ -281,9 +296,9 @@ const ProjectManagement: React.FC = () => {
             <div className="flex items-center space-x-2">
               <Users className="h-5 w-5 text-purple-600" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Members</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Clients</p>
                 <p className="text-2xl font-bold text-foreground">
-                  {projects.reduce((sum, p) => sum + p.members, 0)}
+                  {totals.totalClients}
                 </p>
               </div>
             </div>
@@ -295,9 +310,9 @@ const ProjectManagement: React.FC = () => {
             <div className="flex items-center space-x-2">
               <FileText className="h-5 w-5 text-orange-600" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Reports</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Value</p>
                 <p className="text-2xl font-bold text-foreground">
-                  {projects.reduce((sum, p) => sum + p.activeReports, 0)}
+                  ₹{totals.totalValue.toLocaleString()}
                 </p>
               </div>
             </div>
@@ -339,34 +354,38 @@ const ProjectManagement: React.FC = () => {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="flex items-center space-x-2">
                   <Users className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Members:</span>
-                  <span className="font-medium">{project.members}</span>
+                  <span className="text-muted-foreground">Clients:</span>
+                  <span className="font-medium">{project.clients.length}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <FileText className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Reports:</span>
-                  <span className="font-medium">{project.activeReports}</span>
+                  <span className="text-muted-foreground">Type:</span>
+                  <span className="font-medium">{project.project_type}</span>
                 </div>
               </div>
               
               <div className="border-t pt-3">
-                <h4 className="text-sm font-medium text-muted-foreground mb-2">Billing Summary</h4>
-                <div className="space-y-1 text-xs">
+                <h4 className="text-sm font-medium text-muted-foreground mb-2">Project Description</h4>
+                <p className="text-sm text-foreground">{project.description || 'No description available'}</p>
+              </div>
+              
+              <div className="border-t pt-3">
+                <div className="grid grid-cols-2 gap-4 text-xs">
                   <div className="flex justify-between">
-                    <span>Total Billing:</span>
-                    <span className="font-medium">${(project.totalBilling || 0).toLocaleString()}</span>
+                    <span>Project Value:</span>
+                    <span className="font-medium">₹{(project.project_value || 0).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Paid Amount:</span>
-                    <span className="font-medium text-green-600">${(project.paidAmount || 0).toLocaleString()}</span>
+                    <span>Hourly Budget:</span>
+                    <span className="font-medium">₹{(project.hourly_budget || 0).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Pending:</span>
-                    <span className="font-medium text-orange-600">${(project.pendingAmount || 0).toLocaleString()}</span>
+                    <span>Hours Used:</span>
+                    <span className="font-medium">{project.hours_used || 0}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Last Payment:</span>
-                    <span className="font-medium">{project.lastPayment || 'N/A'}</span>
+                    <span>Completion:</span>
+                    <span className="font-medium">{project.completion_percentage || 0}%</span>
                   </div>
                 </div>
               </div>
