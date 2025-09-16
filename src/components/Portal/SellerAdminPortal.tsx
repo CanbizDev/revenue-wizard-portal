@@ -217,7 +217,11 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
   }
 
   const renderDashboard = () => {
-    const totalClients = clients.length;
+    // Calculate total projects under this tier1 seller (direct + tier2 sellers' projects)
+    const directProjects = clients.length; // Projects directly under tier1 seller
+    const tier2Projects = tier2Sellers.reduce((sum, seller) => sum + (seller.clients || 0), 0); // Projects under tier2 sellers
+    const totalProjects = directProjects + tier2Projects;
+    
     const monthlyRevenue = clients.reduce((sum, client) => {
       if (client.subscription_plans) {
         return sum + client.subscription_plans.price;
@@ -240,10 +244,10 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <DashboardCard
-            title="Total Clients"
-            value={totalClients.toString()}
-            description="Active client accounts"
-            icon={Users}
+            title="Total Projects"
+            value={totalProjects.toString()}
+            description="All projects under your management"
+            icon={FileText}
           />
           {company === 'marketstrendai' && (
             <DashboardCard
