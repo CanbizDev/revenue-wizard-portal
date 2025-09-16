@@ -345,10 +345,13 @@ class ApiService {
   }
 
   async createProject(projectData: any): Promise<any> {
-    return this.request('/projects', {
-      method: 'POST',
-      body: JSON.stringify(projectData),
-    });
+    try {
+      const response = await this.axiosInstance.post('/projects/', projectData);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to create project:', error);
+      throw error;
+    }
   }
 
   async deleteProject(projectId: string): Promise<any> {
