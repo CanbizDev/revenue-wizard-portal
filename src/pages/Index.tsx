@@ -34,10 +34,10 @@ const COMPANIES = [
     description: 'Primary seller with multiple clients'
   },
   {
-    id: 'tier2seller',
-    name: 'Tier2Seller',
+    id: 'xyzseller',
+    name: 'XYZSeller',
     type: 'Tier-2 Seller',
-    subdomain: 'tier2seller.webreports.app',
+    subdomain: 'xyzseller.webreports.app',
     color: 'green',
     description: 'Secondary seller with clients: TCS, Infosys'
   }
@@ -127,7 +127,7 @@ const Index: React.FC<IndexProps> = ({ onCompanySelect }) => {
                 <Globe className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
               </div>
               <h3 className="text-base sm:text-lg font-semibold mb-2">Tier-2 Seller</h3>
-              <p className="text-sm sm:text-base text-gray-600">Tier2Seller - Secondary client operations</p>
+              <p className="text-sm sm:text-base text-gray-600">XYZSeller - Secondary client operations</p>
             </div>
           </div>
         </div>

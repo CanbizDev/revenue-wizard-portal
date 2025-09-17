@@ -16,7 +16,7 @@ import { useState, useEffect } from 'react';
 
 interface CommissionsViewProps {
   userRole: 'tier1_seller' | 'tier2_seller';
-  company: 'marketstrendai' | 'tier2seller';
+  company: 'marketstrendai' | 'xyzseller';
 }
 
 const CommissionsView: React.FC<CommissionsViewProps> = ({ userRole, company }) => {

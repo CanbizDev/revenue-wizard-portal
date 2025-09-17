@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { apiService, type CompanyInfo } from '@/services/api';
 
 interface CompanyLandingProps {
-  company: 'jupiterbrains' | 'marketstrendai' | 'tier2seller';
+  company: 'jupiterbrains' | 'marketstrendai' | 'xyzseller';
   onNavigate: (path: string) => void;
 }
 
@@ -44,7 +44,7 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
         const fallbackData: CompanyInfo = {
           id: company,
           name: company === 'jupiterbrains' ? 'JupiterBrains' : 
-                company === 'marketstrendai' ? 'MarketsTrendAI' : 'Tier2Seller',
+                company === 'marketstrendai' ? 'MarketsTrendAI' : 'XYZSeller',
           subdomain: `${company}.webreports.app`,
           type: company === 'jupiterbrains' ? 'root_admin' : 
                 company === 'marketstrendai' ? 'tier1_seller' : 'tier2_seller',
@@ -54,7 +54,7 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
                        company === 'marketstrendai' ? 'Primary seller with multiple clients' :
                        'Secondary seller with clients: TCS, Infosys',
           hasAdmin: true,
-          clients: company === 'jupiterbrains' ? ['MarketsTrendAI', 'Tier2Seller'] :
+          clients: company === 'jupiterbrains' ? ['MarketsTrendAI', 'XYZSeller'] :
                    company === 'marketstrendai' ? ['TechCorp', 'DataFlow', 'CloudVision'] :
                    ['TCS', 'Infosys']
         };
@@ -108,7 +108,7 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
   const handleAdminAccess = () => {
     if (company === 'jupiterbrains') {
       onNavigate('/admin');
-    } else if (company === 'marketstrendai' || company === 'tier2seller') {
+    } else if (company === 'marketstrendai' || company === 'xyzseller') {
       onNavigate('/seller-admin');
     } else {
       onNavigate('/admin'); // fallback

@@ -38,7 +38,7 @@ const App = () => {
     if (currentPath === '/seller-admin') {
       return (
         <SellerAdminPortal 
-          company={selectedCompany as 'marketstrendai' | 'tier2seller'}
+          company={selectedCompany as 'marketstrendai' | 'xyzseller'}
           onNavigate={handleNavigate}
         />
       );
@@ -49,7 +49,7 @@ const App = () => {
       const clientName = currentPath.substring(1);
       return (
         <ClientLogin 
-          company={selectedCompany as 'marketstrendai' | 'tier2seller'}
+          company={selectedCompany as 'marketstrendai' | 'xyzseller'}
           client={clientName}
           onBack={() => setCurrentPath(`/${selectedCompany}`)}
           onLogin={(role) => {
@@ -64,7 +64,7 @@ const App = () => {
     // Default to company landing
     return (
       <CompanyLanding 
-        company={selectedCompany as 'jupiterbrains' | 'marketstrendai' | 'tier2seller'} 
+        company={selectedCompany as 'jupiterbrains' | 'marketstrendai' | 'xyzseller'} 
         onNavigate={handleNavigate}
       />
     );

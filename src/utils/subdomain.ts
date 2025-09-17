@@ -19,7 +19,7 @@ export const getSubdomain = (): string | null => {
   // Handle direct subdomain matches for development/staging
   if (hostname.toLowerCase() === 'jupiterbrains' || 
       hostname.toLowerCase() === 'markettrendsai' || 
-      hostname.toLowerCase() === 'tier2seller') {
+      hostname.toLowerCase() === 'xyzseller') {
     return hostname.toLowerCase();
   }
   
@@ -32,7 +32,7 @@ export const getCompanyFromSubdomain = (subdomain: string | null): string | null
   const subdomainMap: { [key: string]: string } = {
     'jupiterbrains': 'jupiterbrains',
     'markettrendsai': 'marketstrendai', 
-    'tier2seller': 'tier2seller'
+    'xyzseller': 'xyzseller'
   };
   
   return subdomainMap[subdomain] || null;
