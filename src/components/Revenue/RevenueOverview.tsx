@@ -56,6 +56,7 @@ const RevenueOverview: React.FC = () => {
       setRevenueData(data);
     } catch (error) {
       console.error('Failed to load billing data:', error);
+      console.error('Error details:', error);
     } finally {
       setLoading(false);
     }
@@ -63,7 +64,11 @@ const RevenueOverview: React.FC = () => {
 
   // Apply filters to billing records - show only current logged-in user's data
   const applyFilters = () => {
+    console.log('applyFilters called');
+    console.log('revenueData:', revenueData);
+    
     if (!revenueData || !revenueData.billing_details || !Array.isArray(revenueData.billing_details)) {
+      console.log('No revenue data or billing_details not an array, setting empty filtered data');
       setFilteredData([]);
       return;
     }

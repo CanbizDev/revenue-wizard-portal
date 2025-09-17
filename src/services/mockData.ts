@@ -158,3 +158,59 @@ export const mockBillingSummary = {
     }
   ]
 };
+
+export const mockRevenueData = {
+  summary: {
+    total_bills: 25,
+    paid_bills: 18,
+    pending_bills: 5,
+    overdue_bills: 2,
+    total_value: 485000,
+    collected_amount: 365000,
+    outstanding_amount: 120000
+  },
+  billing_details: [
+    {
+      client_name: "TechCorp Solutions",
+      invoice_id: "INV-2024-001",
+      bill_amount: 75000,
+      due_date: "2024-03-15",
+      payment_date: "2024-03-10",
+      status: "Paid",
+      tier: "Tier-1"
+    },
+    {
+      client_name: "FinanceFlow Inc",
+      invoice_id: "INV-2024-002", 
+      bill_amount: 120000,
+      due_date: "2024-03-20",
+      status: "Pending",
+      tier: "Tier-1"
+    },
+    {
+      client_name: "DataCorp Ltd",
+      invoice_id: "INV-2024-003",
+      bill_amount: 95000,
+      due_date: "2024-02-28",
+      status: "Overdue",
+      tier: "Tier-2"
+    },
+    {
+      client_name: "Analytics Pro",
+      invoice_id: "INV-2024-004",
+      bill_amount: 65000,
+      due_date: "2024-03-25",
+      payment_date: "2024-03-20",
+      status: "Paid",
+      tier: "Tier-1"
+    },
+    {
+      client_name: "ReportMaster Inc",
+      invoice_id: "INV-2024-005",
+      bill_amount: 85000,
+      due_date: "2024-04-01",
+      status: "Pending",
+      tier: "Tier-2"
+    }
+  ]
+};

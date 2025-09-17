@@ -1,6 +1,6 @@
 // API service layer for Flask backend communication
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { mockDashboardData, mockCompanyInfo, mockProjects, mockClientConfig, mockBillingSummary } from './mockData';
+import { mockDashboardData, mockCompanyInfo, mockProjects, mockClientConfig, mockBillingSummary, mockRevenueData } from './mockData';
 
 const API_BASE_URL = 'http://localhost:5021/api';
 
@@ -162,10 +162,17 @@ class ApiService {
   }
 
   private getMockData(endpoint: string): any {
-    // Dashboard endpoints now throw errors instead of returning mock data
+    console.log('getMockData called for endpoint:', endpoint);
+    
+    // Revenue/billing data
+    if (endpoint.includes('/billing/revenue')) {
+      console.log('Returning mock revenue data:', mockRevenueData);
+      return mockRevenueData;
+    }
 
     // Billing summary
     if (endpoint.includes('/billing-summary')) {
+      console.log('Returning mock billing summary:', mockBillingSummary);
       return mockBillingSummary;
     }
 
