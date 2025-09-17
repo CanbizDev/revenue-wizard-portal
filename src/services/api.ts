@@ -1,6 +1,6 @@
 // API service layer for Flask backend communication
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { mockDashboardData, mockCompanyInfo, mockProjects, mockClientConfig, mockBillingSummary, mockRevenueData } from './mockData';
+import { mockDashboardData, mockCompanyInfo, mockProjects, mockClientConfig, mockBillingSummary } from './mockData';
 
 const API_BASE_URL = 'http://localhost:5021/api';
 
@@ -169,11 +169,6 @@ class ApiService {
       return mockBillingSummary;
     }
 
-    // Revenue data
-    if (endpoint.includes('/billing/revenue')) {
-      return mockRevenueData;
-    }
-
     // Company info
     if (endpoint.includes('/company/') && endpoint.includes('/info')) {
       const company = endpoint.split('/')[2];
@@ -312,8 +307,11 @@ class ApiService {
     return this.request<BillingSummary>('/seller/billing-summary');
   }
 
-  async getRevenueData(): Promise<RevenueData> {
-    return this.request<RevenueData>('/billing/revenue');
+  async getRevenueData(tier1Id: string): Promise<RevenueData> {
+    console.log('API: Making revenue request with tier1Id:', tier1Id);
+    const url = `/billing/revenue?tier1_id=${tier1Id}`;
+    console.log('API: Revenue request URL:', url);
+    return this.request<RevenueData>(url);
   }
 
   async getProjectBillingDetails(projectId: string): Promise<any> {
@@ -490,7 +488,9 @@ class ApiService {
 
   getCurrentUser(): any {
     const userData = localStorage.getItem('user_data');
-    return userData ? JSON.parse(userData) : null;
+    const user = userData ? JSON.parse(userData) : null;
+    console.log('getCurrentUser returning:', user);
+    return user;
   }
 }
 
