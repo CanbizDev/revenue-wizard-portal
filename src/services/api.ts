@@ -164,8 +164,8 @@ class ApiService {
   private getMockData(endpoint: string): any {
     // Dashboard endpoints now throw errors instead of returning mock data
 
-    // Billing summary
-    if (endpoint.includes('/billing-summary')) {
+    // Billing summary and revenue data
+    if (endpoint.includes('/billing/summary') || endpoint.includes('/billing/revenue')) {
       return mockBillingSummary;
     }
 
@@ -211,8 +211,8 @@ class ApiService {
       ];
     }
 
-    // Tier2 sellers mock data
-    if (endpoint.includes('/seller/tier2')) {
+    // Tier2 sellers mock data - Use admin endpoints
+    if (endpoint.includes('/admin/tier2-sellers')) {
       return [
         {
           id: '1',
@@ -304,7 +304,7 @@ class ApiService {
 
   // Billing endpoints
   async getBillingSummary(): Promise<BillingSummary> {
-    return this.request<BillingSummary>('/seller/billing-summary');
+    return this.request<BillingSummary>('/billing/summary');
   }
 
   async getRevenueData(): Promise<RevenueData> {
@@ -442,31 +442,31 @@ class ApiService {
     });
   }
 
-  // Tier2 Seller Management (Admin + Tier1)
+  // Tier2 Seller Management - Use same endpoints as others
   async createTier2Seller(sellerData: any): Promise<any> {
-    return this.request('/seller/tier2', {
+    return this.request('/admin/tier2-sellers', {
       method: 'POST',
       data: sellerData,
     });
   }
 
   async getAllTier2Sellers(): Promise<any[]> {
-    return this.request<any[]>('/seller/tier2');
+    return this.request<any[]>('/admin/tier2-sellers');
   }
 
   async getTier2Seller(id: string): Promise<any> {
-    return this.request(`/seller/tier2/${id}`);
+    return this.request(`/admin/tier2-sellers/${id}`);
   }
 
   async updateTier2Seller(id: string, sellerData: any): Promise<any> {
-    return this.request(`/seller/tier2/${id}`, {
+    return this.request(`/admin/tier2-sellers/${id}`, {
       method: 'PUT',
       data: sellerData,
     });
   }
 
   async deleteTier2Seller(id: string): Promise<any> {
-    return this.request(`/seller/tier2/${id}`, {
+    return this.request(`/admin/tier2-sellers/${id}`, {
       method: 'DELETE',
     });
   }
