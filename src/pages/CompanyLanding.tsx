@@ -44,7 +44,7 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
         const fallbackData: CompanyInfo = {
           id: company,
           name: company === 'jupiterbrains' ? 'JupiterBrains' : 
-                company === 'marketstrendai' ? 'MarketsTrendAI' : 'XYZSeller',
+                company === 'marketstrendai' ? 'MarketsTrendAI' : 'Tier-2 Seller',
           subdomain: `${company}.webreports.app`,
           type: company === 'jupiterbrains' ? 'root_admin' : 
                 company === 'marketstrendai' ? 'tier1_seller' : 'tier2_seller',
@@ -54,7 +54,7 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
                        company === 'marketstrendai' ? 'Primary seller with multiple clients' :
                        'Secondary seller with clients: TCS, Infosys',
           hasAdmin: true,
-          clients: company === 'jupiterbrains' ? ['MarketsTrendAI', 'XYZSeller'] :
+          clients: company === 'jupiterbrains' ? ['MarketsTrendAI', 'Tier-2 Seller'] :
                    company === 'marketstrendai' ? ['TechCorp', 'DataFlow', 'CloudVision'] :
                    ['TCS', 'Infosys']
         };
@@ -142,7 +142,8 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
     setTier1LoginLoading(true);
 
     try {
-      const response = await apiService.login(tier1LoginCredentials.email, tier1LoginCredentials.password, 'tier1_seller');
+      const userType = company === 'marketstrendai' ? 'tier1_seller' : 'tier2_seller';
+      const response = await apiService.login(tier1LoginCredentials.email, tier1LoginCredentials.password, userType);
       toast({
         title: "Login successful",
         description: `Welcome back, ${response.user.name}!`,
@@ -290,14 +291,16 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
               </Card>
             )}
 
-            {/* Tier1 Seller Login - Centered for non-JupiterBrains */}
+            {/* Seller Login - Centered for non-JupiterBrains */}
             {company !== 'jupiterbrains' && (
               <Card className={`hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br ${colors.bg} w-full max-w-md`}>
                 <CardHeader className="text-center pb-4">
                   <div className={`w-16 h-16 ${colors.icon} rounded-full flex items-center justify-center mx-auto mb-4`}>
                     <Shield className="w-8 h-8 text-white" />
                   </div>
-                  <CardTitle className={`text-xl ${colors.text}`}>Tier-1 Seller Login</CardTitle>
+                  <CardTitle className={`text-xl ${colors.text}`}>
+                    {company === 'marketstrendai' ? 'Tier-1 Seller Login' : 'Tier-2 Seller Login'}
+                  </CardTitle>
                   <p className="text-sm text-gray-600">
                     Sign in to access your seller portal
                   </p>
@@ -332,7 +335,7 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
                       <Label htmlFor="tier1-user-type">User Type</Label>
                       <Input
                         id="tier1-user-type"
-                        value="tier1_seller"
+                        value={company === 'marketstrendai' ? 'tier1_seller' : 'tier2_seller'}
                         disabled
                         className="bg-gray-50"
                       />

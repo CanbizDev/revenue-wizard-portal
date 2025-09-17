@@ -35,7 +35,7 @@ const COMPANIES = [
   },
   {
     id: 'xyzseller',
-    name: 'XYZSeller',
+    name: 'Tier-2 Seller',
     type: 'Tier-2 Seller',
     subdomain: 'xyzseller.webreports.app',
     color: 'green',
@@ -127,7 +127,7 @@ const Index: React.FC<IndexProps> = ({ onCompanySelect }) => {
                 <Globe className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
               </div>
               <h3 className="text-base sm:text-lg font-semibold mb-2">Tier-2 Seller</h3>
-              <p className="text-sm sm:text-base text-gray-600">XYZSeller - Secondary client operations</p>
+              <p className="text-sm sm:text-base text-gray-600">Tier-2 Seller - Secondary client operations</p>
             </div>
           </div>
         </div>
@@ -165,7 +165,9 @@ const Index: React.FC<IndexProps> = ({ onCompanySelect }) => {
                       className={`w-full ${colors.button} text-sm py-3 mt-auto`}
                       size="lg"
                     >
-                      {company.id === 'marketstrendai' ? 'Enter Tier-1 Seller' : `Enter ${company.name}`}
+                      {company.id === 'marketstrendai' ? 'Enter Tier-1 Seller' : 
+                       company.id === 'xyzseller' ? 'Enter Tier-2 Seller' : 
+                       `Enter ${company.name}`}
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </CardContent>
