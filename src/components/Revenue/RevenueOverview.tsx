@@ -62,7 +62,7 @@ const RevenueOverview: React.FC = () => {
     }
   };
 
-  // Apply filters to billing records - show only current logged-in user's data
+  // Apply filters to billing records - backend already filters by user
   const applyFilters = () => {
     console.log('applyFilters called');
     console.log('revenueData:', revenueData);
@@ -74,61 +74,17 @@ const RevenueOverview: React.FC = () => {
     }
     
     let filtered = [...revenueData.billing_details];
+    
+    console.log('Total billing records from backend:', filtered.length);
 
-    // Get current logged-in user details
-    const currentUser = apiService.getCurrentUser();
-    const currentUserId = currentUser?.id;
-    const currentUserName = currentUser?.name;
-    const currentUserRole = currentUser?.role;
-    
-    console.log('Current logged-in user:', currentUser);
-    console.log('User ID:', currentUserId);
-    console.log('User Name:', currentUserName);
-    console.log('User Role:', currentUserRole);
-    console.log('Total billing records before filtering:', filtered.length);
-    
-    if (currentUserId && currentUserName) {
-      // Filter billing records to show only those belonging to the current logged-in user
-      filtered = filtered.filter(record => {
-        // Check if this billing record belongs to the current logged-in user
-        const belongsToCurrentUser = 
-          // Match by tier field (could contain user name or ID)
-          record.tier === currentUserName || 
-          record.tier === currentUserId ||
-          // Match by any tier1_seller fields if they exist
-          (record as any).tier1_seller_id === currentUserId ||
-          (record as any).tier1_seller_name === currentUserName ||
-          // Match by seller_id if it exists
-          (record as any).seller_id === currentUserId ||
-          (record as any).seller_name === currentUserName ||
-          // For tier1 sellers, also check if tier contains their name/id
-          (currentUserRole === 'tier1_seller' && (
-            record.tier?.toLowerCase().includes(currentUserName.toLowerCase()) ||
-            record.tier?.includes(currentUserId)
-          ));
-        
-        if (belongsToCurrentUser) {
-          console.log(`✓ Record ${record.invoice_id} belongs to current user - tier: "${record.tier}"`);
-        } else {
-          console.log(`✗ Record ${record.invoice_id} does NOT belong to current user - tier: "${record.tier}"`);
-        }
-        
-        return belongsToCurrentUser;
-      });
-    } else {
-      console.warn('No current user ID or name found, showing all records');
-    }
-    
-    console.log(`Billing records after filtering for current user: ${filtered.length} out of ${revenueData.billing_details.length}`);
-
-    // Apply additional client filter if selected
+    // Apply client filter if selected (only filter by client, not by user since backend handles that)
     if (selectedProject !== 'all') {
       const beforeClientFilter = filtered.length;
       filtered = filtered.filter(record => record.client_name.toLowerCase().includes(selectedProject.toLowerCase()));
       console.log(`Records after client filter: ${filtered.length} (filtered out ${beforeClientFilter - filtered.length})`);
     }
 
-    console.log('Final filtered billing data for current user:', filtered);
+    console.log('Final filtered billing data:', filtered);
     setFilteredData(filtered);
   };
 
