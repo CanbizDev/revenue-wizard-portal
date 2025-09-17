@@ -1,6 +1,6 @@
 // API service layer for Flask backend communication
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { mockDashboardData, mockCompanyInfo, mockProjects, mockClientConfig, mockBillingSummary, mockRevenueData } from './mockData';
+import { mockDashboardData, mockCompanyInfo, mockProjects, mockClientConfig, mockBillingSummary } from './mockData';
 
 const API_BASE_URL = 'http://localhost:5021/api';
 
@@ -162,17 +162,10 @@ class ApiService {
   }
 
   private getMockData(endpoint: string): any {
-    console.log('getMockData called for endpoint:', endpoint);
-    
-    // Revenue/billing data
-    if (endpoint.includes('/billing/revenue')) {
-      console.log('Returning mock revenue data:', mockRevenueData);
-      return mockRevenueData;
-    }
+    // Dashboard endpoints now throw errors instead of returning mock data
 
     // Billing summary
     if (endpoint.includes('/billing-summary')) {
-      console.log('Returning mock billing summary:', mockBillingSummary);
       return mockBillingSummary;
     }
 
@@ -314,18 +307,8 @@ class ApiService {
     return this.request<BillingSummary>('/seller/billing-summary');
   }
 
-  async getRevenueData(tier1Id: string): Promise<RevenueData> {
-    console.log('API: Making revenue request with tier1Id:', tier1Id);
-    const url = `/billing/revenue?tier1_id=${tier1Id}`;
-    console.log('API: Revenue request URL:', url);
-    return this.request<RevenueData>(url);
-  }
-
-  async getAdminRevenueData(): Promise<RevenueData> {
-    console.log('API: Making admin revenue request');
-    const url = `/billing/revenue`;
-    console.log('API: Admin revenue request URL:', url);
-    return this.request<RevenueData>(url);
+  async getRevenueData(): Promise<RevenueData> {
+    return this.request<RevenueData>('/billing/revenue');
   }
 
   async getProjectBillingDetails(projectId: string): Promise<any> {
@@ -502,9 +485,7 @@ class ApiService {
 
   getCurrentUser(): any {
     const userData = localStorage.getItem('user_data');
-    const user = userData ? JSON.parse(userData) : null;
-    console.log('getCurrentUser returning:', user);
-    return user;
+    return userData ? JSON.parse(userData) : null;
   }
 }
 
