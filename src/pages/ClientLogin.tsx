@@ -10,7 +10,7 @@ import { apiService, type ClientConfig } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 
 interface ClientLoginProps {
-  company: 'marketstrendai' | 'xyzseller';
+  company: 'marketstrendai' | 'tier2seller';
   client: string;
   onBack: () => void;
   onLogin: (role: 'admin' | 'viewer') => void;

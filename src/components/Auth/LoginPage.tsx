@@ -144,10 +144,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => quickLogin('admin@xyzseller.com', 'admin123', 'tier1_seller')}
+                  onClick={() => quickLogin('admin@tier2seller.com', 'admin123', 'tier2_seller')}
                   className="text-xs"
                 >
-                  XYZ Tier-1 Seller
+                  Tier2Seller Login
                 </Button>
                 <Button
                   variant="outline"

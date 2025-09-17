@@ -60,7 +60,7 @@ import {
 } from 'lucide-react';
 
 interface SellerAdminPortalProps {
-  company?: 'marketstrendai' | 'xyzseller';
+  company?: 'marketstrendai' | 'tier2seller';
   onNavigate?: (path: string) => void;
   activeTab?: string;
 }
@@ -190,7 +190,7 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
       };
     }
 
-    if (company === 'xyzseller') {
+    if (company === 'tier2seller') {
       return {
         name: `${sellerData.name} Admin`,
         email: sellerData.admin_email,
@@ -243,7 +243,7 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
       <div className="space-y-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            {company === 'xyzseller' ? 'Tier-2 Seller Dashboard' : 'Tier-1 Seller Dashboard'}
+            {company === 'tier2seller' ? 'Tier-2 Seller Dashboard' : 'Tier-1 Seller Dashboard'}
           </h2>
           <p className="text-gray-600">Overview of your business operations</p>
         </div>
@@ -561,7 +561,7 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
       case 'tier2-sellers':
         return company === 'marketstrendai' ? renderTier2Sellers() : renderDashboard();
       case 'commissions':
-        return <CommissionsView userRole={company === 'xyzseller' ? 'tier2_seller' : 'tier1_seller'} company={company} />;
+        return <CommissionsView userRole={company === 'tier2seller' ? 'tier2_seller' : 'tier1_seller'} company={company} />;
       case 'billing':
         return <ProjectBilling />;
       case 'reports':
@@ -733,7 +733,7 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
         <Sidebar
           activeTab={activeTab}
           onTabChange={setActiveTab}
-          userRole={company === 'xyzseller' ? 'tier2_seller' : 'tier1_seller'}
+          userRole={company === 'tier2seller' ? 'tier2_seller' : 'tier1_seller'}
           portalType="seller"
         />
         

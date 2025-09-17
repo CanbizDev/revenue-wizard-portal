@@ -87,10 +87,10 @@ export const mockCompanyInfo = {
     hasAdmin: true,
     description: 'MarketsTriendAI company description'
   },
-  xyzseller: {
-    id: 'xyzseller',
-    name: 'XYZ Seller',
-    subdomain: 'xyzseller',
+  tier2seller: {
+    id: 'tier2seller',
+    name: 'Tier2 Seller',
+    subdomain: 'tier2seller',
     type: 'tier2_seller' as const,
     color: '#8B5CF6',
     clients: ['client1'],
