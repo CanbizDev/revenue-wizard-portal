@@ -136,14 +136,40 @@ const Header: React.FC<HeaderProps> = ({ portalType, user, sellerName, onMenuTog
                 )}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-72">
               <DropdownMenuLabel>
-                <div>
-                  <p className="font-medium">{user?.name}</p>
-                  <p className="text-sm text-gray-500">{user?.email}</p>
-                  {user?.company && (
-                    <p className="text-xs text-gray-400">{user.company}</p>
-                  )}
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-full flex items-center justify-center">
+                      <span className="text-white font-semibold text-sm">
+                        {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 truncate">{user?.name || 'Unknown User'}</p>
+                      <p className="text-sm text-gray-500 truncate">{user?.email || 'No email'}</p>
+                    </div>
+                  </div>
+                  <div className="pt-2 border-t border-gray-100">
+                    <div className="grid grid-cols-1 gap-1 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Role:</span>
+                        <span className="font-medium text-gray-700 capitalize">
+                          {user?.role?.replace('_', ' ') || 'Unknown'}
+                        </span>
+                      </div>
+                      {user?.company && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Company:</span>
+                          <span className="font-medium text-gray-700 truncate ml-2">{user.company}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Portal:</span>
+                        <span className="font-medium text-gray-700 capitalize">{portalType}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
