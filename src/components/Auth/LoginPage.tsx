@@ -6,13 +6,14 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { apiService, LoginRequest } from '@/services/api';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
 
 interface LoginPageProps {
   onLoginSuccess: (userType: string) => void;
+  onBack?: () => void;
 }
 
-const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
+const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onBack }) => {
   const [credentials, setCredentials] = useState<LoginRequest>({
     email: '',
     password: '',
@@ -50,6 +51,17 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
+        {onBack && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onBack}
+            className="self-start"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Landing
+          </Button>
+        )}
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold tracking-tight">Welcome Back</h1>
           <p className="text-muted-foreground">Sign in to your SaaS dashboard</p>

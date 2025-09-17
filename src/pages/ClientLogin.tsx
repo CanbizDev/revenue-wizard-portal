@@ -146,7 +146,7 @@ const ClientLogin: React.FC<ClientLoginProps> = ({ company, client, onBack, onLo
                 className="text-muted-foreground hover:text-foreground"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Back
+                Back to Landing
               </Button>
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center shadow-lg">

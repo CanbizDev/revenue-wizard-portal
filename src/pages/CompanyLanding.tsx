@@ -5,16 +5,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowRight, Building2, Users, Shield, Loader2 } from 'lucide-react';
+import { ArrowRight, Building2, Users, Shield, Loader2, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiService, type CompanyInfo } from '@/services/api';
 
 interface CompanyLandingProps {
   company: 'jupiterbrains' | 'marketstrendai' | 'xyzseller';
   onNavigate: (path: string) => void;
+  onBack?: () => void;
 }
 
-const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) => {
+const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate, onBack }) => {
   const [selectedClient, setSelectedClient] = useState<string>('');
   const [companyData, setCompanyData] = useState<CompanyInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -188,6 +189,17 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
+            {onBack && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onBack}
+                className="text-gray-600 hover:text-gray-900"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
+              </Button>
+            )}
             <div className="flex items-center space-x-3">
               <div className={`w-10 h-10 ${colors.icon} rounded-xl flex items-center justify-center`}>
                 <Building2 className="w-6 h-6 text-white" />
