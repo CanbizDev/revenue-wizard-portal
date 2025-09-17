@@ -1,6 +1,6 @@
 // API service layer for Flask backend communication
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { mockDashboardData, mockCompanyInfo, mockProjects, mockClientConfig, mockBillingSummary } from './mockData';
+import { mockDashboardData, mockCompanyInfo, mockProjects, mockClientConfig, mockBillingSummary, mockRevenueData } from './mockData';
 
 const API_BASE_URL = 'http://localhost:5021/api';
 
@@ -167,6 +167,11 @@ class ApiService {
     // Billing summary
     if (endpoint.includes('/billing-summary')) {
       return mockBillingSummary;
+    }
+
+    // Revenue data
+    if (endpoint.includes('/billing/revenue')) {
+      return mockRevenueData;
     }
 
     // Company info

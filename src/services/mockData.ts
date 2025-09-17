@@ -158,3 +158,76 @@ export const mockBillingSummary = {
     }
   ]
 };
+
+export const mockRevenueData = {
+  summary: {
+    total_bills: 25,
+    paid_bills: 18,
+    pending_bills: 7,
+    overdue_bills: 2,
+    total_value: 850000,
+    collected_amount: 650000,
+    outstanding_amount: 200000
+  },
+  billing_details: [
+    {
+      client_name: 'TechCorp Solutions',
+      invoice_id: 'INV-2024-001',
+      bill_amount: 75000,
+      due_date: '2024-03-15',
+      payment_date: '2024-03-12',
+      status: 'Paid',
+      tier: 'Tier-1'
+    },
+    {
+      client_name: 'FinanceFlow Inc',
+      invoice_id: 'INV-2024-002',
+      bill_amount: 120000,
+      due_date: '2024-03-20',
+      payment_date: '2024-03-18',
+      status: 'Paid',
+      tier: 'Tier-2'
+    },
+    {
+      client_name: 'DataAnalytics Pro',
+      invoice_id: 'INV-2024-003',
+      bill_amount: 95000,
+      due_date: '2024-03-25',
+      status: 'Pending',
+      tier: 'Tier-1'
+    },
+    {
+      client_name: 'RetailMetrics Corp',
+      invoice_id: 'INV-2024-004',
+      bill_amount: 60000,
+      due_date: '2024-02-28',
+      status: 'Overdue',
+      tier: 'Tier-2'
+    },
+    {
+      client_name: 'CloudInsights Ltd',
+      invoice_id: 'INV-2024-005',
+      bill_amount: 85000,
+      due_date: '2024-04-01',
+      status: 'Pending',
+      tier: 'Tier-1'
+    },
+    {
+      client_name: 'SmartBI Solutions',
+      invoice_id: 'INV-2024-006',
+      bill_amount: 110000,
+      due_date: '2024-04-05',
+      payment_date: '2024-04-03',
+      status: 'Paid',
+      tier: 'Tier-2'
+    },
+    {
+      client_name: 'TrendAnalytics Inc',
+      invoice_id: 'INV-2024-007',
+      bill_amount: 45000,
+      due_date: '2024-02-15',
+      status: 'Overdue',
+      tier: 'Tier-1'
+    }
+  ]
+};
