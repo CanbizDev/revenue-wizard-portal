@@ -27,20 +27,31 @@ const RevenueOverview: React.FC = () => {
   const loadBillingData = async () => {
     try {
       setLoading(true);
-      // Get current user data to get the tier1 seller ID
+      // Get current user data
       const currentUser = apiService.getCurrentUser();
-      const tier1Id = currentUser?.id;
       
       console.log('Current user for revenue:', currentUser);
-      console.log('Tier1 ID for revenue request:', tier1Id);
       
-      if (!tier1Id) {
-        console.error('No tier1 seller ID found');
-        return;
+      let data;
+      if (currentUser?.role === 'admin') {
+        // Admin sees all revenue data - no tier1Id needed
+        console.log('Making admin revenue API call');
+        data = await apiService.getAdminRevenueData();
+      } else {
+        // Tier1/Tier2 sellers need tier1Id
+        const tier1Id = currentUser?.id;
+        
+        console.log('Tier1 ID for revenue request:', tier1Id);
+        
+        if (!tier1Id) {
+          console.error('No tier1 seller ID found');
+          return;
+        }
+        
+        console.log('Making revenue API call with tier1Id:', tier1Id);
+        data = await apiService.getRevenueData(tier1Id);
       }
       
-      console.log('Making revenue API call with tier1Id:', tier1Id);
-      const data = await apiService.getRevenueData(tier1Id);
       console.log('Revenue data received:', data);
       setRevenueData(data);
     } catch (error) {

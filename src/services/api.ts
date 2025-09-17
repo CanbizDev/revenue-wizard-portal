@@ -314,6 +314,13 @@ class ApiService {
     return this.request<RevenueData>(url);
   }
 
+  async getAdminRevenueData(): Promise<RevenueData> {
+    console.log('API: Making admin revenue request');
+    const url = `/billing/revenue`;
+    console.log('API: Admin revenue request URL:', url);
+    return this.request<RevenueData>(url);
+  }
+
   async getProjectBillingDetails(projectId: string): Promise<any> {
     return this.request(`/seller/project/${projectId}/billing-details`);
   }
