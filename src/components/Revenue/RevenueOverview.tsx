@@ -30,11 +30,24 @@ const RevenueOverview: React.FC = () => {
   // Load billing data from API
   const loadBillingData = async () => {
     try {
+      console.log('🚀 Starting to load billing data...');
       setLoading(true);
+      
+      // Check if user is authenticated
+      const currentUser = apiService.getCurrentUser();
+      console.log('👤 Current user:', currentUser);
+      
+      if (!apiService.isAuthenticated()) {
+        console.error('❌ User is not authenticated');
+        return;
+      }
+      
+      console.log('📡 Making API call to /billing/revenue...');
       const data = await apiService.getRevenueData();
+      console.log('✅ Revenue data received:', data);
       setRevenueData(data);
     } catch (error) {
-      console.error('Failed to load billing data:', error);
+      console.error('❌ Failed to load billing data:', error);
     } finally {
       setLoading(false);
     }
