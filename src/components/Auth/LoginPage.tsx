@@ -16,7 +16,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const [credentials, setCredentials] = useState<LoginRequest>({
     email: '',
     password: '',
-    user_type: 'tier1_seller'
+    user_type: 'admin'
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -139,7 +139,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   onClick={() => quickLogin('admin@marketstrendai.com', 'admin123', 'tier1_seller')}
                   className="text-xs"
                 >
-                  MarketTrends Tier-1 Seller
+                  MarketsTrendAI Tier-1 Seller
                 </Button>
                 <Button
                   variant="outline"
