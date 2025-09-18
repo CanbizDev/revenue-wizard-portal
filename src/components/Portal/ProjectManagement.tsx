@@ -355,7 +355,7 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                   placeholder="Enter project type"
                 />
               </div>
-              {userRole === 'tier1' && (
+              {/* {userRole === 'tier1' && (
                 <div>
                   <Label htmlFor="tier2_seller_id">Tier 2 Seller (Optional)</Label>
                   <Select value={newProject.tier2_seller_id || "none"} onValueChange={(value) => setNewProject({ ...newProject, tier2_seller_id: value === "none" ? "" : value })}>
@@ -372,7 +372,7 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                     </SelectContent>
                   </Select>
                 </div>
-              )}
+              )} */}
               <div>
                 <Label htmlFor="status">Status</Label>
                 <Select value={newProject.status} onValueChange={(value: 'active' | 'inactive') => setNewProject({ ...newProject, status: value })}>

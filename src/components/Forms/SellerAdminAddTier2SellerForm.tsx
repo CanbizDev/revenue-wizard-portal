@@ -152,12 +152,12 @@ const SellerAdminAddTier2SellerForm: React.FC<SellerAdminAddTier2SellerFormProps
                   type="text"
                   value={formData.adminPassword}
                   onChange={(e) => handleInputChange('adminPassword', e.target.value)}
-                  placeholder="Generated password"
+                  placeholder="password"
                   required
                 />
-                <Button type="button" onClick={generatePassword} variant="outline">
+                {/* <Button type="button" onClick={generatePassword} variant="outline">
                   Generate
-                </Button>
+                </Button> */}
               </div>
             </div>
           </div>
