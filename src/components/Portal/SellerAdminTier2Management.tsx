@@ -142,8 +142,8 @@ const SellerAdminTier2Management: React.FC<SellerAdminTier2ManagementProps> = ({
                   <TableRow>
                     <TableHead>Seller Details</TableHead>
                     <TableHead>Subdomain</TableHead>
-                    <TableHead>Commission</TableHead>
-                    <TableHead>Clients</TableHead>
+                    
+                    <TableHead>Projects</TableHead>
                     <TableHead>Revenue</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Actions</TableHead>
@@ -178,15 +178,15 @@ const SellerAdminTier2Management: React.FC<SellerAdminTier2ManagementProps> = ({
                           {seller.subdomain}.reportingportal.ai
                         </div>
                       </TableCell>
-                      <TableCell>
+                      {/* <TableCell>
                         <div className="font-medium">
                           {seller.commission_type === 'percentage' 
                             ? `${seller.commission_value || 0}%` 
                             : `₹${seller.commission_value || 0}`}
                         </div>
-                      </TableCell>
+                      </TableCell> */}
                       <TableCell>
-                        <div className="font-medium">{seller.client_count || 0}</div>
+                        <div className="font-medium">{seller.project_count || 0}</div>
                       </TableCell>
                       <TableCell>
                         <div className="font-medium">₹{seller.revenue || 0}</div>

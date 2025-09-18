@@ -66,6 +66,7 @@ const App = () => {
       <CompanyLanding 
         company={selectedCompany as 'jupiterbrains' | 'marketstrendai' | 'xyzseller'} 
         onNavigate={handleNavigate}
+        onBack={() => setSelectedCompany('')} // <-- ADD THIS LINE
       />
     );
   };

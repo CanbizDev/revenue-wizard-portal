@@ -8,7 +8,7 @@ CREATE TABLE public.sellers (
   site_content JSONB,
   admin_email TEXT NOT NULL,
   admin_password_hash TEXT NOT NULL,
-  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'pending', 'suspended')),
+  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'pending')),
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );

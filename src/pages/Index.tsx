@@ -35,11 +35,11 @@ const COMPANIES = [
   },
   {
     id: 'xyzseller',
-    name: 'XYZSeller',
+    name: 'Tier-2 Seller',
     type: 'Tier-2 Seller',
     subdomain: 'xyzseller.webreports.app',
     color: 'green',
-    description: 'Secondary seller with clients: TCS, Infosys'
+    description: 'Secondary seller with clients'
   }
 ];
 

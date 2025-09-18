@@ -12,7 +12,7 @@ export interface Company {
   name: string;
   type: 'tier1_seller' | 'tier2_seller' | 'client';
   parent_id?: string;
-  status: 'pending' | 'active' | 'suspended';
+  status: 'pending' | 'active' ;
   created_at: string;
 }
 

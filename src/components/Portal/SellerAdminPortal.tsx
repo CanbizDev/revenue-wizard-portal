@@ -16,7 +16,8 @@ import ProjectManagement from './ProjectManagement';
 import ProjectBilling from './ProjectBilling';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { apiService } from '@/services/api';
+
+import { apiService,UserProfile } from '@/services/api';
 import { mockSellerData } from '@/services/mockData';
 import {
   AlertDialog,
@@ -67,6 +68,7 @@ interface SellerAdminPortalProps {
 
 const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'marketstrendai', onNavigate, activeTab: propActiveTab }) => {
   const [activeTab, setActiveTab] = useState(propActiveTab || 'dashboard');
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null); 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showAddClientForm, setShowAddClientForm] = useState(false);
   const [showIntakeForm, setShowIntakeForm] = useState(false);
@@ -115,98 +117,106 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
   const [tier2Sellers, setTier2Sellers] = useState<any[]>([]);
 
   // Fetch dashboard data and tier2 sellers if this is a tier1 seller
+  // Fetch dashboard data based on user role (Tier-1 or Tier-2)
   React.useEffect(() => {
-    if (company === 'marketstrendai' && sellerData) {
-      const fetchDashboardData = async () => {
-        try {
-          // Get current user data to get the actual tier1 seller UUID
-          const currentUser = apiService.getCurrentUser();
-          const tier1Id = currentUser?.id || sellerData.id;
+    const fetchPortalData = async () => {
+      try {
+        setLoading(true);
+        const currentUser = apiService.getCurrentUser();
+        if (!currentUser) {
+          console.error("No user found");
+          toast({ title: "Authentication Error", description: "Please log in again.", variant: "destructive" });
+          return;
+        }
+
+        let dashboardResponse;
+
+        // Check the user's role based on the company prop
+        if (company === 'marketstrendai') { // This is a Tier-1 Seller
+          const tier1Id = currentUser.id;
+          dashboardResponse = await apiService.getTier1DashboardData(tier1Id);
           
-          // Fetch tier1 dashboard data
-          const dashboardResponse = await apiService.getTier1DashboardData(tier1Id);
+          // You can also fetch the actual Tier-2 sellers here instead of mock data
+          // const tier2Data = await apiService.getTier2SellersForTier1(tier1Id);
+          // setTier2Sellers(tier2Data);
+
+        } else if (company === 'xyzseller') { // This is a Tier-2 Seller
+          const tier2Id = currentUser.id;
+          dashboardResponse = await apiService.getTier2DashboardData(tier2Id);
+        }
+
+        if (dashboardResponse) {
           setDashboardData(dashboardResponse.stats);
-        } catch (error) {
-          console.error('Error fetching dashboard data:', error);
         }
-      };
 
-      const fetchTier2Sellers = async () => {
-        try {
-          // Mock tier2 sellers data with all required properties
-          const mockTier2Data = [
-            { 
-              id: '1', 
-              name: 'Mock Tier2 Seller', 
-              admin_email: 'tier2@mock.com', 
-              subdomain: 'mock-tier2',
-              commission_type: 'percentage',
-              commission_value: 8,
-              status: 'active',
-              created_at: new Date().toISOString(),
-              clients: []
-            }
-          ];
-          
-          const formattedSellers = mockTier2Data.map(seller => ({
-            id: seller.id,
-            name: seller.name,
-            email: seller.admin_email,
-            subdomain: seller.subdomain,
-            company: seller.name,
-            commission: seller.commission_type === 'percentage' 
-              ? `${seller.commission_value}%` 
-              : `₹${seller.commission_value}`,
-            clients: seller.clients?.[0]?.count || 0,
-            status: seller.status,
-            joinedDate: new Date(seller.created_at).toLocaleDateString()
-          })) || [];
-          
-          setTier2Sellers(formattedSellers);
-        } catch (error) {
-          console.error('Error fetching tier2 sellers:', error);
-        }
-      };
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        // Added toast for better user feedback on error
+        toast({
+          title: "Error",
+          description: "Could not load dashboard data.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      fetchDashboardData();
-      fetchTier2Sellers();
-    }
-  }, [company, sellerData]);
-
+    fetchPortalData();
+  }, [company, toast]); // Dependencies updated for correctness
   // Update active tab when prop changes
+
+  React.useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const userProfile = await apiService.getUserProfile();
+        setCurrentUser(userProfile);
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+        toast({
+          title: "Error",
+          description: "Could not fetch user details.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchUser();
+  }, [toast]);
+
   React.useEffect(() => {
     if (propActiveTab && propActiveTab !== activeTab) {
       setActiveTab(propActiveTab);
     }
   }, [propActiveTab, activeTab]);
 
-  const getCompanyData = () => {
-    if (!sellerData) {
-      return {
-        name: 'Loading...',
-        email: 'loading@example.com',
-        role: 'Loading...',
-        company: 'Loading...'
-      };
-    }
+  // const getCompanyData = () => {
+  //   if (!sellerData) {
+  //     return {
+  //       name: 'Loading...',
+  //       email: 'loading@example.com',
+  //       role: 'Loading...',
+  //       company: 'Loading...'
+  //     };
+  //   }
 
-    if (company === 'xyzseller') {
-      return {
-        name: `${sellerData.name} Admin`,
-        email: sellerData.admin_email,
-        role: 'Tier-2 Seller Admin',
-        company: sellerData.name
-      };
-    }
-    return {
-      name: `${sellerData.name} Admin`,
-      email: sellerData.admin_email,
-      role: 'Tier-1 Seller Admin',
-      company: sellerData.name
-    };
-  };
+  //   if (company === 'xyzseller') {
+  //     return {
+  //       name: `${sellerData.name} Admin`,
+  //       email: sellerData.admin_email,
+  //       role: 'Tier-2 Seller Admin',
+  //       company: sellerData.name
+  //     };
+  //   }
+  //   return {
+  //     name: `${sellerData.name} Admin`,
+  //     email: sellerData.admin_email,
+  //     role: 'Tier-1 Seller Admin',
+  //     company: sellerData.name
+  //   };
+  // };
 
-  const mockUser = getCompanyData();
+  // const mockUser = getCompanyData();
 
   if (loading) {
     return (
@@ -263,12 +273,12 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
               icon={Building2}
             />
           )}
-          <DashboardCard
+          {/* <DashboardCard
             title="Active Plans"
             value={activePlans.toString()}
             description="Subscription plans"
             icon={BarChart3}
-          />
+          /> */}
           <DashboardCard
             title="Monthly Revenue"
             value={`₹${monthlyRevenue.toLocaleString()}`}
@@ -278,7 +288,7 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
+          {/* <Card>
             <CardHeader>
               <CardTitle>Recent Clients</CardTitle>
             </CardHeader>
@@ -297,9 +307,9 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
                 ))}
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
 
-          <Card>
+          {/* <Card>
             <CardHeader>
               <CardTitle>Plan Distribution</CardTitle>
             </CardHeader>
@@ -318,7 +328,7 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
                 })}
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
       </div>
     );
@@ -555,7 +565,7 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
       case 'clients':
         return renderClients();
       case 'projects':
-        return <ProjectManagement />;
+        return <ProjectManagement userRole={company === 'xyzseller' ? 'tier2' : 'tier1'} />;
       case 'plans':
         return renderPlans();
       case 'tier2-sellers':
@@ -723,7 +733,7 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
   return (
     <div className="min-h-screen bg-gray-50">
       <Header 
-        user={mockUser}
+        user={currentUser}
         onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
         portalType="seller"
         onNavigate={onNavigate}

@@ -5,16 +5,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowRight, Building2, Users, Shield, Loader2 } from 'lucide-react';
+import { ArrowRight,ArrowLeft, Building2, Users, Shield, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiService, type CompanyInfo } from '@/services/api';
 
 interface CompanyLandingProps {
   company: 'jupiterbrains' | 'marketstrendai' | 'xyzseller';
   onNavigate: (path: string) => void;
+  onBack: () => void; 
 }
 
-const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) => {
+const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate ,onBack}) => {
   const [selectedClient, setSelectedClient] = useState<string>('');
   const [companyData, setCompanyData] = useState<CompanyInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -29,6 +30,12 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
     password: ''
   });
   const [tier1LoginLoading, setTier1LoginLoading] = useState(false);
+  const [tier2LoginCredentials, setTier2LoginCredentials] = useState({
+    email: '',
+    password: ''
+  });
+  const [tier2LoginLoading, setTier2LoginLoading] = useState(false);
+
   const { toast } = useToast();
 
   useEffect(() => {
@@ -159,6 +166,32 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
     }
   };
 
+  //... after handleTier1Login function
+
+  const handleTier2Login = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setTier2LoginLoading(true);
+
+    try {
+      const response = await apiService.login(tier2LoginCredentials.email, tier2LoginCredentials.password, 'tier2_seller');
+      toast({
+        title: "Login successful",
+        description: `Welcome back, ${response.user.name}!`,
+      });
+      onNavigate('/seller-admin'); // Or wherever Tier-2 sellers should go
+    } catch (error) {
+      toast({
+        title: "Login failed",
+        description: "Please check your credentials and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setTier2LoginLoading(false);
+    }
+  };
+
+//...
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center">
@@ -187,15 +220,27 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className={`w-10 h-10 ${colors.icon} rounded-xl flex items-center justify-center`}>
-                <Building2 className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {companyData.name}
-                </h1>
-                <p className="text-sm text-gray-500">{companyData.subdomain}</p>
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              {/* BACK BUTTON ADDED HERE */}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={onBack}
+                className="flex items-center"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
+              <div className="flex items-center space-x-3">
+                <div className={`w-10 h-10 ${colors.icon} rounded-xl flex items-center justify-center`}>
+                  <Building2 className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+                    {companyData.name}
+                  </h1>
+                  <p className="text-sm text-gray-500 hidden sm:block">{companyData.subdomain}</p>
+                </div>
               </div>
             </div>
             <Badge className={`${colors.badge} px-3 py-1`}>
@@ -220,8 +265,8 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
 
           {/* Access Options */}
           <div className="flex justify-center max-w-4xl mx-auto">
-            {/* Admin Login - Centered for JupiterBrains */}
-            {companyData.hasAdmin && company === 'jupiterbrains' && (
+            {/* Admin Login for JupiterBrains */}
+            {company === 'jupiterbrains' && (
               <Card className={`hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br ${colors.bg} w-full max-w-md`}>
                 <CardHeader className="text-center pb-4">
                   <div className={`w-16 h-16 ${colors.icon} rounded-full flex items-center justify-center mx-auto mb-4`}>
@@ -234,64 +279,29 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleAdminLogin} className="space-y-4">
+                    {/* ... (Keep the existing admin form JSX) ... */}
                     <div className="space-y-2">
                       <Label htmlFor="admin-email">Email</Label>
-                      <Input
-                        id="admin-email"
-                        type="email"
-                        placeholder="Enter your email"
-                        value={loginCredentials.email}
-                        onChange={(e) => setLoginCredentials({ ...loginCredentials, email: e.target.value })}
-                        required
-                      />
+                      <Input id="admin-email" type="email" placeholder="Enter your email" value={loginCredentials.email} onChange={(e) => setLoginCredentials({ ...loginCredentials, email: e.target.value })} required />
                     </div>
-
                     <div className="space-y-2">
                       <Label htmlFor="admin-password">Password</Label>
-                      <Input
-                        id="admin-password"
-                        type="password"
-                        placeholder="Enter your password"
-                        value={loginCredentials.password}
-                        onChange={(e) => setLoginCredentials({ ...loginCredentials, password: e.target.value })}
-                        required
-                      />
+                      <Input id="admin-password" type="password" placeholder="Enter your password" value={loginCredentials.password} onChange={(e) => setLoginCredentials({ ...loginCredentials, password: e.target.value })} required />
                     </div>
-
                     <div className="space-y-2">
                       <Label htmlFor="user-type">User Type</Label>
-                      <Input
-                        id="user-type"
-                        value="admin"
-                        disabled
-                        className="bg-gray-50"
-                      />
+                      <Input id="user-type" value="admin" disabled className="bg-gray-50"/>
                     </div>
-
-                    <Button 
-                      type="submit" 
-                      className={`w-full ${colors.button}`}
-                      disabled={loginLoading}
-                    >
-                      {loginLoading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Signing in...
-                        </>
-                      ) : (
-                        <>
-                          Access Admin Portal
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </>
-                      )}
+                    <Button type="submit" className={`w-full ${colors.button}`} disabled={loginLoading}>
+                      {loginLoading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Signing in...</>) : (<>Access Admin Portal<ArrowRight className="ml-2 h-4 w-4" /></>)}
                     </Button>
                   </form>
                 </CardContent>
               </Card>
             )}
 
-            {/* Tier1 Seller Login - Centered for non-JupiterBrains */}
-            {company !== 'jupiterbrains' && (
+            {/* Tier-1 Seller Login for MarketsTrendAI */}
+            {company === 'marketstrendai' && (
               <Card className={`hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br ${colors.bg} w-full max-w-md`}>
                 <CardHeader className="text-center pb-4">
                   <div className={`w-16 h-16 ${colors.icon} rounded-full flex items-center justify-center mx-auto mb-4`}>
@@ -304,35 +314,70 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleTier1Login} className="space-y-4">
-                    <div className="space-y-2">
+                    {/* ... (Keep the existing Tier-1 form JSX) ... */}
+                     <div className="space-y-2">
                       <Label htmlFor="tier1-email">Email</Label>
-                      <Input
-                        id="tier1-email"
-                        type="email"
-                        placeholder="Enter your email"
-                        value={tier1LoginCredentials.email}
-                        onChange={(e) => setTier1LoginCredentials({ ...tier1LoginCredentials, email: e.target.value })}
-                        required
-                      />
+                      <Input id="tier1-email" type="email" placeholder="Enter your email" value={tier1LoginCredentials.email} onChange={(e) => setTier1LoginCredentials({ ...tier1LoginCredentials, email: e.target.value })} required />
                     </div>
-
                     <div className="space-y-2">
                       <Label htmlFor="tier1-password">Password</Label>
+                      <Input id="tier1-password" type="password" placeholder="Enter your password" value={tier1LoginCredentials.password} onChange={(e) => setTier1LoginCredentials({ ...tier1LoginCredentials, password: e.target.value })} required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="tier1-user-type">User Type</Label>
+                      <Input id="tier1-user-type" value="tier1_seller" disabled className="bg-gray-50"/>
+                    </div>
+                    <Button type="submit" className={`w-full ${colors.button}`} disabled={tier1LoginLoading}>
+                      {tier1LoginLoading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Signing in...</>) : (<>Access Seller Portal<ArrowRight className="ml-2 h-4 w-4" /></>)}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Tier-2 Seller Login for XYZSeller */}
+            {company === 'xyzseller' && (
+              <Card className={`hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br ${colors.bg} w-full max-w-md`}>
+                <CardHeader className="text-center pb-4">
+                  <div className={`w-16 h-16 ${colors.icon} rounded-full flex items-center justify-center mx-auto mb-4`}>
+                    <Shield className="w-8 h-8 text-white" />
+                  </div>
+                  <CardTitle className={`text-xl ${colors.text}`}>Tier-2 Seller Login</CardTitle>
+                  <p className="text-sm text-gray-600">
+                    Sign in to access your seller portal
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleTier2Login} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="tier2-email">Email</Label>
                       <Input
-                        id="tier1-password"
-                        type="password"
-                        placeholder="Enter your password"
-                        value={tier1LoginCredentials.password}
-                        onChange={(e) => setTier1LoginCredentials({ ...tier1LoginCredentials, password: e.target.value })}
+                        id="tier2-email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={tier2LoginCredentials.email}
+                        onChange={(e) => setTier2LoginCredentials({ ...tier2LoginCredentials, email: e.target.value })}
                         required
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="tier1-user-type">User Type</Label>
+                      <Label htmlFor="tier2-password">Password</Label>
                       <Input
-                        id="tier1-user-type"
-                        value="tier1_seller"
+                        id="tier2-password"
+                        type="password"
+                        placeholder="Enter your password"
+                        value={tier2LoginCredentials.password}
+                        onChange={(e) => setTier2LoginCredentials({ ...tier2LoginCredentials, password: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="tier2-user-type">User Type</Label>
+                      <Input
+                        id="tier2-user-type"
+                        value="tier2_seller"
                         disabled
                         className="bg-gray-50"
                       />
@@ -341,9 +386,9 @@ const CompanyLanding: React.FC<CompanyLandingProps> = ({ company, onNavigate }) 
                     <Button 
                       type="submit" 
                       className={`w-full ${colors.button}`}
-                      disabled={tier1LoginLoading}
+                      disabled={tier2LoginLoading}
                     >
-                      {tier1LoginLoading ? (
+                      {tier2LoginLoading ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           Signing in...

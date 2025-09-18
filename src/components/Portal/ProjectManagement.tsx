@@ -39,7 +39,11 @@ interface Project {
   clients: Client[];
 }
 
-const ProjectManagement: React.FC = () => {
+interface ProjectManagementProps {
+  userRole: 'tier1' | 'tier2';
+}
+
+const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [tier2Sellers, setTier2Sellers] = useState<Tier2Seller[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,12 +64,16 @@ const ProjectManagement: React.FC = () => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const [projectsData, tier2Data] = await Promise.all([
-          apiService.getProjects(),
-          apiService.getAllTier2Sellers()
-        ]);
+        // Fetch projects for everyone
+        const projectsData = await apiService.getProjects();
         setProjects(projectsData);
-        setTier2Sellers(tier2Data);
+
+        // Conditionally fetch tier2 sellers only for tier1 users
+        if (userRole === 'tier1') {
+          const tier2Data = await apiService.getAllTier2Sellers();
+          setTier2Sellers(tier2Data);
+        }
+
       } catch (err) {
         console.error('Failed to load data:', err);
         setError('Failed to load data. Please try again.');
@@ -77,7 +85,7 @@ const ProjectManagement: React.FC = () => {
     };
 
     loadData();
-  }, []);
+  }, [userRole]); // Added userRole to dependency array
 
   const [newProject, setNewProject] = useState({
     name: '',
@@ -347,22 +355,24 @@ const ProjectManagement: React.FC = () => {
                   placeholder="Enter project type"
                 />
               </div>
-              <div>
-                <Label htmlFor="tier2_seller_id">Tier 2 Seller (Optional)</Label>
-                <Select value={newProject.tier2_seller_id || "none"} onValueChange={(value) => setNewProject({ ...newProject, tier2_seller_id: value === "none" ? "" : value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a Tier 2 seller" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">No Tier 2 Seller</SelectItem>
-                    {tier2Sellers.map((seller) => (
-                      <SelectItem key={seller.id} value={seller.id}>
-                        {seller.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {userRole === 'tier1' && (
+                <div>
+                  <Label htmlFor="tier2_seller_id">Tier 2 Seller (Optional)</Label>
+                  <Select value={newProject.tier2_seller_id || "none"} onValueChange={(value) => setNewProject({ ...newProject, tier2_seller_id: value === "none" ? "" : value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a Tier 2 seller" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No Tier 2 Seller</SelectItem>
+                      {tier2Sellers.map((seller) => (
+                        <SelectItem key={seller.id} value={seller.id}>
+                          {seller.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div>
                 <Label htmlFor="status">Status</Label>
                 <Select value={newProject.status} onValueChange={(value: 'active' | 'inactive') => setNewProject({ ...newProject, status: value })}>
@@ -540,7 +550,7 @@ const ProjectManagement: React.FC = () => {
                   <p className="text-sm text-foreground">{project.description || 'No description available'}</p>
                 </div>
                 
-                {project.tier2_seller_id && (
+                {userRole === 'tier1' && project.tier2_seller_id && (
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Tier 2 Seller</p>
                     <p className="text-sm text-foreground">{getTier2SellerName(project.tier2_seller_id)}</p>
@@ -586,22 +596,24 @@ const ProjectManagement: React.FC = () => {
                 placeholder="Enter project type"
               />
             </div>
-            <div>
-              <Label htmlFor="edit-tier2_seller_id">Tier 2 Seller (Optional)</Label>
-              <Select value={editProjectData.tier2_seller_id || "none"} onValueChange={(value) => setEditProjectData({ ...editProjectData, tier2_seller_id: value === "none" ? "" : value })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a Tier 2 seller" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">No Tier 2 Seller</SelectItem>
-                  {tier2Sellers.map((seller) => (
-                    <SelectItem key={seller.id} value={seller.id}>
-                      {seller.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {userRole === 'tier1' && (
+              <div>
+                <Label htmlFor="edit-tier2_seller_id">Tier 2 Seller (Optional)</Label>
+                <Select value={editProjectData.tier2_seller_id || "none"} onValueChange={(value) => setEditProjectData({ ...editProjectData, tier2_seller_id: value === "none" ? "" : value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a Tier 2 seller" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No Tier 2 Seller</SelectItem>
+                    {tier2Sellers.map((seller) => (
+                      <SelectItem key={seller.id} value={seller.id}>
+                        {seller.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={closeEditDialog}>
                 Cancel

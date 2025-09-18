@@ -162,7 +162,7 @@ const SellerAdminAddTier2SellerForm: React.FC<SellerAdminAddTier2SellerFormProps
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="commissionType">Commission Type</Label>
               <Select 
@@ -194,7 +194,7 @@ const SellerAdminAddTier2SellerForm: React.FC<SellerAdminAddTier2SellerFormProps
                 placeholder={formData.commissionType === 'percentage' ? '10' : '1000'}
               />
             </div>
-          </div>
+          </div> */}
 
           <div className="flex justify-end space-x-2">
             <Button type="button" variant="outline" onClick={onClose}>

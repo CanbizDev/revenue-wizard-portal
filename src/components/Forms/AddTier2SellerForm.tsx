@@ -42,6 +42,7 @@ const AddTier2SellerForm: React.FC<AddTier2SellerFormProps> = ({ isOpen, onClose
   const loadTier1Sellers = async () => {
     try {
       const sellers = await apiService.getAllTier1Sellers();
+      console.log(sellers)
       setTier1Sellers(sellers);
     } catch (error: any) {
       console.error('Error loading tier1 sellers:', error);

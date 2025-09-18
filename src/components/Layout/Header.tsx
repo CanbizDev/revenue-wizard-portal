@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 
+import { apiService } from '@/services/api'; 
+
 interface HeaderProps {
   portalType: 'admin' | 'seller' | 'client';
   user?: {
@@ -28,6 +30,14 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ portalType, user, sellerName, onMenuToggle, onNavigate }) => {
   const isMobile = useIsMobile();
+  const handleSignOut = async () => {
+    await apiService.logout();
+    // Force a full page reload to the root URL.
+    // This clears any old application state and ensures a clean redirect.
+    window.location.href = '/';
+  };
+
+
   const getPortalTitle = () => {
     switch (portalType) {
       case 'admin':
@@ -147,20 +157,7 @@ const Header: React.FC<HeaderProps> = ({ portalType, user, sellerName, onMenuTog
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
-              </DropdownMenuItem>
-              {onNavigate && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => onNavigate('/home')}>
-                    <Settings className="mr-2 h-4 w-4" />
-                    Back to Home
-                  </DropdownMenuItem>
-                </>
-              )}
-              <DropdownMenuItem className="text-red-600" onClick={() => onNavigate?.('/home')}>
+              <DropdownMenuItem className="text-red-600 focus:text-red-700 cursor-pointer" onClick={handleSignOut}>
                 <LogOut className="mr-2 h-4 w-4" />
                 Sign out
               </DropdownMenuItem>

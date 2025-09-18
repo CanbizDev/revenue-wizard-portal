@@ -245,44 +245,26 @@ const ServiceControlPanel: React.FC = () => {
   }> = [];
 
   services.forEach(service => {
-    if (service.type === 'tier1') {
-      // Add Doc and Email services for Tier 1 using independent statuses
-      flattenedServices.push({
-        company: service.name,
-        tier: 'Tier 1',
-        service: 'Doc',
-        status: serviceStatuses[`${service.id}-doc`] ?? service.isActive,
-        id: `${service.id}-doc`,
-        type: service.type
-      });
-      flattenedServices.push({
-        company: service.name,
-        tier: 'Tier 1',
-        service: 'Email',
-        status: serviceStatuses[`${service.id}-email`] ?? service.isActive,
-        id: `${service.id}-email`,
-        type: service.type
-      });
-    } else if (service.type === 'tier2') {
-      // Add Doc and Email services for Tier 2 using independent statuses
-      flattenedServices.push({
-        company: service.name,
-        tier: 'Tier 2',
-        service: 'Doc',
-        status: serviceStatuses[`${service.id}-doc`] ?? service.isActive,
-        id: `${service.id}-doc`,
-        type: service.type
-      });
-      flattenedServices.push({
-        company: service.name,
-        tier: 'Tier 2',
-        service: 'Email',
-        status: serviceStatuses[`${service.id}-email`] ?? service.isActive,
-        id: `${service.id}-email`,
-        type: service.type
-      });
-    } else if (service.type === 'project') {
-      // Add project as service using independent status and correct tier level
+    // if (service.type === 'tier1') {
+    //   // Add Doc and Email services for Tier 1 using independent statuses
+    //   flattenedServices.push({
+    //     company: service.name,
+    //     tier: 'Tier 1',
+    //     service: 'Doc',
+    //     status: serviceStatuses[`${service.id}-doc`] ?? service.isActive,
+    //     id: `${service.id}-doc`,
+    //     type: service.type
+    //   });
+    //   flattenedServices.push({
+    //     company: service.name,
+    //     tier: 'Tier 1',
+    //     service: 'Email',
+    //     status: serviceStatuses[`${service.id}-email`] ?? service.isActive,
+    //     id: `${service.id}-email`,
+    //     type: service.type
+    //   });
+     if (service.type === 'project') {
+      // Add project as service using independent status
       flattenedServices.push({
         company: service.parentName || 'Unknown Parent',
         tier: service.tierLevel || 'Tier 1',

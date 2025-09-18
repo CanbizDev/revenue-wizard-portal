@@ -109,6 +109,13 @@ export interface ClientConfig {
   };
 }
 
+export interface UserProfile {
+  id: string;
+  role: string;
+  email: string;
+  name: string;
+}
+
 class ApiService {
   private axiosInstance: AxiosInstance;
   private token: string | null = null;
@@ -259,10 +266,24 @@ class ApiService {
     return response.data;
   }
 
-  logout(): void {
-    this.token = null;
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user_data');
+  async logout(): Promise<void> {
+    try {
+      // Call the backend logout endpoint.
+      // The auth token is sent automatically by the axios interceptor.
+      await this.axiosInstance.post('/auth/logout');
+    } catch (error) {
+      console.error('Logout API call failed, but clearing client-side session anyway.', error);
+    } finally {
+      // This part runs whether the API call succeeds or fails, ensuring the user is logged out on the frontend.
+      this.token = null;
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user_data');
+    }
+  }
+  
+  async getUserProfile(): Promise<UserProfile> {
+    return this.request<UserProfile>('/auth/profile');
   }
 
   // Dashboard endpoints
@@ -273,6 +294,10 @@ class ApiService {
   // Tier1 seller dashboard endpoint
   async getTier1DashboardData(tier1Id: string): Promise<any> {
     return this.request<any>(`/admin/dashboard/tier1/${tier1Id}`);
+  }
+
+  async getTier2DashboardData(tier2Id: string): Promise<any> {
+    return this.request<any>(`/admin/dashboard/tier2/${tier2Id}`);
   }
 
   // Legacy methods for components that need mock data
@@ -336,7 +361,7 @@ class ApiService {
   }
 
   async toggleProjectStatus(projectId: string): Promise<any> {
-    return this.request(`/services/${projectId}/toggle`, {
+    return this.request(`/projects/services/${projectId}/toggle`, {
       method: 'POST',
     });
   }

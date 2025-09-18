@@ -194,7 +194,7 @@ const RevenueOverview: React.FC = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Client Name</TableHead>
+                    <TableHead>Project Name</TableHead>
                     <TableHead>Invoice ID</TableHead>
                     <TableHead>
                       <Button
