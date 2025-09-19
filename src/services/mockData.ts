@@ -103,20 +103,53 @@ export const mockProjects = [
   {
     id: '1',
     name: 'E-commerce Analytics Dashboard',
-    client: 'TechCorp Solutions',
-    status: 'In Progress',
-    progress: 75,
-    deadline: '2024-03-15',
-    description: 'Advanced analytics dashboard for e-commerce metrics'
+    description: 'Advanced analytics dashboard for e-commerce metrics',
+    project_type: 'Analytics',
+    project_value: 50000,
+    commission_percentage: 15,
+    hourly_budget: 200,
+    hours_used: 150,
+    completion_percentage: 75,
+    status: 'active',
+    tier1_seller_id: 'tier1-1',
+    tier2_seller_id: 'tier2-1',
+    clients: [
+      { id: 'client-1', name: 'TechCorp Solutions', company: 'TechCorp' }
+    ]
   },
   {
     id: '2',
     name: 'Financial Reporting System',
-    client: 'FinanceFlow Inc',
-    status: 'Completed',
-    progress: 100,
-    deadline: '2024-02-28',
-    description: 'Comprehensive financial reporting and analysis system'
+    description: 'Comprehensive financial reporting and analysis system',
+    project_type: 'Reporting',
+    project_value: 75000,
+    commission_percentage: 20,
+    hourly_budget: 300,
+    hours_used: 300,
+    completion_percentage: 100,
+    status: 'active',
+    tier1_seller_id: 'tier1-1',
+    tier2_seller_id: null,
+    clients: [
+      { id: 'client-2', name: 'FinanceFlow Inc', company: 'FinanceFlow' }
+    ]
+  },
+  {
+    id: '3',
+    name: 'Customer Insights Platform',
+    description: 'AI-powered customer behavior analysis platform',
+    project_type: 'AI/ML',
+    project_value: 120000,
+    commission_percentage: 25,
+    hourly_budget: 500,
+    hours_used: 200,
+    completion_percentage: 40,
+    status: 'active',
+    tier1_seller_id: 'tier1-1',
+    tier2_seller_id: 'tier2-2',
+    clients: [
+      { id: 'client-3', name: 'RetailMax Corp', company: 'RetailMax' }
+    ]
   }
 ];
 

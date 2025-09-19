@@ -32,6 +32,28 @@ export interface OnboardingStep {
   current: boolean;
 }
 
+export interface Project {
+  id: string;
+  name: string;
+  description: string;
+  project_type: string;
+  project_value: number;
+  commission_percentage: number;
+  hourly_budget: number;
+  hours_used: number;
+  completion_percentage: number;
+  status: 'active' | 'inactive';
+  tier1_seller_id: string;
+  tier2_seller_id: string | null;
+  clients: Client[];
+}
+
+export interface Client {
+  id: string;
+  name: string;
+  company?: string;
+}
+
 export interface Report {
   id: string;
   title: string;

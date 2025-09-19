@@ -17,6 +17,8 @@ interface ProjectBilling {
   status: 'paid' | 'pending' | 'overdue';
   invoiceId: string;
   dueDate: string;
+  projectValue: number;
+  commissionPercentage: number;
 }
 
 const ProjectBilling: React.FC = () => {
@@ -36,7 +38,9 @@ const ProjectBilling: React.FC = () => {
           lastPayment: bill.payment_date || '-',
           status: bill.status.toLowerCase(),
           invoiceId: bill.invoice_id,
-          dueDate: bill.due_date || '-'
+          dueDate: bill.due_date || '-',
+          projectValue: bill.project_value || 0,
+          commissionPercentage: bill.commission_percentage || 0
         }));
         setBillingData(transformed);
       } catch (err) {
@@ -105,6 +109,8 @@ const ProjectBilling: React.FC = () => {
               <TableRow>
                 <TableHead>Project</TableHead>
                 <TableHead>Invoice</TableHead>
+                <TableHead>Project Value</TableHead>
+                <TableHead>Commission %</TableHead>
                 <TableHead>Amount</TableHead>
                 <TableHead>Due</TableHead>
                 <TableHead>Last Payment</TableHead>
@@ -116,7 +122,9 @@ const ProjectBilling: React.FC = () => {
                 <TableRow key={billing.id}>
                   <TableCell>{billing.projectName}</TableCell>
                   <TableCell>{billing.invoiceId}</TableCell>
-                  <TableCell>${billing.totalBilling}</TableCell>
+                  <TableCell>₹{billing.projectValue?.toLocaleString() || 'N/A'}</TableCell>
+                  <TableCell>{billing.commissionPercentage || 'N/A'}%</TableCell>
+                  <TableCell>₹{(billing.projectValue * (billing.commissionPercentage / 100)) || billing.totalBilling}</TableCell>
                   <TableCell>{billing.dueDate}</TableCell>
                   <TableCell>{billing.lastPayment}</TableCell>
                   <TableCell>

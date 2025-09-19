@@ -19,6 +19,8 @@ interface ProjectBilling {
   invoiceId: string;
   dueDate: string;
   clientName: string;
+  projectValue: number;
+  commissionPercentage: number;
 }
 
 const ClientBilling: React.FC<{ client: string }> = ({ client }) => {
@@ -290,6 +292,8 @@ const ClientBilling: React.FC<{ client: string }> = ({ client }) => {
               <TableRow>
                 <TableHead>Project Name</TableHead>
                 <TableHead>Invoice ID</TableHead>
+                <TableHead>Project Value</TableHead>
+                <TableHead>Commission %</TableHead>
                 <TableHead>Total Billing</TableHead>
                 <TableHead>Paid Amount</TableHead>
                 <TableHead>Pending Amount</TableHead>
@@ -304,12 +308,14 @@ const ClientBilling: React.FC<{ client: string }> = ({ client }) => {
                 <TableRow key={billing.id}>
                   <TableCell className="font-medium">{billing.projectName}</TableCell>
                   <TableCell className="font-mono text-sm">{billing.invoiceId}</TableCell>
-                  <TableCell>${billing.totalBilling.toLocaleString()}</TableCell>
+                  <TableCell>₹{billing.projectValue?.toLocaleString() || 'N/A'}</TableCell>
+                  <TableCell>{billing.commissionPercentage || 'N/A'}%</TableCell>
+                  <TableCell>₹{(billing.projectValue * (billing.commissionPercentage / 100)) || billing.totalBilling.toLocaleString()}</TableCell>
                   <TableCell className="text-green-600 font-medium">
-                    ${billing.paidAmount.toLocaleString()}
+                    ₹{billing.paidAmount.toLocaleString()}
                   </TableCell>
                   <TableCell className="text-orange-600 font-medium">
-                    ${billing.pendingAmount.toLocaleString()}
+                    ₹{billing.pendingAmount.toLocaleString()}
                   </TableCell>
                   <TableCell>{billing.dueDate}</TableCell>
                   <TableCell>{billing.lastPayment}</TableCell>

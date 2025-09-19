@@ -30,6 +30,7 @@ interface Project {
   description: string;
   project_type: string;
   project_value: number;
+  commission_percentage: number;
   hourly_budget: number;
   hours_used: number;
   completion_percentage: number;
@@ -57,6 +58,8 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
     name: '',
     description: '',
     project_type: '',
+    project_value: 0,
+    commission_percentage: 0,
     tier2_seller_id: ''
   });
 
@@ -91,6 +94,8 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
     name: '',
     description: '',
     project_type: '',
+    project_value: 0,
+    commission_percentage: 0,
     status: 'active' as 'active' | 'inactive',
     tier2_seller_id: ''
   });
@@ -104,12 +109,14 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
   });
 
   const handleAddProject = async () => {
-    if (newProject.name && newProject.description && newProject.project_type) {
+    if (newProject.name && newProject.description && newProject.project_type && newProject.project_value > 0 && newProject.commission_percentage > 0) {
       try {
         const projectData = {
           name: newProject.name,
           description: newProject.description,
           project_type: newProject.project_type,
+          project_value: newProject.project_value,
+          commission_percentage: newProject.commission_percentage,
           status: newProject.status,
           tier2_seller_id: newProject.tier2_seller_id.trim() || null
         };
@@ -124,6 +131,8 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
           name: '', 
           description: '', 
           project_type: '', 
+          project_value: 0,
+          commission_percentage: 0,
           status: 'active',
           tier2_seller_id: ''
         });
@@ -169,6 +178,8 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
       name: project.name,
       description: project.description,
       project_type: project.project_type,
+      project_value: project.project_value,
+      commission_percentage: project.commission_percentage,
       tier2_seller_id: project.tier2_seller_id || ''
     });
     setIsEditDialogOpen(true);
@@ -181,6 +192,8 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
       name: '',
       description: '',
       project_type: '',
+      project_value: 0,
+      commission_percentage: 0,
       tier2_seller_id: ''
     });
   };
@@ -200,6 +213,8 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
         name: editProjectData.name,
         description: editProjectData.description,
         project_type: editProjectData.project_type,
+        project_value: editProjectData.project_value,
+        commission_percentage: editProjectData.commission_percentage,
         tier2_seller_id: editProjectData.tier2_seller_id.trim() || null
       };
 
@@ -353,6 +368,28 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                   value={newProject.project_type}
                   onChange={(e) => setNewProject({ ...newProject, project_type: e.target.value })}
                   placeholder="Enter project type"
+                />
+              </div>
+              <div>
+                <Label htmlFor="project_value">Project Value</Label>
+                <Input
+                  id="project_value"
+                  type="number"
+                  value={newProject.project_value}
+                  onChange={(e) => setNewProject({ ...newProject, project_value: Number(e.target.value) })}
+                  placeholder="Enter project value"
+                />
+              </div>
+              <div>
+                <Label htmlFor="commission_percentage">Commission %</Label>
+                <Input
+                  id="commission_percentage"
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={newProject.commission_percentage}
+                  onChange={(e) => setNewProject({ ...newProject, commission_percentage: Number(e.target.value) })}
+                  placeholder="Enter commission percentage"
                 />
               </div>
               {/* {userRole === 'tier1' && (
@@ -546,6 +583,16 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                 </div>
                 
                 <div>
+                  <p className="text-sm font-medium text-muted-foreground">Project Value</p>
+                  <p className="text-sm text-foreground">₹{project.project_value?.toLocaleString() || 'N/A'}</p>
+                </div>
+                
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Commission %</p>
+                  <p className="text-sm text-foreground">{project.commission_percentage || 'N/A'}%</p>
+                </div>
+                
+                <div>
                   <p className="text-sm font-medium text-muted-foreground">Description</p>
                   <p className="text-sm text-foreground">{project.description || 'No description available'}</p>
                 </div>
@@ -594,6 +641,28 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                 value={editProjectData.project_type}
                 onChange={(e) => setEditProjectData({ ...editProjectData, project_type: e.target.value })}
                 placeholder="Enter project type"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-project_value">Project Value</Label>
+              <Input
+                id="edit-project_value"
+                type="number"
+                value={editProjectData.project_value}
+                onChange={(e) => setEditProjectData({ ...editProjectData, project_value: Number(e.target.value) })}
+                placeholder="Enter project value"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-commission_percentage">Commission %</Label>
+              <Input
+                id="edit-commission_percentage"
+                type="number"
+                min="0"
+                max="100"
+                value={editProjectData.commission_percentage}
+                onChange={(e) => setEditProjectData({ ...editProjectData, commission_percentage: Number(e.target.value) })}
+                placeholder="Enter commission percentage"
               />
             </div>
             {userRole === 'tier1' && (
