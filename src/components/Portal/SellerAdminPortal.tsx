@@ -57,7 +57,10 @@ import {
   Edit,
   Trash2,
   Plus,
-  Building2
+  Building2,
+  Percent,
+  CheckCircle,
+  Clock
 } from 'lucide-react';
 
 interface SellerAdminPortalProps {
@@ -249,6 +252,11 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
     const activePlans = plans.filter(plan => plan.active).length;
     const totalCommissions = commissions.reduce((sum, commission) => sum + commission.commission_amount, 0);
 
+    // Calculate commission percentage and billing amounts for tier2 sellers
+    const avgCommissionPercentage = dashboardData?.commission_percentage || 15; // Default to 15%
+    const paidAmount = dashboardData?.paid_amount || 75000;
+    const pendingAmount = dashboardData?.pending_amount || 25000;
+
     return (
       <div className="space-y-6">
         <div>
@@ -272,6 +280,28 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
               description="Managed by you"
               icon={Building2}
             />
+          )}
+          {company === 'xyzseller' && (
+            <>
+              <DashboardCard
+                title="Commission %"
+                value={`${avgCommissionPercentage}%`}
+                description="Your commission rate"
+                icon={Percent}
+              />
+              <DashboardCard
+                title="Paid Amount"
+                value={`₹${paidAmount.toLocaleString()}`}
+                description="Total payments received"
+                icon={CheckCircle}
+              />
+              <DashboardCard
+                title="Pending Amount"
+                value={`₹${pendingAmount.toLocaleString()}`}
+                description="Pending payments"
+                icon={Clock}
+              />
+            </>
           )}
           {/* <DashboardCard
             title="Active Plans"
