@@ -29,8 +29,8 @@ const SellerAdminAddTier2SellerForm: React.FC<SellerAdminAddTier2SellerFormProps
     subdomain: '',
     adminEmail: '',
     adminPassword: '',
-    commissionType: 'percentage' as 'fixed' | 'percentage',
-    commissionValue: ''
+    commissionFromClient: '',
+    commissionForJB: ''
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -64,8 +64,8 @@ const SellerAdminAddTier2SellerForm: React.FC<SellerAdminAddTier2SellerFormProps
         logo_url: null,
         stylesheet_url: null,
         site_content: null,
-        commission_type: formData.commissionType,
-        commission_value: formData.commissionValue ? parseFloat(formData.commissionValue) : null
+        commission_from_client: formData.commissionFromClient ? parseFloat(formData.commissionFromClient) : null,
+        commission_for_jb: formData.commissionForJB ? parseFloat(formData.commissionForJB) : null
       });
 
       toast({
@@ -79,8 +79,8 @@ const SellerAdminAddTier2SellerForm: React.FC<SellerAdminAddTier2SellerFormProps
         subdomain: '',
         adminEmail: '',
         adminPassword: '',
-        commissionType: 'percentage' as 'fixed' | 'percentage',
-        commissionValue: ''
+        commissionFromClient: '',
+        commissionForJB: ''
       });
 
       onSuccess();
@@ -162,39 +162,35 @@ const SellerAdminAddTier2SellerForm: React.FC<SellerAdminAddTier2SellerFormProps
             </div>
           </div>
 
-          {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="commissionType">Commission Type</Label>
-              <Select 
-                value={formData.commissionType} 
-                onValueChange={(value: 'fixed' | 'percentage') => handleInputChange('commissionType', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="percentage">Percentage</SelectItem>
-                  <SelectItem value="fixed">Fixed Amount</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="commissionFromClient">Commission % (From Client)</Label>
+              <Input
+                id="commissionFromClient"
+                type="number"
+                step="0.1"
+                min="0"
+                max="100"
+                value={formData.commissionFromClient}
+                onChange={(e) => handleInputChange('commissionFromClient', e.target.value)}
+                placeholder="15"
+              />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="commissionValue">
-                Commission {formData.commissionType === 'percentage' ? 'Percentage' : 'Amount (₹)'}
-              </Label>
+              <Label htmlFor="commissionForJB">Commission % (For JB)</Label>
               <Input
-                id="commissionValue"
+                id="commissionForJB"
                 type="number"
-                step={formData.commissionType === 'percentage' ? '0.1' : '1'}
+                step="0.1"
                 min="0"
-                max={formData.commissionType === 'percentage' ? '100' : undefined}
-                value={formData.commissionValue}
-                onChange={(e) => handleInputChange('commissionValue', e.target.value)}
-                placeholder={formData.commissionType === 'percentage' ? '10' : '1000'}
+                max="100"
+                value={formData.commissionForJB}
+                onChange={(e) => handleInputChange('commissionForJB', e.target.value)}
+                placeholder="5"
               />
             </div>
-          </div> */}
+          </div>
 
           <div className="flex justify-end space-x-2">
             <Button type="button" variant="outline" onClick={onClose}>
