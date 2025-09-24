@@ -512,6 +512,57 @@ class ApiService {
     const userData = localStorage.getItem('user_data');
     return userData ? JSON.parse(userData) : null;
   }
+
+  // Subscription Plan Management (Admin Only)
+  async createSubscriptionPlan(planData: any): Promise<any> {
+    try {
+      const response = await this.axiosInstance.post('/subscription-plans/', planData);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to create subscription plan:', error);
+      throw error;
+    }
+  }
+
+  async getAllSubscriptionPlans(): Promise<any[]> {
+    try {
+      const response = await this.axiosInstance.get('/subscription-plans/');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch subscription plans:', error);
+      throw error;
+    }
+  }
+
+  async getSubscriptionPlan(planId: string): Promise<any> {
+    try {
+      const response = await this.axiosInstance.get(`/subscription-plans/${planId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch subscription plan:', error);
+      throw error;
+    }
+  }
+
+  async updateSubscriptionPlan(planId: string, planData: any): Promise<any> {
+    try {
+      const response = await this.axiosInstance.put(`/subscription-plans/${planId}`, planData);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to update subscription plan:', error);
+      throw error;
+    }
+  }
+
+  async deleteSubscriptionPlan(planId: string): Promise<any> {
+    try {
+      const response = await this.axiosInstance.delete(`/subscription-plans/${planId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to delete subscription plan:', error);
+      throw error;
+    }
+  }
 }
 
 export const apiService = new ApiService();

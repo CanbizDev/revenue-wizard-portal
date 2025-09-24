@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { apiService } from '@/services/api';
 import AddPlanForm from '@/components/Forms/AddPlanForm';
 import { 
   CreditCard, 
@@ -32,63 +33,29 @@ const SubscriptionPlanManagement: React.FC = () => {
   const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
   const { toast } = useToast();
 
-  // Mock data for now - will be replaced with actual API calls
-  const mockPlans: SubscriptionPlan[] = [
-    {
-      id: '1',
-      name: 'Basic Plan',
-      price: 999,
-      currency: 'INR',
-      billing_cycle: 'monthly',
-      max_clients: 5,
-      description: 'Perfect for small businesses',
-      features: ['5 Client Projects', 'Basic Reports', 'Email Support'],
-      status: 'active',
-      created_at: '2024-01-15'
-    },
-    {
-      id: '2',
-      name: 'Professional Plan',
-      price: 2499,
-      currency: 'INR',
-      billing_cycle: 'monthly',
-      max_clients: 15,
-      description: 'Ideal for growing businesses',
-      features: ['15 Client Projects', 'Advanced Reports', 'Priority Support', 'Custom Branding'],
-      status: 'active',
-      created_at: '2024-01-15'
-    },
-    {
-      id: '3',
-      name: 'Enterprise Plan',
-      price: 4999,
-      currency: 'INR',
-      billing_cycle: 'monthly',
-      max_clients: -1, // Unlimited
-      description: 'For large enterprises',
-      features: ['Unlimited Clients', 'Custom Reports', '24/7 Support', 'White Label', 'API Access'],
-      status: 'active',
-      created_at: '2024-01-15'
+  const loadPlans = async () => {
+    try {
+      const plansData = await apiService.getAllSubscriptionPlans();
+      setPlans(plansData);
+    } catch (error: any) {
+      console.error('Error loading subscription plans:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load subscription plans',
+        variant: 'destructive'
+      });
     }
-  ];
+  };
 
   useEffect(() => {
-    // Load plans on component mount
-    setPlans(mockPlans);
+    loadPlans();
   }, []);
 
   const handleCreatePlan = async (planData: any) => {
     try {
-      // TODO: Replace with actual API call
-      const newPlan: SubscriptionPlan = {
-        id: Date.now().toString(),
-        ...planData,
-        status: 'active' as const,
-        created_at: new Date().toISOString()
-      };
-      
-      setPlans(prev => [...prev, newPlan]);
+      await apiService.createSubscriptionPlan(planData);
       setIsAddPlanOpen(false);
+      await loadPlans(); // Reload plans after creation
       
       toast({
         title: 'Success',
@@ -104,16 +71,13 @@ const SubscriptionPlanManagement: React.FC = () => {
   };
 
   const handleEditPlan = async (planData: any) => {
+    if (!editingPlan) return;
+    
     try {
-      // TODO: Replace with actual API call
-      setPlans(prev => prev.map(plan => 
-        plan.id === editingPlan?.id 
-          ? { ...plan, ...planData }
-          : plan
-      ));
-      
+      await apiService.updateSubscriptionPlan(editingPlan.id, planData);
       setEditingPlan(null);
       setIsAddPlanOpen(false);
+      await loadPlans(); // Reload plans after update
       
       toast({
         title: 'Success',
@@ -130,8 +94,8 @@ const SubscriptionPlanManagement: React.FC = () => {
 
   const handleDeletePlan = async (planId: string) => {
     try {
-      // TODO: Replace with actual API call
-      setPlans(prev => prev.filter(plan => plan.id !== planId));
+      await apiService.deleteSubscriptionPlan(planId);
+      await loadPlans(); // Reload plans after deletion
       
       toast({
         title: 'Success',

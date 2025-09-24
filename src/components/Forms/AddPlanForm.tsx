@@ -33,17 +33,17 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
     name: editingPlan?.name || '',
     price: editingPlan?.price || '',
     currency: editingPlan?.currency || 'INR',
-    billing: editingPlan?.billing || 'monthly',
-    maxClients: editingPlan?.maxClients || '',
+    billing_cycle: editingPlan?.billing_cycle || 'monthly',
+    max_clients: editingPlan?.max_clients || '',
     description: editingPlan?.description || '',
     features: editingPlan?.features || [''],
-    active: editingPlan?.active ?? true
+    status: editingPlan?.status || 'active'
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.price || !formData.maxClients) {
+    if (!formData.name || !formData.price || !formData.max_clients) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -52,14 +52,15 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
       return;
     }
 
-    const selectedCurrency = currencyOptions.find(c => c.code === formData.currency);
-    
     const planData = {
-      ...formData,
-      price: parseInt(formData.price),
-      maxClients: parseInt(formData.maxClients),
-      currencySymbol: selectedCurrency?.symbol || '₹',
-      features: formData.features.filter(f => f.trim() !== '')
+      name: formData.name,
+      description: formData.description,
+      price: parseFloat(formData.price),
+      billing_cycle: formData.billing_cycle,
+      currency: formData.currency,
+      max_clients: parseInt(formData.max_clients),
+      features: formData.features.filter(f => f.trim() !== ''),
+      status: formData.status
     };
 
     onSubmit(planData);
@@ -69,11 +70,11 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
         name: '',
         price: '',
         currency: 'INR',
-        billing: 'monthly',
-        maxClients: '',
+        billing_cycle: 'monthly',
+        max_clients: '',
         description: '',
         features: [''],
-        active: true
+        status: 'active'
       });
     }
     
@@ -136,8 +137,8 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
                 <Input
                   id="maxClients"
                   type="number"
-                  value={formData.maxClients}
-                  onChange={(e) => handleChange('maxClients', e.target.value)}
+                  value={formData.max_clients}
+                  onChange={(e) => handleChange('max_clients', e.target.value)}
                   placeholder="15"
                   required
                 />
@@ -173,7 +174,7 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
               </div>
               <div className="space-y-2">
                 <Label htmlFor="billing">Billing Cycle</Label>
-                <Select value={formData.billing} onValueChange={(value) => handleChange('billing', value)}>
+                <Select value={formData.billing_cycle} onValueChange={(value) => handleChange('billing_cycle', value)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -192,7 +193,7 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
                 <span className="text-lg font-semibold">
                   {currencyOptions.find(c => c.code === formData.currency)?.symbol || '₹'}
                   {formData.price ? parseInt(formData.price).toLocaleString() : '0'} 
-                  <span className="text-sm text-gray-500"> / {formData.billing}</span>
+                  <span className="text-sm text-gray-500"> / {formData.billing_cycle}</span>
                 </span>
                 <div className="text-xs text-gray-500 mt-1">{formData.currency}</div>
               </div>
@@ -249,8 +250,8 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="active"
-                checked={formData.active}
-                onCheckedChange={(checked) => handleChange('active', checked)}
+                checked={formData.status === 'active'}
+                onCheckedChange={(checked) => handleChange('status', checked ? 'active' : 'inactive')}
               />
               <Label htmlFor="active">Plan is active</Label>
             </div>
