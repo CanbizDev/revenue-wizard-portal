@@ -8,6 +8,7 @@ import CompanyLanding from "./pages/CompanyLanding";
 import ClientLogin from "./pages/ClientLogin";
 import AdminPortal from "./components/Portal/AdminPortal";
 import SellerAdminPortal from "./components/Portal/SellerAdminPortal";
+import Tier1SellerPortal from "./components/Portal/Tier1SellerPortal";
 
 const queryClient = new QueryClient();
 
@@ -36,12 +37,18 @@ const App = () => {
     }
     
     if (currentPath === '/seller-admin') {
-      return (
-        <SellerAdminPortal 
-          company={selectedCompany as 'marketstrendai' | 'xyzseller'}
-          onNavigate={handleNavigate}
-        />
-      );
+      if (selectedCompany === 'marketstrendai') {
+        // Use Tier1SellerPortal for MarketsTrendAI
+        return <Tier1SellerPortal />;
+      } else {
+        // Use regular SellerAdminPortal for other sellers
+        return (
+          <SellerAdminPortal 
+            company={selectedCompany as 'marketstrendai' | 'xyzseller'}
+            onNavigate={handleNavigate}
+          />
+        );
+      }
     }
 
     // Handle client login pages
