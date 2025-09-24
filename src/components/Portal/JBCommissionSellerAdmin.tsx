@@ -19,7 +19,6 @@ const mockTier2Projects = [
     id: '1',
     projectName: 'E-commerce Analytics',
     tier2SellerName: 'TechSolutions Ltd',
-    clientName: 'RetailCorp',
     commissionReceived: 15000,
     jbCommissionPercentage: 10,
   },
@@ -27,7 +26,6 @@ const mockTier2Projects = [
     id: '2',
     projectName: 'Marketing Dashboard',
     tier2SellerName: 'DataViz Pro',
-    clientName: 'MarketingInc',
     commissionReceived: 22500,
     jbCommissionPercentage: 10,
   },
@@ -35,7 +33,6 @@ const mockTier2Projects = [
     id: '3',
     projectName: 'Financial Reports',
     tier2SellerName: 'TechSolutions Ltd',
-    clientName: 'FinanceGroup',
     commissionReceived: 18000,
     jbCommissionPercentage: 10,
   },
@@ -43,7 +40,6 @@ const mockTier2Projects = [
     id: '4',
     projectName: 'Inventory Tracking',
     tier2SellerName: 'DataViz Pro',
-    clientName: 'WarehouseCorp',
     commissionReceived: 12000,
     jbCommissionPercentage: 10,
   },
@@ -91,7 +87,6 @@ const JBCommissionSellerAdmin: React.FC = () => {
               <TableRow>
                 <TableHead>Project Name</TableHead>
                 <TableHead>Tier-2 Seller</TableHead>
-                <TableHead>Client</TableHead>
                 <TableHead>Commission Received</TableHead>
                 <TableHead>Commission % (For JB)</TableHead>
                 <TableHead>Action</TableHead>
@@ -102,7 +97,6 @@ const JBCommissionSellerAdmin: React.FC = () => {
                 <TableRow key={project.id}>
                   <TableCell className="font-medium">{project.projectName}</TableCell>
                   <TableCell>{project.tier2SellerName}</TableCell>
-                  <TableCell>{project.clientName}</TableCell>
                   <TableCell className="font-semibold text-green-600">
                     ₹{project.commissionReceived.toLocaleString()}
                   </TableCell>
