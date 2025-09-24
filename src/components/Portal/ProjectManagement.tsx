@@ -78,15 +78,22 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
           setTier2Sellers(tier2Data);
         }
 
-        // Fetch subscription plans for all users
-        const plansData = await apiService.getAllSubscriptionPlans();
-        setSubscriptionPlans(plansData);
+        // Try to fetch subscription plans, but don't fail if endpoint doesn't exist
+        try {
+          const plansData = await apiService.getAllSubscriptionPlans();
+          setSubscriptionPlans(plansData);
+        } catch (plansError: any) {
+          console.warn('Subscription plans endpoint not available:', plansError.message);
+          // Set empty array so component still works
+          setSubscriptionPlans([]);
+        }
 
       } catch (err) {
         console.error('Failed to load data:', err);
         setError('Failed to load data. Please try again.');
         setProjects([]);
         setTier2Sellers([]);
+        setSubscriptionPlans([]);
       } finally {
         setLoading(false);
       }
@@ -382,21 +389,23 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                   placeholder="Enter project type"
                 />
               </div>
-              <div>
-                <Label htmlFor="subscription_plan">Subscription Plan</Label>
-                <Select value={newProject.subscription_plan_id} onValueChange={(value) => setNewProject({ ...newProject, subscription_plan_id: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a subscription plan" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {subscriptionPlans.map((plan) => (
-                      <SelectItem key={plan.id} value={plan.id}>
-                        {plan.name} - ${plan.price}/{plan.billing_cycle}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {subscriptionPlans.length > 0 && (
+                <div>
+                  <Label htmlFor="subscription_plan">Subscription Plan</Label>
+                  <Select value={newProject.subscription_plan_id} onValueChange={(value) => setNewProject({ ...newProject, subscription_plan_id: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a subscription plan" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {subscriptionPlans.map((plan) => (
+                        <SelectItem key={plan.id} value={plan.id}>
+                          {plan.name} - ${plan.price}/{plan.billing_cycle}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div>
                 <Label htmlFor="admin_commission">Commission % (For Admin)</Label>
                 <Input
