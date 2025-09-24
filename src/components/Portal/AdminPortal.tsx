@@ -11,7 +11,6 @@ import { EditSellerForm } from '@/components/Forms/EditSellerForm';
 import RevenueOverview from '@/components/Revenue/RevenueOverview';
 import ServiceControlPanel from '@/components/Portal/ServiceControlPanel';
 import SubscriptionPlanManagement from '@/components/Portal/SubscriptionPlanManagement';
-import JBCommissionManagement from '@/components/Portal/JBCommissionManagement';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -359,8 +358,6 @@ const AdminPortal: React.FC = () => {
         return <RevenueOverview />;
       case 'subscription-plans':
         return <SubscriptionPlanManagement />;
-      case 'jb-commission':
-        return <JBCommissionManagement />;
       case 'settings':
         return <ServiceControlPanel />;
       default:

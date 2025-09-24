@@ -36,8 +36,7 @@ const Sidebar: React.FC<SidebarProps> = ({ portalType, userRole, activeTab, onTa
           { id: 'tier1-sellers', label: 'Tier-1 Sellers', icon: Building2 },
           { id: 'tier2-sellers', label: 'Tier-2 Sellers', icon: Users },
           { id: 'subscription-plans', label: 'Subscription Plans', icon: CreditCard },
-          { id: 'jb-commission', label: 'Commission % (For JB)', icon: DollarSign },
-          { id: 'revenue', label: 'Revenue Overview', icon: BarChart3 },
+          { id: 'revenue', label: 'Revenue Overview', icon: DollarSign },
           { id: 'settings', label: 'Global Settings', icon: Settings },
         ];
       
