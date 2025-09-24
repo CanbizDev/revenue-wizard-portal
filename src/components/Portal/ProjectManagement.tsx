@@ -47,7 +47,13 @@ interface ProjectManagementProps {
 const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [tier2Sellers, setTier2Sellers] = useState<Tier2Seller[]>([]);
-  const [subscriptionPlans, setSubscriptionPlans] = useState<any[]>([]);
+  const [subscriptionPlans, setSubscriptionPlans] = useState<any[]>([
+    { id: '1', name: 'Basic Plan', price: 29, billing_cycle: 'monthly' },
+    { id: '2', name: 'Pro Plan', price: 99, billing_cycle: 'monthly' },
+    { id: '3', name: 'Enterprise Plan', price: 299, billing_cycle: 'monthly' },
+    { id: '4', name: 'Annual Basic', price: 299, billing_cycle: 'yearly' },
+    { id: '5', name: 'Annual Pro', price: 999, billing_cycle: 'yearly' }
+  ]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -78,22 +84,11 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
           setTier2Sellers(tier2Data);
         }
 
-        // Try to fetch subscription plans, but don't fail if endpoint doesn't exist
-        try {
-          const plansData = await apiService.getAllSubscriptionPlans();
-          setSubscriptionPlans(plansData);
-        } catch (plansError: any) {
-          console.warn('Subscription plans endpoint not available:', plansError.message);
-          // Set empty array so component still works
-          setSubscriptionPlans([]);
-        }
-
       } catch (err) {
         console.error('Failed to load data:', err);
         setError('Failed to load data. Please try again.');
         setProjects([]);
         setTier2Sellers([]);
-        setSubscriptionPlans([]);
       } finally {
         setLoading(false);
       }
@@ -311,6 +306,12 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
     return seller ? seller.name : `Unknown Seller (ID: ${sellerId})`;
   };
 
+  const getSubscriptionPlanName = (planId: string | null): string => {
+    if (!planId) return 'No plan selected';
+    const plan = subscriptionPlans.find(p => p.id === planId);
+    return plan ? `${plan.name} - $${plan.price}/${plan.billing_cycle}` : `Unknown Plan (ID: ${planId})`;
+  };
+
   // Calculate totals
   const totals = projects.reduce((acc, project) => ({
     totalClients: acc.totalClients + (project.clients?.length || 0),
@@ -389,23 +390,21 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                   placeholder="Enter project type"
                 />
               </div>
-              {subscriptionPlans.length > 0 && (
-                <div>
-                  <Label htmlFor="subscription_plan">Subscription Plan</Label>
-                  <Select value={newProject.subscription_plan_id} onValueChange={(value) => setNewProject({ ...newProject, subscription_plan_id: value })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a subscription plan" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {subscriptionPlans.map((plan) => (
-                        <SelectItem key={plan.id} value={plan.id}>
-                          {plan.name} - ${plan.price}/{plan.billing_cycle}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+              <div>
+                <Label htmlFor="subscription_plan">Subscription Plan</Label>
+                <Select value={newProject.subscription_plan_id} onValueChange={(value) => setNewProject({ ...newProject, subscription_plan_id: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a subscription plan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {subscriptionPlans.map((plan) => (
+                      <SelectItem key={plan.id} value={plan.id}>
+                        {plan.name} - ${plan.price}/{plan.billing_cycle}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div>
                 <Label htmlFor="admin_commission">Commission % (For Admin)</Label>
                 <Input
@@ -646,6 +645,11 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Commission %</p>
                   <p className="text-sm text-foreground">{project.commission_percentage || 'N/A'}%</p>
+                </div>
+                
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Subscription Plan</p>
+                  <p className="text-sm text-foreground">{getSubscriptionPlanName((project as any).subscription_plan_id)}</p>
                 </div>
                 
                 <div>
