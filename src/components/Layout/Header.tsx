@@ -30,11 +30,21 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ portalType, user, sellerName, onMenuToggle, onNavigate }) => {
   const isMobile = useIsMobile();
+  const [isLoggingOut, setIsLoggingOut] = React.useState(false);
+  
   const handleSignOut = async () => {
-    await apiService.logout();
-    // Force a full page reload to the root URL.
-    // This clears any old application state and ensures a clean redirect.
-    window.location.href = '/';
+    if (isLoggingOut) return; // Prevent multiple calls
+    
+    setIsLoggingOut(true);
+    try {
+      await apiService.logout();
+      // Force a full page reload to the root URL.
+      // This clears any old application state and ensures a clean redirect.
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Logout failed:', error);
+      setIsLoggingOut(false);
+    }
   };
 
 
@@ -157,9 +167,13 @@ const Header: React.FC<HeaderProps> = ({ portalType, user, sellerName, onMenuTog
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600 focus:text-red-700 cursor-pointer" onClick={handleSignOut}>
+              <DropdownMenuItem 
+                className="text-red-600 focus:text-red-700 cursor-pointer" 
+                onClick={handleSignOut}
+                disabled={isLoggingOut}
+              >
                 <LogOut className="mr-2 h-4 w-4" />
-                Sign out
+                {isLoggingOut ? 'Signing out...' : 'Sign out'}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

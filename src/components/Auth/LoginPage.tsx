@@ -23,6 +23,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading) return; // Prevent multiple calls
     setIsLoading(true);
 
     try {
@@ -43,8 +44,28 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     }
   };
 
-  const quickLogin = (email: string, password: string, userType: 'admin' | 'tier1_seller' | 'tier2_seller') => {
+  const quickLogin = async (email: string, password: string, userType: 'admin' | 'tier1_seller' | 'tier2_seller') => {
+    if (isLoading) return; // Prevent multiple calls
+    
     setCredentials({ email, password, user_type: userType });
+    setIsLoading(true);
+    
+    try {
+      const response = await apiService.login(email, password, userType);
+      toast({
+        title: "Login successful",
+        description: `Welcome back, ${response.user.name}!`,
+      });
+      onLoginSuccess(response.user.role);
+    } catch (error) {
+      toast({
+        title: "Login failed",
+        description: "Please check your credentials and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -130,6 +151,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   size="sm"
                   onClick={() => quickLogin('admin@jupiterbrains.com', 'admin123', 'admin')}
                   className="text-xs"
+                  disabled={isLoading}
                 >
                   Admin Login
                 </Button>
@@ -138,6 +160,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   size="sm"
                   onClick={() => quickLogin('admin@marketstrendai.com', 'admin123', 'tier1_seller')}
                   className="text-xs"
+                  disabled={isLoading}
                 >
                   MarketTrends Tier-1 Seller
                 </Button>
@@ -146,6 +169,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   size="sm"
                   onClick={() => quickLogin('admin@xyzseller.com', 'admin123', 'tier1_seller')}
                   className="text-xs"
+                  disabled={isLoading}
                 >
                   XYZ Tier-1 Seller
                 </Button>
@@ -154,6 +178,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   size="sm"
                   onClick={() => quickLogin('admin@datainsightspro.com', 'admin123', 'tier2_seller')}
                   className="text-xs"
+                  disabled={isLoading}
                 >
                   DataInsights Tier-2 Seller
                 </Button>
