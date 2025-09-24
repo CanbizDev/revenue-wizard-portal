@@ -638,6 +638,11 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                     <p className="text-sm text-foreground">{getTier2SellerName(project.tier2_seller_id)}</p>
                   </div>
                 )}
+                
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Commission % (For Admin)</p>
+                  <p className="text-sm text-foreground">{(project as any).admin_commission_percentage || 'N/A'}%</p>
+                </div>
               </div>
             </CardContent>
           </Card>
