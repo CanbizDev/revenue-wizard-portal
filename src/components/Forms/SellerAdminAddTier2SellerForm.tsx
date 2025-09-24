@@ -28,9 +28,7 @@ const SellerAdminAddTier2SellerForm: React.FC<SellerAdminAddTier2SellerFormProps
     name: '',
     subdomain: '',
     adminEmail: '',
-    adminPassword: '',
-    commissionFromClient: '',
-    commissionForJB: ''
+    adminPassword: ''
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -63,9 +61,7 @@ const SellerAdminAddTier2SellerForm: React.FC<SellerAdminAddTier2SellerFormProps
         tier1_seller_id: currentTier1SellerId || 'current-tier1-seller', // Use current tier1 seller
         logo_url: null,
         stylesheet_url: null,
-        site_content: null,
-        commission_from_client: formData.commissionFromClient ? parseFloat(formData.commissionFromClient) : null,
-        commission_for_jb: formData.commissionForJB ? parseFloat(formData.commissionForJB) : null
+        site_content: null
       });
 
       toast({
@@ -78,9 +74,7 @@ const SellerAdminAddTier2SellerForm: React.FC<SellerAdminAddTier2SellerFormProps
         name: '',
         subdomain: '',
         adminEmail: '',
-        adminPassword: '',
-        commissionFromClient: '',
-        commissionForJB: ''
+        adminPassword: ''
       });
 
       onSuccess();
@@ -162,35 +156,6 @@ const SellerAdminAddTier2SellerForm: React.FC<SellerAdminAddTier2SellerFormProps
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="commissionFromClient">Commission % (From Client)</Label>
-              <Input
-                id="commissionFromClient"
-                type="number"
-                step="0.1"
-                min="0"
-                max="100"
-                value={formData.commissionFromClient}
-                onChange={(e) => handleInputChange('commissionFromClient', e.target.value)}
-                placeholder="15"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="commissionForJB">Commission % (For JB)</Label>
-              <Input
-                id="commissionForJB"
-                type="number"
-                step="0.1"
-                min="0"
-                max="100"
-                value={formData.commissionForJB}
-                onChange={(e) => handleInputChange('commissionForJB', e.target.value)}
-                placeholder="5"
-              />
-            </div>
-          </div>
 
           <div className="flex justify-end space-x-2">
             <Button type="button" variant="outline" onClick={onClose}>

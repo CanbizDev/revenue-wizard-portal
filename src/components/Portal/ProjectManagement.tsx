@@ -47,6 +47,7 @@ interface ProjectManagementProps {
 const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [tier2Sellers, setTier2Sellers] = useState<Tier2Seller[]>([]);
+  const [subscriptionPlans, setSubscriptionPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -77,6 +78,10 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
           setTier2Sellers(tier2Data);
         }
 
+        // Fetch subscription plans for all users
+        const plansData = await apiService.getAllSubscriptionPlans();
+        setSubscriptionPlans(plansData);
+
       } catch (err) {
         console.error('Failed to load data:', err);
         setError('Failed to load data. Please try again.');
@@ -96,6 +101,8 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
     project_type: '',
     project_value: 0,
     commission_percentage: 0,
+    subscription_plan_id: '',
+    admin_commission_percentage: 0,
     status: 'active' as 'active' | 'inactive',
     tier2_seller_id: ''
   });
@@ -136,6 +143,8 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
           project_type: '', 
           project_value: 0,
           commission_percentage: 0,
+          subscription_plan_id: '',
+          admin_commission_percentage: 0,
           status: 'active',
           tier2_seller_id: ''
         });
@@ -372,6 +381,37 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                   onChange={(e) => setNewProject({ ...newProject, project_type: e.target.value })}
                   placeholder="Enter project type"
                 />
+              </div>
+              <div>
+                <Label htmlFor="subscription_plan">Subscription Plan</Label>
+                <Select value={newProject.subscription_plan_id} onValueChange={(value) => setNewProject({ ...newProject, subscription_plan_id: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a subscription plan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {subscriptionPlans.map((plan) => (
+                      <SelectItem key={plan.id} value={plan.id}>
+                        {plan.name} - ${plan.price}/{plan.billing_cycle}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="admin_commission">Commission % (For Admin)</Label>
+                <Input
+                  id="admin_commission"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  value={newProject.admin_commission_percentage}
+                  onChange={(e) => setNewProject({ ...newProject, admin_commission_percentage: Number(e.target.value) })}
+                  placeholder="Enter commission percentage for admin"
+                  readOnly
+                  className="bg-muted"
+                />
+                <p className="text-xs text-muted-foreground mt-1">This field is immutable</p>
               </div>
               {userRole === 'tier2' && (
                 <>
