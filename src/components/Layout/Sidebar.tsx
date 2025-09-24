@@ -61,7 +61,6 @@ const Sidebar: React.FC<SidebarProps> = ({ portalType, userRole, activeTab, onTa
           { id: 'clients', label: 'Clients', icon: Users },
           { id: 'projects', label: 'Projects', icon: Building2 },
           { id: 'revenue', label: 'Revenue', icon: DollarSign },
-          { id: 'jb-commission', label: 'Commission (For JB)', icon: CreditCard },
           { id: 'settings', label: 'Settings', icon: Settings },
         ];
       

@@ -7,7 +7,6 @@ import DashboardCard from '@/components/Dashboard/DashboardCard';
 import AddTier2SellerForm from '@/components/Forms/AddTier2SellerForm';
 import { EditSellerForm } from '@/components/Forms/EditSellerForm';
 import RevenueOverview from '@/components/Revenue/RevenueOverview';
-import JBCommissionTier1 from '@/components/Portal/JBCommissionTier1';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -253,8 +252,6 @@ const Tier1SellerPortal: React.FC = () => {
         return renderTier2Sellers();
       case 'revenue':
         return <RevenueOverview />;
-      case 'jb-commission':
-        return <JBCommissionTier1 />;
       case 'settings':
         return <div className="p-6">Settings placeholder</div>;
       default:
