@@ -416,10 +416,8 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                   value={newProject.admin_commission_percentage}
                   onChange={(e) => setNewProject({ ...newProject, admin_commission_percentage: Number(e.target.value) })}
                   placeholder="Enter commission percentage for admin"
-                  readOnly
-                  className="bg-muted"
                 />
-                <p className="text-xs text-muted-foreground mt-1">This field is immutable</p>
+                <p className="text-xs text-muted-foreground mt-1">This value cannot be changed after project creation</p>
               </div>
               {userRole === 'tier2' && (
                 <>
