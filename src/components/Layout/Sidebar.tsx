@@ -50,6 +50,7 @@ const Sidebar: React.FC<SidebarProps> = ({ portalType, userRole, activeTab, onTa
         
         if (userRole === 'tier1_seller') {
           sellerItems.splice(1, 0, { id: 'tier2-sellers', label: 'Tier-2 Sellers', icon: Building2 });
+          sellerItems.push({ id: 'jb-commission', label: 'Commission (For JB)', icon: DollarSign });
         }
         
         return sellerItems;
