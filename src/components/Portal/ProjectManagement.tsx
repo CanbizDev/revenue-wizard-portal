@@ -723,7 +723,12 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                 value={editProjectData.commission_percentage}
                 onChange={(e) => setEditProjectData({ ...editProjectData, commission_percentage: Number(e.target.value) })}
                 placeholder="Enter commission percentage"
+                readOnly={editingProject?.commission_percentage ? editingProject.commission_percentage > 0 : false}
+                className={editingProject?.commission_percentage ? editingProject.commission_percentage > 0 ? "bg-muted" : "" : ""}
               />
+              {editingProject?.commission_percentage && editingProject.commission_percentage > 0 && (
+                <p className="text-xs text-muted-foreground mt-1">Commission percentage cannot be changed once set</p>
+              )}
             </div>
             {userRole === 'tier1' && (
               <div>
