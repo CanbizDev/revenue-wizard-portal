@@ -68,6 +68,7 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
     project_value: 0,
     commission_percentage: 0,
     admin_commission_percentage: 0,
+    subscription_plan_id: '',
     tier2_seller_id: ''
   });
 
@@ -195,6 +196,7 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
       project_value: project.project_value,
       commission_percentage: project.commission_percentage,
       admin_commission_percentage: (project as any).admin_commission_percentage || 0,
+      subscription_plan_id: (project as any).subscription_plan_id || '',
       tier2_seller_id: project.tier2_seller_id || ''
     });
     setIsEditDialogOpen(true);
@@ -210,6 +212,7 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
       project_value: 0,
       commission_percentage: 0,
       admin_commission_percentage: 0,
+      subscription_plan_id: '',
       tier2_seller_id: ''
     });
   };
@@ -697,6 +700,21 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                     onChange={(e) => setEditProjectData({ ...editProjectData, project_value: Number(e.target.value) })}
                     placeholder="Enter project value"
                   />
+            </div>
+            <div>
+              <Label htmlFor="edit-subscription_plan">Subscription Plan</Label>
+              <Select value={editProjectData.subscription_plan_id} onValueChange={(value) => setEditProjectData({ ...editProjectData, subscription_plan_id: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a subscription plan" />
+                </SelectTrigger>
+                <SelectContent>
+                  {subscriptionPlans.map((plan) => (
+                    <SelectItem key={plan.id} value={plan.id}>
+                      {plan.name} - ${plan.price}/{plan.billing_cycle}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="edit-admin_commission">Commission % (For Admin)</Label>
