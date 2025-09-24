@@ -118,17 +118,16 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
   });
 
   const handleAddProject = async () => {
-    const isValidForTier1 = userRole === 'tier1' && newProject.name && newProject.description && newProject.project_type;
-    const isValidForTier2 = userRole === 'tier2' && newProject.name && newProject.description && newProject.project_type && newProject.project_value > 0 && newProject.commission_percentage > 0;
+    const isValid = newProject.name && newProject.description && newProject.project_type;
     
-    if (isValidForTier1 || isValidForTier2) {
+    if (isValid) {
       try {
         const projectData = {
           name: newProject.name,
           description: newProject.description,
           project_type: newProject.project_type,
-          project_value: userRole === 'tier2' ? newProject.project_value : 0,
-          commission_percentage: userRole === 'tier2' ? newProject.commission_percentage : 0,
+          project_value: 0,
+          commission_percentage: 0,
           status: newProject.status,
           tier2_seller_id: newProject.tier2_seller_id.trim() || null
         };
@@ -419,32 +418,6 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                 />
                 <p className="text-xs text-muted-foreground mt-1">This value cannot be changed after project creation</p>
               </div>
-              {userRole === 'tier2' && (
-                <>
-                  <div>
-                    <Label htmlFor="project_value">Project Value</Label>
-                    <Input
-                      id="project_value"
-                      type="number"
-                      value={newProject.project_value}
-                      onChange={(e) => setNewProject({ ...newProject, project_value: Number(e.target.value) })}
-                      placeholder="Enter project value"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="commission_percentage">Commission %</Label>
-                    <Input
-                      id="commission_percentage"
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={newProject.commission_percentage}
-                      onChange={(e) => setNewProject({ ...newProject, commission_percentage: Number(e.target.value) })}
-                      placeholder="Enter commission percentage"
-                    />
-                  </div>
-                </>
-              )}
               {/* {userRole === 'tier1' && (
                 <div>
                   <Label htmlFor="tier2_seller_id">Tier 2 Seller (Optional)</Label>
@@ -635,15 +608,19 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                   <p className="text-sm text-foreground">{project.project_type}</p>
                 </div>
                 
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Project Value</p>
-                  <p className="text-sm text-foreground">₹{project.project_value?.toLocaleString() || 'N/A'}</p>
-                </div>
-                
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Commission %</p>
-                  <p className="text-sm text-foreground">{project.commission_percentage || 'N/A'}%</p>
-                </div>
+                {userRole === 'tier1' && (
+                  <>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Project Value</p>
+                      <p className="text-sm text-foreground">₹{project.project_value?.toLocaleString() || 'N/A'}</p>
+                    </div>
+                    
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Commission %</p>
+                      <p className="text-sm text-foreground">{project.commission_percentage || 'N/A'}%</p>
+                    </div>
+                  </>
+                )}
                 
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Subscription Plan</p>
@@ -701,33 +678,37 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                 placeholder="Enter project type"
               />
             </div>
-            <div>
-              <Label htmlFor="edit-project_value">Project Value</Label>
-              <Input
-                id="edit-project_value"
-                type="number"
-                value={editProjectData.project_value}
-                onChange={(e) => setEditProjectData({ ...editProjectData, project_value: Number(e.target.value) })}
-                placeholder="Enter project value"
-              />
-            </div>
-            <div>
-              <Label htmlFor="edit-commission_percentage">Commission %</Label>
-              <Input
-                id="edit-commission_percentage"
-                type="number"
-                min="0"
-                max="100"
-                value={editProjectData.commission_percentage}
-                onChange={(e) => setEditProjectData({ ...editProjectData, commission_percentage: Number(e.target.value) })}
-                placeholder="Enter commission percentage"
-                readOnly={editingProject?.commission_percentage ? editingProject.commission_percentage > 0 : false}
-                className={editingProject?.commission_percentage ? editingProject.commission_percentage > 0 ? "bg-muted" : "" : ""}
-              />
-              {editingProject?.commission_percentage && editingProject.commission_percentage > 0 && (
-                <p className="text-xs text-muted-foreground mt-1">Commission percentage cannot be changed once set</p>
-              )}
-            </div>
+            {userRole === 'tier1' && (
+              <>
+                <div>
+                  <Label htmlFor="edit-project_value">Project Value</Label>
+                  <Input
+                    id="edit-project_value"
+                    type="number"
+                    value={editProjectData.project_value}
+                    onChange={(e) => setEditProjectData({ ...editProjectData, project_value: Number(e.target.value) })}
+                    placeholder="Enter project value"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-commission_percentage">Commission %</Label>
+                  <Input
+                    id="edit-commission_percentage"
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={editProjectData.commission_percentage}
+                    onChange={(e) => setEditProjectData({ ...editProjectData, commission_percentage: Number(e.target.value) })}
+                    placeholder="Enter commission percentage"
+                    readOnly={editingProject?.commission_percentage ? editingProject.commission_percentage > 0 : false}
+                    className={editingProject?.commission_percentage ? editingProject.commission_percentage > 0 ? "bg-muted" : "" : ""}
+                  />
+                  {editingProject?.commission_percentage && editingProject.commission_percentage > 0 && (
+                    <p className="text-xs text-muted-foreground mt-1">Commission percentage cannot be changed once set</p>
+                  )}
+                </div>
+              </>
+            )}
             {userRole === 'tier1' && (
               <div>
                 <Label htmlFor="edit-tier2_seller_id">Tier 2 Seller (Optional)</Label>
