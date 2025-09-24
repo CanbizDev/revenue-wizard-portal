@@ -118,17 +118,17 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
   });
 
   const handleAddProject = async () => {
-    const isValidForTier1 = userRole === 'tier1' && newProject.name && newProject.description && newProject.project_type;
-    const isValidForTier2 = userRole === 'tier2' && newProject.name && newProject.description && newProject.project_type && newProject.project_value > 0 && newProject.commission_percentage > 0;
+    // Both tier1 and tier2 need the same basic validation
+    const isValid = newProject.name && newProject.description && newProject.project_type && newProject.project_value > 0 && newProject.commission_percentage > 0;
     
-    if (isValidForTier1 || isValidForTier2) {
+    if (isValid) {
       try {
         const projectData = {
           name: newProject.name,
           description: newProject.description,
           project_type: newProject.project_type,
-          project_value: userRole === 'tier2' ? newProject.project_value : 0,
-          commission_percentage: userRole === 'tier2' ? newProject.commission_percentage : 0,
+          project_value: newProject.project_value,
+          commission_percentage: newProject.commission_percentage,
           status: newProject.status,
           tier2_seller_id: newProject.tier2_seller_id.trim() || null
         };
@@ -164,6 +164,12 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
           variant: "destructive",
         });
       }
+    } else {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields including project value and commission percentage",
+        variant: "destructive",
+      });
     }
   };
 
@@ -419,33 +425,32 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                 />
                 <p className="text-xs text-muted-foreground mt-1">This value cannot be changed after project creation</p>
               </div>
-              {userRole === 'tier2' && (
-                <>
-                  <div>
-                    <Label htmlFor="project_value">Project Value</Label>
-                    <Input
-                      id="project_value"
-                      type="number"
-                      value={newProject.project_value}
-                      onChange={(e) => setNewProject({ ...newProject, project_value: Number(e.target.value) })}
-                      placeholder="Enter project value"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="commission_percentage">Commission %</Label>
-                    <Input
-                      id="commission_percentage"
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={newProject.commission_percentage}
-                      onChange={(e) => setNewProject({ ...newProject, commission_percentage: Number(e.target.value) })}
-                      placeholder="Enter commission percentage"
-                    />
-                  </div>
-                </>
-              )}
-              {/* {userRole === 'tier1' && (
+              <div>
+                <Label htmlFor="project_value">Project Value</Label>
+                <Input
+                  id="project_value"
+                  type="number"
+                  value={newProject.project_value}
+                  onChange={(e) => setNewProject({ ...newProject, project_value: Number(e.target.value) })}
+                  placeholder="Enter project value"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="commission_percentage">Commission %</Label>
+                <Input
+                  id="commission_percentage"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  value={newProject.commission_percentage}
+                  onChange={(e) => setNewProject({ ...newProject, commission_percentage: Number(e.target.value) })}
+                  placeholder="Enter commission percentage"
+                  required
+                />
+              </div>
+              {userRole === 'tier1' && (
                 <div>
                   <Label htmlFor="tier2_seller_id">Tier 2 Seller (Optional)</Label>
                   <Select value={newProject.tier2_seller_id || "none"} onValueChange={(value) => setNewProject({ ...newProject, tier2_seller_id: value === "none" ? "" : value })}>
@@ -462,7 +467,7 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                     </SelectContent>
                   </Select>
                 </div>
-              )} */}
+              )}
               <div>
                 <Label htmlFor="status">Status</Label>
                 <Select value={newProject.status} onValueChange={(value: 'active' | 'inactive') => setNewProject({ ...newProject, status: value })}>
