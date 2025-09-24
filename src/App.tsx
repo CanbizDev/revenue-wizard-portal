@@ -8,6 +8,7 @@ import CompanyLanding from "./pages/CompanyLanding";
 import ClientLogin from "./pages/ClientLogin";
 import AdminPortal from "./components/Portal/AdminPortal";
 import SellerAdminPortal from "./components/Portal/SellerAdminPortal";
+import Tier1SellerPortal from "./components/Portal/Tier1SellerPortal";
 
 const queryClient = new QueryClient();
 
@@ -36,12 +37,17 @@ const App = () => {
     }
     
     if (currentPath === '/seller-admin') {
-      return (
-        <SellerAdminPortal 
-          company={selectedCompany as 'marketstrendai' | 'xyzseller'}
-          onNavigate={handleNavigate}
-        />
-      );
+      // Route to appropriate portal based on company type
+      if (selectedCompany === 'marketstrendai') {
+        return <Tier1SellerPortal />;
+      } else {
+        return (
+          <SellerAdminPortal 
+            company={selectedCompany as 'marketstrendai' | 'xyzseller'}
+            onNavigate={handleNavigate}
+          />
+        );
+      }
     }
 
     // Handle client login pages
