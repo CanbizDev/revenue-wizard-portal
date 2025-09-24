@@ -67,6 +67,7 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
     project_type: '',
     project_value: 0,
     commission_percentage: 0,
+    admin_commission_percentage: 0,
     tier2_seller_id: ''
   });
 
@@ -193,6 +194,7 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
       project_type: project.project_type,
       project_value: project.project_value,
       commission_percentage: project.commission_percentage,
+      admin_commission_percentage: (project as any).admin_commission_percentage || 0,
       tier2_seller_id: project.tier2_seller_id || ''
     });
     setIsEditDialogOpen(true);
@@ -207,6 +209,7 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
       project_type: '',
       project_value: 0,
       commission_percentage: 0,
+      admin_commission_percentage: 0,
       tier2_seller_id: ''
     });
   };
@@ -694,7 +697,22 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                     onChange={(e) => setEditProjectData({ ...editProjectData, project_value: Number(e.target.value) })}
                     placeholder="Enter project value"
                   />
-                </div>
+            </div>
+            <div>
+              <Label htmlFor="edit-admin_commission">Commission % (For Admin)</Label>
+              <Input
+                id="edit-admin_commission"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                value={editProjectData.admin_commission_percentage}
+                readOnly
+                className="bg-muted"
+                placeholder="Admin commission percentage"
+              />
+              <p className="text-xs text-muted-foreground mt-1">This value cannot be changed after project creation</p>
+            </div>
                 <div>
                   <Label htmlFor="edit-commission_percentage">Commission %</Label>
                   <Input
