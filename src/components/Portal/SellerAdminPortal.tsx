@@ -583,6 +583,30 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
     </div>
   );
 
+  const renderSubscriptionPlans = () => (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Subscription Plans & Commission</h2>
+        <p className="text-gray-600">Manage subscription plans and JB commission settings</p>
+      </div>
+
+      <Tabs defaultValue="plans" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="plans">Subscription Plans</TabsTrigger>
+          <TabsTrigger value="commission">Commission (JB)</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="plans" className="space-y-6">
+          {renderPlans()}
+        </TabsContent>
+        
+        <TabsContent value="commission" className="space-y-6">
+          <CommissionsView userRole={company === 'xyzseller' ? 'tier2_seller' : 'tier1_seller'} company={company} showJBCommission={true} />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+
   const renderTier2Sellers = () => (
     <SellerAdminTier2Management 
       currentTier1SellerId={sellerData?.id}
@@ -604,6 +628,8 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
         return company === 'marketstrendai' ? renderTier2Sellers() : renderDashboard();
       case 'commissions':
         return <CommissionsView userRole={company === 'xyzseller' ? 'tier2_seller' : 'tier1_seller'} company={company} />;
+      case 'subscription-plans':
+        return renderSubscriptionPlans();
       case 'billing':
         return company === 'xyzseller' ? <ProjectBilling /> : <ProjectBillingTier1 />;
       case 'reports':

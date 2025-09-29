@@ -17,9 +17,10 @@ import { useState, useEffect } from 'react';
 interface CommissionsViewProps {
   userRole: 'tier1_seller' | 'tier2_seller';
   company: 'marketstrendai' | 'xyzseller';
+  showJBCommission?: boolean;
 }
 
-const CommissionsView: React.FC<CommissionsViewProps> = ({ userRole, company }) => {
+const CommissionsView: React.FC<CommissionsViewProps> = ({ userRole, company, showJBCommission = false }) => {
   const [commissions, setCommissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -147,6 +148,7 @@ const CommissionsView: React.FC<CommissionsViewProps> = ({ userRole, company }) 
                 <TableHead>Type</TableHead>
                 <TableHead>Amount</TableHead>
                 <TableHead>Commission</TableHead>
+                {showJBCommission && <TableHead>Commission (JB Admin)</TableHead>}
                 <TableHead>Status</TableHead>
                 <TableHead>Date</TableHead>
               </TableRow>
@@ -163,6 +165,9 @@ const CommissionsView: React.FC<CommissionsViewProps> = ({ userRole, company }) 
                   <TableCell>{commission.type}</TableCell>
                   <TableCell>₹{commission.amount.toLocaleString()}</TableCell>
                   <TableCell>₹{commission.commission.toLocaleString()}</TableCell>
+                  {showJBCommission && (
+                    <TableCell>₹{Math.round(commission.commission * 0.1).toLocaleString()}</TableCell>
+                  )}
                   <TableCell>
                     <Badge variant={commission.status === 'Paid' ? 'default' : 'secondary'}>
                       {commission.status}

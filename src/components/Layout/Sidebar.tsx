@@ -44,6 +44,7 @@ const Sidebar: React.FC<SidebarProps> = ({ portalType, userRole, activeTab, onTa
         const sellerItems = [
           { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
           { id: 'projects', label: 'Project Management', icon: Building2 },
+          { id: 'subscription-plans', label: 'Subscription Plans', icon: CreditCard },
           { id: 'billing', label: 'Billing & Revenue', icon: DollarSign },
           { id: 'reports', label: 'Reports', icon: FileText },
         ];
