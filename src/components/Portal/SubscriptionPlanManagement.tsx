@@ -13,47 +13,56 @@ import {
   Users,
   DollarSign
 } from 'lucide-react';
-
-interface SubscriptionPlan {
-  id: string;
-  name: string;
-  price: number;
-  currency: string;
-  billing_cycle: string;
-  max_clients: number;
-  description?: string;
-  features: string[];
-  status: 'active' | 'inactive';
-  created_at: string;
-}
+import { SubscriptionPlan } from '@/types';
 
 const SubscriptionPlanManagement: React.FC = () => {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [isAddPlanOpen, setIsAddPlanOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
   const { toast } = useToast();
-
-  const loadPlans = async () => {
-    try {
-      const plansData = await apiService.getAllSubscriptionPlans();
-      setPlans(plansData);
-    } catch (error: any) {
-      console.error('Error loading subscription plans:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load subscription plans',
-        variant: 'destructive'
-      });
-    }
-  };
+  const currentUser = apiService.getCurrentUser();
+  const userRole = currentUser?.role;
 
   useEffect(() => {
+    // console.log("nushgigginushs")
+    // const loadPlans = async () => {
+    //   try {
+    //     const plansData = await apiService.getAvailablePlans();
+    //     setPlans(plansData);
+    //   } catch (error: any) {
+    //     console.error('Error loading subscription plans:', error);
+    //     toast({
+    //       title: 'Error',
+    //       description: 'Failed to load subscription plans',
+    //       variant: 'destructive'
+    //     });
+    //   }
+    // };
     loadPlans();
   }, []);
 
+  const loadPlans = async () => {
+      try {
+        const plansData = await apiService.getAvailablePlans();
+        setPlans(plansData);
+      } catch (error: any) {
+        console.error('Error loading subscription plans:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load subscription plans',
+          variant: 'destructive'
+        });
+      }
+    };
+
   const handleCreatePlan = async (planData: any) => {
     try {
-      await apiService.createSubscriptionPlan(planData);
+      if (userRole === 'admin') {
+        await apiService.createMasterPlan(planData);
+      } else if (userRole === 'tier1_seller') {
+        await apiService.createTier1Plan(planData);
+      }
+      
       setIsAddPlanOpen(false);
       await loadPlans(); // Reload plans after creation
       
@@ -65,6 +74,22 @@ const SubscriptionPlanManagement: React.FC = () => {
       toast({
         title: 'Error',
         description: 'Failed to create subscription plan',
+        variant: 'destructive'
+      });
+    }
+  };
+  
+  const handleSubscribe = async (planId: string) => {
+    try {
+      await apiService.subscribeToPlan(planId);
+      toast({
+        title: 'Success',
+        description: 'Successfully subscribed to the plan!'
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to subscribe to the plan.',
         variant: 'destructive'
       });
     }
@@ -110,13 +135,8 @@ const SubscriptionPlanManagement: React.FC = () => {
     }
   };
 
-  const formatPrice = (price: number, currency: string, billingCycle: string) => {
-    const symbol = currency === 'USD' ? '$' : '₹';
-    return `${symbol}${price}/${billingCycle}`;
-  };
-
-  const formatClientLimit = (maxClients: number) => {
-    return maxClients === -1 ? 'Unlimited' : maxClients.toString();
+  const formatPrice = (price: string, billingCycle: string = 'month') => {
+    return `$${price}/${billingCycle}`;
   };
 
   return (
@@ -126,60 +146,15 @@ const SubscriptionPlanManagement: React.FC = () => {
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Subscription Plans</h2>
           <p className="text-gray-600">Manage subscription plans for your platform</p>
         </div>
-        <Button 
-          className="flex items-center space-x-2 w-full sm:w-auto" 
-          onClick={() => setIsAddPlanOpen(true)}
-        >
-          <Plus className="h-4 w-4" />
-          <span>Add New Plan</span>
-        </Button>
-      </div>
-
-      {/* Plans Overview Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <CreditCard className="h-6 w-6 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Total Plans</p>
-                <p className="text-2xl font-bold">{plans.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Users className="h-6 w-6 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Active Plans</p>
-                <p className="text-2xl font-bold">{plans.filter(p => p.status === 'active').length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <DollarSign className="h-6 w-6 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Avg. Price</p>
-                <p className="text-2xl font-bold">
-                  ₹{Math.round(plans.reduce((sum, plan) => sum + plan.price, 0) / plans.length || 0)}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {(userRole === 'admin' || userRole === 'tier1_seller') && (
+          <Button 
+            className="flex items-center space-x-2 w-full sm:w-auto" 
+            onClick={() => setIsAddPlanOpen(true)}
+          >
+            <Plus className="h-4 w-4" />
+            <span>Add New Plan</span>
+          </Button>
+        )}
       </div>
 
       {/* Plans List */}
@@ -191,7 +166,7 @@ const SubscriptionPlanManagement: React.FC = () => {
           <div className="space-y-4">
             {plans.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                No subscription plans found. Create your first plan to get started.
+                No subscription plans found.
               </div>
             ) : (
               plans.map((plan) => (
@@ -204,43 +179,49 @@ const SubscriptionPlanManagement: React.FC = () => {
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
                           <h3 className="font-semibold text-gray-900">{plan.name}</h3>
-                          <Badge 
-                            variant={plan.status === 'active' ? 'default' : 'secondary'}
-                            className={plan.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}
-                          >
-                            {plan.status}
+                          <Badge variant="default">
+                            {plan.creator_type}
                           </Badge>
                         </div>
-                        <p className="text-gray-600 text-sm mb-2">{plan.description}</p>
                         <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
                           <span className="font-medium text-lg text-blue-600">
-                            {formatPrice(plan.price, plan.currency, plan.billing_cycle)}
+                            {formatPrice(plan.price)}
                           </span>
-                          <span>Max Clients: {formatClientLimit(plan.max_clients)}</span>
-                          <span>Features: {plan.features.length}</span>
                         </div>
                       </div>
                     </div>
                   </div>
                   
                   <div className="flex items-center space-x-2 w-full lg:w-auto justify-end">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setEditingPlan(plan);
-                        setIsAddPlanOpen(true);
-                      }}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDeletePlan(plan.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {userRole === 'tier2_seller' && (
+                      <Button
+                        size="sm"
+                        onClick={() => handleSubscribe(plan.id)}
+                      >
+                        Subscribe
+                      </Button>
+                    )}
+                    {userRole === 'admin' && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setEditingPlan(plan);
+                            setIsAddPlanOpen(true);
+                          }}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeletePlan(plan.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               ))
@@ -258,7 +239,7 @@ const SubscriptionPlanManagement: React.FC = () => {
         }}
         onSubmit={editingPlan ? handleEditPlan : handleCreatePlan}
         editingPlan={editingPlan}
-        formType="admin"
+        formType={userRole}
       />
     </div>
   );

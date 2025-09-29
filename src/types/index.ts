@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   email: string;
@@ -57,15 +56,36 @@ export interface Client {
 export interface Report {
   id: string;
   title: string;
-  client_id: string;
-  sections: ReportSection[];
-  created_at: string;
-  status: 'draft' | 'published';
+  generated_at: string;
+  data: any;
 }
 
-export interface ReportSection {
+export interface Tier1Seller {
+    id: string;
+    name: string;
+    admin_email: string;
+    subdomain: string;
+    project_count: number;
+    revenue: number;
+}
+
+export interface Tier2Seller {
+    id: string;
+    name: string;
+    admin_email: string;
+    subdomain: string;
+    project_count: number;
+    revenue: number;
+    tier1_seller: {
+        name: string;
+    };
+}
+
+export interface SubscriptionPlan {
   id: string;
-  title: string;
-  content: string;
-  visible_to: string[]; // user IDs who can view this section
+  name: string;
+  price: string;
+  creator_type: 'admin' | 'tier1_seller';
+  admin_commission_pct?: string;
+  tier1_commission_pct?: string;
 }

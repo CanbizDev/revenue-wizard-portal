@@ -135,8 +135,10 @@ class ApiService {
 
     // Add request interceptor to include auth token
     this.axiosInstance.interceptors.request.use((config) => {
-      if (this.token) {
-        config.headers.Authorization = `Bearer ${this.token}`;
+      // Refresh the token from localStorage for each request
+      const currentToken = localStorage.getItem('auth_token');
+      if (currentToken) {
+        config.headers.Authorization = `Bearer ${currentToken}`;
       }
       return config;
     });
@@ -512,31 +514,55 @@ class ApiService {
     const userData = localStorage.getItem('user_data');
     return userData ? JSON.parse(userData) : null;
   }
-
-  // Subscription Plan Management (Admin Only)
-  async createSubscriptionPlan(planData: any): Promise<any> {
+  
+  // ===============================================================
+  // NEW TIERED SUBSCRIPTION MANAGEMENT
+  // ===============================================================
+  
+  async getAvailablePlans(): Promise<any[]> {
     try {
-      const response = await this.axiosInstance.post('/subscription-plans/', planData);
+      const response = await this.axiosInstance.get('/subscription/plans');
       return response.data;
     } catch (error) {
-      console.error('Failed to create subscription plan:', error);
+      console.error('Failed to fetch available subscription plans:', error);
       throw error;
     }
   }
 
-  async getAllSubscriptionPlans(): Promise<any[]> {
+  async createMasterPlan(planData: { name: string; price: number; admin_commission_pct: number; description?: string }): Promise<any> {
     try {
-      const response = await this.axiosInstance.get('/subscription-plans/');
+      const response = await this.axiosInstance.post('/subscription/admin/plans', planData);
       return response.data;
     } catch (error) {
-      console.error('Failed to fetch subscription plans:', error);
+      console.error('Failed to create master plan:', error);
       throw error;
     }
   }
+  
+  async createTier1Plan(planData: { master_plan_id: string; tier1_commission_pct: number }): Promise<any> {
+    try {
+      const response = await this.axiosInstance.post('/subscription/tier1/plans', planData);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to create Tier 1 plan:', error);
+      throw error;
+    }
+  }
+
+  async subscribeToPlan(planId: string): Promise<any> {
+    try {
+      const response = await this.axiosInstance.post('/subscription/subscribe', { plan_id: planId });
+      return response.data;
+    } catch (error) {
+      console.error('Failed to subscribe to plan:', error);
+      throw error;
+    }
+  }
+
 
   async getSubscriptionPlan(planId: string): Promise<any> {
     try {
-      const response = await this.axiosInstance.get(`/subscription-plans/${planId}`);
+      const response = await this.axiosInstance.get(`/subscription/plans/${planId}`);
       return response.data;
     } catch (error) {
       console.error('Failed to fetch subscription plan:', error);
@@ -546,7 +572,7 @@ class ApiService {
 
   async updateSubscriptionPlan(planId: string, planData: any): Promise<any> {
     try {
-      const response = await this.axiosInstance.put(`/subscription-plans/${planId}`, planData);
+      const response = await this.axiosInstance.put(`/subscription/plans/${planId}`, planData);
       return response.data;
     } catch (error) {
       console.error('Failed to update subscription plan:', error);
@@ -556,7 +582,7 @@ class ApiService {
 
   async deleteSubscriptionPlan(planId: string): Promise<any> {
     try {
-      const response = await this.axiosInstance.delete(`/subscription-plans/${planId}`);
+      const response = await this.axiosInstance.delete(`/subscription/plans/${planId}`);
       return response.data;
     } catch (error) {
       console.error('Failed to delete subscription plan:', error);
