@@ -24,13 +24,12 @@ const CommissionsView: React.FC<CommissionsViewProps> = ({ userRole, company }) 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  // Mock commission data since API is not available
+    // Mock commission data since API is not available
     const mockCommissions = [
       {
         id: '1',
         amount: 15000,
         commission_amount: 2250,
-        jb_admin_commission: 225,
         type: 'client_payment',
         status: 'paid',
         transaction_date: new Date().toISOString(),
@@ -40,7 +39,6 @@ const CommissionsView: React.FC<CommissionsViewProps> = ({ userRole, company }) 
         id: '2',
         amount: 8000,
         commission_amount: 1200,
-        jb_admin_commission: 120,
         type: 'client_payment',
         status: 'pending',
         transaction_date: new Date().toISOString(),
@@ -78,7 +76,6 @@ const CommissionsView: React.FC<CommissionsViewProps> = ({ userRole, company }) 
     company: commission.clients?.company || 'Unknown Company',
     amount: commission.amount,
     commission: commission.commission_amount,
-    jbAdminCommission: commission.jb_admin_commission || 0,
     type: commission.type === 'client_payment' ? 'Client Payment' : 'Tier-2 Commission',
     status: commission.status === 'paid' ? 'Paid' : 'Pending',
     date: new Date(commission.transaction_date).toLocaleDateString()
@@ -150,7 +147,6 @@ const CommissionsView: React.FC<CommissionsViewProps> = ({ userRole, company }) 
                 <TableHead>Type</TableHead>
                 <TableHead>Amount</TableHead>
                 <TableHead>Commission</TableHead>
-                <TableHead>Commission (JB Admin)</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Date</TableHead>
               </TableRow>
@@ -167,7 +163,6 @@ const CommissionsView: React.FC<CommissionsViewProps> = ({ userRole, company }) 
                   <TableCell>{commission.type}</TableCell>
                   <TableCell>₹{commission.amount.toLocaleString()}</TableCell>
                   <TableCell>₹{commission.commission.toLocaleString()}</TableCell>
-                  <TableCell>₹{commission.jbAdminCommission.toLocaleString()}</TableCell>
                   <TableCell>
                     <Badge variant={commission.status === 'Paid' ? 'default' : 'secondary'}>
                       {commission.status}
