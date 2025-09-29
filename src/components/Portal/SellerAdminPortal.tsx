@@ -15,7 +15,7 @@ import CommissionsView from './CommissionsView';
 import ProjectManagement from './ProjectManagement';
 import ProjectBilling from './ProjectBilling';
 import ProjectBillingTier1 from './ProjectBillingTier1';
-import JBCommissionSellerAdmin from './JBCommissionSellerAdmin';
+
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -606,8 +606,6 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
         return <CommissionsView userRole={company === 'xyzseller' ? 'tier2_seller' : 'tier1_seller'} company={company} />;
       case 'billing':
         return company === 'xyzseller' ? <ProjectBilling /> : <ProjectBillingTier1 />;
-      case 'jb-commission':
-        return company === 'marketstrendai' ? <JBCommissionSellerAdmin /> : renderDashboard();
       case 'reports':
         return <div className="p-8 text-center text-gray-500">Reports coming soon...</div>;
       default:
