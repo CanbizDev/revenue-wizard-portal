@@ -258,6 +258,7 @@ const SubscriptionPlanManagement: React.FC = () => {
         }}
         onSubmit={editingPlan ? handleEditPlan : handleCreatePlan}
         editingPlan={editingPlan}
+        formType="admin"
       />
     </div>
   );

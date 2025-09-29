@@ -493,7 +493,8 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
             <AddPlanForm 
               isOpen={showAddPlanForm}
               onClose={() => setShowAddPlanForm(false)}
-              onSubmit={handleAddPlan} 
+              onSubmit={handleAddPlan}
+              formType="seller_admin"
             />
           </DialogContent>
         </Dialog>
@@ -834,7 +835,9 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
                 setShowAddPlanForm(false);
                 setEditingPlan(null);
               }}
-              onSubmit={editingPlan ? handleEditPlan : handleAddPlan} 
+              onSubmit={editingPlan ? handleEditPlan : handleAddPlan}
+              editingPlan={editingPlan}
+              formType="seller_admin"
             />
           </DialogContent>
         </Dialog>

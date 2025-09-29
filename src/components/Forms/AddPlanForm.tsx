@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { X, Plus, Trash2 } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface AddPlanFormProps {
@@ -14,9 +14,10 @@ interface AddPlanFormProps {
   onClose: () => void;
   onSubmit: (planData: any) => void;
   editingPlan?: any;
+  formType?: 'admin' | 'seller_admin';
 }
 
-const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, editingPlan }) => {
+const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, editingPlan, formType = 'seller_admin' }) => {
   const { toast } = useToast();
   
   const currencyOptions = [
@@ -34,17 +35,22 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
     price: editingPlan?.price || '',
     currency: editingPlan?.currency || 'INR',
     billing_cycle: editingPlan?.billing_cycle || 'monthly',
-    max_clients: editingPlan?.max_clients || '',
     description: editingPlan?.description || '',
-    features: editingPlan?.features || [''],
-    status: editingPlan?.status || 'active',
-    jb_commission_percentage: editingPlan?.jb_commission_percentage || '10'
+    tier1_commission_percentage: editingPlan?.tier1_commission_percentage || '15',
+    jb_commission_percentage: editingPlan?.jb_commission_percentage || '10',
+    status: editingPlan?.status || 'active'
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.price || !formData.max_clients || !formData.jb_commission_percentage) {
+    const requiredFields = formType === 'admin' 
+      ? ['name', 'price', 'tier1_commission_percentage']
+      : ['name', 'price', 'tier1_commission_percentage', 'jb_commission_percentage'];
+    
+    const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
+    
+    if (missingFields.length > 0) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -53,17 +59,19 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
       return;
     }
 
-    const planData = {
+    const planData: any = {
       name: formData.name,
       description: formData.description,
       price: parseFloat(formData.price),
       billing_cycle: formData.billing_cycle,
       currency: formData.currency,
-      max_clients: parseInt(formData.max_clients),
-      features: formData.features.filter(f => f.trim() !== ''),
       status: formData.status,
-      jb_commission_percentage: parseFloat(formData.jb_commission_percentage)
+      tier1_commission_percentage: parseFloat(formData.tier1_commission_percentage)
     };
+
+    if (formType === 'seller_admin') {
+      planData.jb_commission_percentage = parseFloat(formData.jb_commission_percentage);
+    }
 
     onSubmit(planData);
     
@@ -73,11 +81,10 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
         price: '',
         currency: 'INR',
         billing_cycle: 'monthly',
-        max_clients: '',
         description: '',
-        features: [''],
-        status: 'active',
-        jb_commission_percentage: '10'
+        tier1_commission_percentage: '15',
+        jb_commission_percentage: '10',
+        status: 'active'
       });
     }
     
@@ -93,23 +100,6 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const addFeature = () => {
-    setFormData(prev => ({ ...prev, features: [...prev.features, ''] }));
-  };
-
-  const removeFeature = (index: number) => {
-    setFormData(prev => ({ 
-      ...prev, 
-      features: prev.features.filter((_, i) => i !== index) 
-    }));
-  };
-
-  const updateFeature = (index: number, value: string) => {
-    setFormData(prev => ({ 
-      ...prev, 
-      features: prev.features.map((f, i) => i === index ? value : f) 
-    }));
-  };
 
   if (!isOpen) return null;
 
@@ -124,28 +114,15 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Plan Name *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => handleChange('name', e.target.value)}
-                  placeholder="e.g., Premium Plan"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="maxClients">Max Clients *</Label>
-                <Input
-                  id="maxClients"
-                  type="number"
-                  value={formData.max_clients}
-                  onChange={(e) => handleChange('max_clients', e.target.value)}
-                  placeholder="15"
-                  required
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="name">Plan Name *</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => handleChange('name', e.target.value)}
+                placeholder="e.g., Premium Plan"
+                required
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -190,22 +167,44 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="jbCommission">Commission (JB) % *</Label>
-              <Input
-                id="jbCommission"
-                type="number"
-                min="0"
-                max="100"
-                step="0.1"
-                value={formData.jb_commission_percentage}
-                onChange={(e) => handleChange('jb_commission_percentage', e.target.value)}
-                placeholder="10"
-                required
-              />
-              <div className="text-xs text-gray-500">
-                Percentage of commission for JB Admin (default: 10%)
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="tier1Commission">Commission (From Tier1) % *</Label>
+                <Input
+                  id="tier1Commission"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  value={formData.tier1_commission_percentage}
+                  onChange={(e) => handleChange('tier1_commission_percentage', e.target.value)}
+                  placeholder="15"
+                  required
+                />
+                <div className="text-xs text-gray-500">
+                  Percentage of commission from Tier1 sellers
+                </div>
               </div>
+              
+              {formType === 'seller_admin' && (
+                <div className="space-y-2">
+                  <Label htmlFor="jbCommission">Commission (For JB) % *</Label>
+                  <Input
+                    id="jbCommission"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    value={formData.jb_commission_percentage}
+                    onChange={(e) => handleChange('jb_commission_percentage', e.target.value)}
+                    placeholder="10"
+                    required
+                  />
+                  <div className="text-xs text-gray-500">
+                    Percentage of commission for JB Admin
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -231,42 +230,6 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
               />
             </div>
 
-            <div className="space-y-2">
-              <Label>Features</Label>
-              <div className="space-y-3">
-                {formData.features.map((feature, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <Input
-                      value={feature}
-                      onChange={(e) => updateFeature(index, e.target.value)}
-                      placeholder="Enter feature"
-                      className="flex-1"
-                    />
-                    {formData.features.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeFeature(index)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={addFeature}
-                  className="flex items-center space-x-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  <span>Add Feature</span>
-                </Button>
-              </div>
-            </div>
 
             <div className="flex items-center space-x-2">
               <Checkbox
