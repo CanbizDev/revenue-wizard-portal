@@ -37,13 +37,14 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
     max_clients: editingPlan?.max_clients || '',
     description: editingPlan?.description || '',
     features: editingPlan?.features || [''],
-    status: editingPlan?.status || 'active'
+    status: editingPlan?.status || 'active',
+    jb_commission_percentage: editingPlan?.jb_commission_percentage || '10'
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.price || !formData.max_clients) {
+    if (!formData.name || !formData.price || !formData.max_clients || !formData.jb_commission_percentage) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -60,7 +61,8 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
       currency: formData.currency,
       max_clients: parseInt(formData.max_clients),
       features: formData.features.filter(f => f.trim() !== ''),
-      status: formData.status
+      status: formData.status,
+      jb_commission_percentage: parseFloat(formData.jb_commission_percentage)
     };
 
     onSubmit(planData);
@@ -74,7 +76,8 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
         max_clients: '',
         description: '',
         features: [''],
-        status: 'active'
+        status: 'active',
+        jb_commission_percentage: '10'
       });
     }
     
@@ -184,6 +187,24 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
                     <SelectItem value="yearly">Yearly</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="jbCommission">Commission (JB) % *</Label>
+              <Input
+                id="jbCommission"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                value={formData.jb_commission_percentage}
+                onChange={(e) => handleChange('jb_commission_percentage', e.target.value)}
+                placeholder="10"
+                required
+              />
+              <div className="text-xs text-gray-500">
+                Percentage of commission for JB Admin (default: 10%)
               </div>
             </div>
 
