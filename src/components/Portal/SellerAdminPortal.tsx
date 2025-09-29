@@ -586,24 +586,11 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
   const renderSubscriptionPlans = () => (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Subscription Plans & Commission</h2>
-        <p className="text-gray-600">Manage subscription plans and JB commission settings</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Subscription Plans</h2>
+        <p className="text-gray-600">Manage subscription plans with JB commission settings</p>
       </div>
-
-      <Tabs defaultValue="plans" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="plans">Subscription Plans</TabsTrigger>
-          <TabsTrigger value="commission">Commission (JB)</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="plans" className="space-y-6">
-          {renderPlans()}
-        </TabsContent>
-        
-        <TabsContent value="commission" className="space-y-6">
-          <CommissionsView userRole={company === 'xyzseller' ? 'tier2_seller' : 'tier1_seller'} company={company} showJBCommission={true} />
-        </TabsContent>
-      </Tabs>
+      
+      {renderPlans()}
     </div>
   );
 
