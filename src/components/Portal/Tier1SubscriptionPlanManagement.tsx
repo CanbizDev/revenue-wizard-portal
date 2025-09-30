@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { apiService } from '@/services/api';
 import { 
@@ -42,6 +43,10 @@ const Tier1SubscriptionPlanManagement: React.FC = () => {
   const [tier1Commission, setTier1Commission] = useState('15');
   const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    description: '',
+    billing_cycle: 'monthly'
+  });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -101,10 +106,10 @@ const Tier1SubscriptionPlanManagement: React.FC = () => {
   };
 
   const handleEditPlan = async () => {
-    if (!editingPlan || !tier1Commission) {
+    if (!editingPlan) {
       toast({
         title: 'Error',
-        description: 'Please enter commission percentage',
+        description: 'No plan selected for editing',
         variant: 'destructive'
       });
       return;
@@ -112,12 +117,13 @@ const Tier1SubscriptionPlanManagement: React.FC = () => {
 
     try {
       await apiService.updateSubscriptionPlan(editingPlan.id, {
-        tier1_commission_pct: parseFloat(tier1Commission)
+        description: editFormData.description,
+        billing_cycle: editFormData.billing_cycle
       });
       
       setIsEditDialogOpen(false);
       setEditingPlan(null);
-      setTier1Commission('15');
+      setEditFormData({ description: '', billing_cycle: 'monthly' });
       await loadPlans();
       
       toast({
@@ -212,30 +218,76 @@ const Tier1SubscriptionPlanManagement: React.FC = () => {
                           Create White-labeled Plan
                         </Button>
                       </DialogTrigger>
-                      <DialogContent>
+                      <DialogContent className="max-w-2xl">
                         <DialogHeader>
                           <DialogTitle>Create White-labeled Plan</DialogTitle>
                           <DialogDescription>
-                            Create your own version of "{selectedMasterPlan?.name}" with your commission rate
+                            Create your own version of this master plan with your commission rate
                           </DialogDescription>
                         </DialogHeader>
-                        <div className="space-y-4 py-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="commission">Your Commission Percentage</Label>
-                            <Input
-                              id="commission"
-                              type="number"
-                              min="0"
-                              max="100"
-                              step="0.1"
-                              value={tier1Commission}
-                              onChange={(e) => setTier1Commission(e.target.value)}
-                              placeholder="15"
-                            />
-                            <p className="text-xs text-gray-500">
-                              This is your commission percentage from this plan
-                            </p>
+                        <div className="space-y-6 py-4">
+                          {/* Master Plan Details */}
+                          <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+                            <h4 className="font-semibold text-gray-900">Master Plan Details</h4>
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <span className="font-medium text-gray-600">Plan Name:</span>
+                                <p className="text-gray-900">{selectedMasterPlan?.name}</p>
+                              </div>
+                              <div>
+                                <span className="font-medium text-gray-600">Price:</span>
+                                <p className="text-gray-900">{formatPrice(selectedMasterPlan?.price || '0', selectedMasterPlan?.billing_cycle)}</p>
+                              </div>
+                              <div>
+                                <span className="font-medium text-gray-600">Billing Cycle:</span>
+                                <p className="text-gray-900 capitalize">{selectedMasterPlan?.billing_cycle || 'monthly'}</p>
+                              </div>
+                              <div>
+                                <span className="font-medium text-gray-600">Admin Commission:</span>
+                                <p className="text-gray-900">{selectedMasterPlan?.admin_commission_pct || '0'}%</p>
+                              </div>
+                            </div>
+                            {selectedMasterPlan?.description && (
+                              <div>
+                                <span className="font-medium text-gray-600">Description:</span>
+                                <p className="text-gray-900 mt-1">{selectedMasterPlan.description}</p>
+                              </div>
+                            )}
                           </div>
+
+                          {/* Your Plan Settings */}
+                          <div className="space-y-4">
+                            <h4 className="font-semibold text-gray-900">Your Plan Settings</h4>
+                            <div className="space-y-2">
+                              <Label htmlFor="planName">Plan Name (Inherited from Master Plan)</Label>
+                              <Input
+                                id="planName"
+                                value={selectedMasterPlan?.name || ''}
+                                disabled
+                                className="bg-gray-100"
+                              />
+                              <p className="text-xs text-gray-500">
+                                Plan name cannot be changed and will match the master plan
+                              </p>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="commission">Your Commission Percentage</Label>
+                              <Input
+                                id="commission"
+                                type="number"
+                                min="0"
+                                max="100"
+                                step="0.1"
+                                value={tier1Commission}
+                                onChange={(e) => setTier1Commission(e.target.value)}
+                                placeholder="15"
+                              />
+                              <p className="text-xs text-gray-500">
+                                This is your commission percentage from this plan
+                              </p>
+                            </div>
+                          </div>
+
                           <div className="flex justify-end space-x-2">
                             <Button 
                               variant="outline" 
@@ -248,7 +300,7 @@ const Tier1SubscriptionPlanManagement: React.FC = () => {
                               Cancel
                             </Button>
                             <Button onClick={handleCreateWhiteLabeledPlan}>
-                              Create Plan
+                              Create White-labeled Plan
                             </Button>
                           </div>
                         </div>
@@ -312,40 +364,87 @@ const Tier1SubscriptionPlanManagement: React.FC = () => {
                           size="sm"
                           onClick={() => {
                             setEditingPlan(plan);
-                            setTier1Commission(plan.tier1_commission_pct || '15');
+                            setEditFormData({
+                              description: plan.description || '',
+                              billing_cycle: plan.billing_cycle || 'monthly'
+                            });
                           }}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
                       </DialogTrigger>
-                      <DialogContent>
+                      <DialogContent className="max-w-2xl">
                         <DialogHeader>
-                          <DialogTitle>Edit Plan Commission</DialogTitle>
+                          <DialogTitle>Edit Plan Details</DialogTitle>
                           <DialogDescription>
-                            Update the commission percentage for "{editingPlan?.name}"
+                            Update plan description and billing cycle. Note: Commission rates cannot be changed - create a new plan if needed.
                           </DialogDescription>
                         </DialogHeader>
-                        <div className="space-y-4 py-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="editCommission">Your Commission Percentage</Label>
-                            <Input
-                              id="editCommission"
-                              type="number"
-                              min="0"
-                              max="100"
-                              step="0.1"
-                              value={tier1Commission}
-                              onChange={(e) => setTier1Commission(e.target.value)}
-                              placeholder="15"
-                            />
+                        <div className="space-y-6 py-4">
+                          {/* Non-editable Plan Info */}
+                          <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+                            <h4 className="font-semibold text-gray-900">Plan Information (Read-only)</h4>
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <span className="font-medium text-gray-600">Plan Name:</span>
+                                <p className="text-gray-900">{editingPlan?.name}</p>
+                              </div>
+                              <div>
+                                <span className="font-medium text-gray-600">Price:</span>
+                                <p className="text-gray-900">{formatPrice(editingPlan?.price || '0', editingPlan?.billing_cycle)}</p>
+                              </div>
+                              <div>
+                                <span className="font-medium text-gray-600">Admin Commission:</span>
+                                <p className="text-gray-900">{editingPlan?.admin_commission_pct || '0'}%</p>
+                              </div>
+                              <div>
+                                <span className="font-medium text-gray-600">Your Commission:</span>
+                                <p className="text-gray-900">{editingPlan?.tier1_commission_pct || '0'}%</p>
+                              </div>
+                            </div>
                           </div>
+
+                          {/* Editable Fields */}
+                          <div className="space-y-4">
+                            <h4 className="font-semibold text-gray-900">Editable Fields</h4>
+                            <div className="space-y-2">
+                              <Label htmlFor="editDescription">Description</Label>
+                              <Textarea
+                                id="editDescription"
+                                value={editFormData.description}
+                                onChange={(e) => setEditFormData(prev => ({ ...prev, description: e.target.value }))}
+                                placeholder="Plan description"
+                                rows={3}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="editBillingCycle">Billing Cycle</Label>
+                              <select
+                                id="editBillingCycle"
+                                value={editFormData.billing_cycle}
+                                onChange={(e) => setEditFormData(prev => ({ ...prev, billing_cycle: e.target.value }))}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              >
+                                <option value="monthly">Monthly</option>
+                                <option value="quarterly">Quarterly</option>
+                                <option value="yearly">Yearly</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                            <p className="text-sm text-yellow-800">
+                              <strong>Note:</strong> Commission rates cannot be modified. If you need to change commission percentages, please create a new plan from the master plan.
+                            </p>
+                          </div>
+
                           <div className="flex justify-end space-x-2">
                             <Button 
                               variant="outline" 
                               onClick={() => {
                                 setIsEditDialogOpen(false);
                                 setEditingPlan(null);
-                                setTier1Commission('15');
+                                setEditFormData({ description: '', billing_cycle: 'monthly' });
                               }}
                             >
                               Cancel
