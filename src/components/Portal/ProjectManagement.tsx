@@ -47,13 +47,7 @@ interface ProjectManagementProps {
 const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [tier2Sellers, setTier2Sellers] = useState<Tier2Seller[]>([]);
-  const [subscriptionPlans, setSubscriptionPlans] = useState<any[]>([
-    { id: '1', name: 'Basic Plan', price: 29, billing_cycle: 'monthly' },
-    { id: '2', name: 'Pro Plan', price: 99, billing_cycle: 'monthly' },
-    { id: '3', name: 'Enterprise Plan', price: 299, billing_cycle: 'monthly' },
-    { id: '4', name: 'Annual Basic', price: 299, billing_cycle: 'yearly' },
-    { id: '5', name: 'Annual Pro', price: 999, billing_cycle: 'yearly' }
-  ]);
+  const [subscriptionPlans, setSubscriptionPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -80,10 +74,19 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
         const projectsData = await apiService.getProjects();
         setProjects(projectsData);
 
-        // Conditionally fetch tier2 sellers only for tier1 users
+        // Fetch subscription plans based on user role
         if (userRole === 'tier1') {
+          // Tier1 sellers see admin plans
+          const plans = await apiService.getMasterPlans();
+          setSubscriptionPlans(plans);
+          
+          // Fetch tier2 sellers for tier1 users
           const tier2Data = await apiService.getAllTier2Sellers();
           setTier2Sellers(tier2Data);
+        } else if (userRole === 'tier2') {
+          // Tier2 sellers see their parent tier1 seller's plans
+          const plans = await apiService.getAvailablePlans();
+          setSubscriptionPlans(plans);
         }
 
       } catch (err) {
@@ -91,13 +94,14 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
         setError('Failed to load data. Please try again.');
         setProjects([]);
         setTier2Sellers([]);
+        setSubscriptionPlans([]);
       } finally {
         setLoading(false);
       }
     };
 
     loadData();
-  }, [userRole]); // Added userRole to dependency array
+  }, [userRole]);
 
   const [newProject, setNewProject] = useState({
     name: '',
@@ -401,28 +405,14 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                   <SelectTrigger>
                     <SelectValue placeholder="Select a subscription plan" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-popover z-50">
                     {subscriptionPlans.map((plan) => (
                       <SelectItem key={plan.id} value={plan.id}>
-                        {plan.name} - ${plan.price}/{plan.billing_cycle}
+                        {plan.name} - ${plan.price}/{plan.billing_cycle || 'monthly'}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
-              <div>
-                <Label htmlFor="admin_commission">Commission % (For Admin)</Label>
-                <Input
-                  id="admin_commission"
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  value={newProject.admin_commission_percentage}
-                  onChange={(e) => setNewProject({ ...newProject, admin_commission_percentage: Number(e.target.value) })}
-                  placeholder="Enter commission percentage for admin"
-                />
-                <p className="text-xs text-muted-foreground mt-1">This value cannot be changed after project creation</p>
               </div>
               {/* {userRole === 'tier1' && (
                 <div>
@@ -644,11 +634,6 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                     <p className="text-sm text-foreground">{getTier2SellerName(project.tier2_seller_id)}</p>
                   </div>
                 )}
-                
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Commission % (For Admin)</p>
-                  <p className="text-sm text-foreground">{(project as any).admin_commission_percentage || 'N/A'}%</p>
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -707,29 +692,14 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                 <SelectTrigger>
                   <SelectValue placeholder="Select a subscription plan" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-popover z-50">
                   {subscriptionPlans.map((plan) => (
                     <SelectItem key={plan.id} value={plan.id}>
-                      {plan.name} - ${plan.price}/{plan.billing_cycle}
+                      {plan.name} - ${plan.price}/{plan.billing_cycle || 'monthly'}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-            <div>
-              <Label htmlFor="edit-admin_commission">Commission % (For Admin)</Label>
-              <Input
-                id="edit-admin_commission"
-                type="number"
-                min="0"
-                max="100"
-                step="0.1"
-                value={editProjectData.admin_commission_percentage}
-                readOnly
-                className="bg-muted"
-                placeholder="Admin commission percentage"
-              />
-              <p className="text-xs text-muted-foreground mt-1">This value cannot be changed after project creation</p>
             </div>
                 <div>
                   <Label htmlFor="edit-commission_percentage">Commission %</Label>
