@@ -529,6 +529,29 @@ class ApiService {
     }
   }
 
+  async getMasterPlans(): Promise<any[]> {
+    try {
+      const response = await this.axiosInstance.get('/subscription/plans');
+      return response.data.filter((plan: any) => plan.creator_type === 'admin');
+    } catch (error) {
+      console.error('Failed to fetch master plans:', error);
+      throw error;
+    }
+  }
+
+  async getTier1Plans(): Promise<any[]> {
+    try {
+      const response = await this.axiosInstance.get('/subscription/plans');
+      const currentUser = this.getCurrentUser();
+      return response.data.filter((plan: any) => 
+        plan.creator_type === 'tier1_seller' && plan.creator_id === currentUser?.id
+      );
+    } catch (error) {
+      console.error('Failed to fetch tier1 plans:', error);
+      throw error;
+    }
+  }
+
   async createMasterPlan(planData: { name: string; price: number; admin_commission_pct: number; description?: string }): Promise<any> {
     try {
       const response = await this.axiosInstance.post('/subscription/admin/plans', planData);

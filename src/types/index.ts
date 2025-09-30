@@ -86,6 +86,23 @@ export interface SubscriptionPlan {
   name: string;
   price: string;
   creator_type: 'admin' | 'tier1_seller';
+  creator_id: string;
   admin_commission_pct?: string;
   tier1_commission_pct?: string;
+  billing_cycle?: string;
+  description?: string;
+  parent_plan_id?: string;
+}
+
+export interface MasterPlanData {
+  name: string;
+  price: number;
+  admin_commission_pct: number;
+  description?: string;
+  billing_cycle?: string;
+}
+
+export interface Tier1PlanData {
+  master_plan_id: string;
+  tier1_commission_pct: number;
 }

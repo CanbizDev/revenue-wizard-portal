@@ -11,6 +11,7 @@ import AddClientForm from '@/components/Forms/AddClientForm';
 import { ClientIntakeForm } from '@/components/Forms/ClientIntakeForm';
 import SellerAdminTier2Management from '@/components/Portal/SellerAdminTier2Management';
 import AddPlanForm from '@/components/Forms/AddPlanForm';
+import Tier1SubscriptionPlanManagement from '@/components/Portal/Tier1SubscriptionPlanManagement';
 import CommissionsView from './CommissionsView';
 import ProjectManagement from './ProjectManagement';
 import ProjectBilling from './ProjectBilling';
@@ -473,115 +474,7 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
   );
 
   const renderPlans = () => (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Subscription Plans</h1>
-        <Dialog open={showAddPlanForm} onOpenChange={setShowAddPlanForm}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Plan
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Add New Plan</DialogTitle>
-              <DialogDescription>
-                Create a new subscription plan
-              </DialogDescription>
-            </DialogHeader>
-            <AddPlanForm 
-              isOpen={showAddPlanForm}
-              onClose={() => setShowAddPlanForm(false)}
-              onSubmit={handleAddPlan}
-              formType="seller_admin"
-            />
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {plans.map((plan) => (
-          <Card key={plan.id} className={!plan.active ? 'opacity-50' : ''}>
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <CardTitle>{plan.name}</CardTitle>
-                <Badge variant={plan.active ? 'default' : 'secondary'}>
-                  {plan.active ? 'Active' : 'Inactive'}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="text-3xl font-bold">
-                  {plan.currency_symbol}{plan.price.toLocaleString()}
-                  <span className="text-sm font-normal text-muted-foreground">/{plan.billing}</span>
-                </div>
-                
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">Features:</p>
-                  <ul className="space-y-1">
-                    {Array.isArray(plan.features) ? plan.features.map((feature, index) => (
-                      <li key={index} className="text-sm flex items-center">
-                        <span className="w-2 h-2 bg-primary rounded-full mr-2"></span>
-                        {feature}
-                      </li>
-                    )) : <li className="text-sm text-muted-foreground">No features listed</li>}
-                  </ul>
-                </div>
-                
-                <div className="text-sm text-muted-foreground">
-                  Max Clients: {plan.max_clients || 'Unlimited'}
-                </div>
-                
-                <div className="flex space-x-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1"
-                    onClick={() => {
-                      setEditingPlan(plan);
-                      setShowAddPlanForm(true);
-                    }}
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => togglePlanStatus(plan.id)}
-                  >
-                    {plan.active ? 'Deactivate' : 'Activate'}
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="outline" size="sm">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Plan</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete "{plan.name}"? This action will check for active clients and prevent deletion if any are found.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDeletePlan(plan.id)}>
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
+    <Tier1SubscriptionPlanManagement />
   );
 
   const renderSubscriptionPlans = () => (
