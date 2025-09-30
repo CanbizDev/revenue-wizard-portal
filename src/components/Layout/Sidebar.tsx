@@ -44,13 +44,13 @@ const Sidebar: React.FC<SidebarProps> = ({ portalType, userRole, activeTab, onTa
         const sellerItems = [
           { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
           { id: 'projects', label: 'Project Management', icon: Building2 },
-          { id: 'subscription-plans', label: 'Subscription Plans', icon: CreditCard },
           { id: 'billing', label: 'Billing & Revenue', icon: DollarSign },
           { id: 'reports', label: 'Reports', icon: FileText },
         ];
         
         if (userRole === 'tier1_seller') {
           sellerItems.splice(1, 0, { id: 'tier2-sellers', label: 'Tier-2 Sellers', icon: Building2 });
+          sellerItems.splice(3, 0, { id: 'subscription-plans', label: 'Subscription Plans', icon: CreditCard });
         }
         
         return sellerItems;
