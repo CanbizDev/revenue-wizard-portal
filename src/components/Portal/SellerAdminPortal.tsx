@@ -286,12 +286,12 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
           )}
           {company === 'xyzseller' && (
             <>
-              <DashboardCard
+              {/* <DashboardCard
                 title="Commission %"
                 value={`${avgCommissionPercentage}%`}
                 description="Your commission rate"
                 icon={Percent}
-              />
+              /> */}
               <DashboardCard
                 title="Paid Amount"
                 value={`₹${paidAmount.toLocaleString()}`}
@@ -312,12 +312,12 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
             description="Subscription plans"
             icon={BarChart3}
           /> */}
-          <DashboardCard
+          {/* <DashboardCard
             title="Monthly Revenue"
             value={`₹${monthlyRevenue.toLocaleString()}`}
             description="Total revenue"
             icon={DollarSign}
-          />
+          /> */}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -479,10 +479,10 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
 
   const renderSubscriptionPlans = () => (
     <div className="space-y-6">
-      <div>
+      {/* <div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Subscription Plans</h2>
         <p className="text-gray-600">Manage subscription plans with JB commission settings</p>
-      </div>
+      </div> */}
       
       {renderPlans()}
     </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Make sure useEffect is imported
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,15 +31,43 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
   ];
 
   const [formData, setFormData] = useState({
-    name: editingPlan?.name || '',
-    price: editingPlan?.price || '',
-    currency: editingPlan?.currency || 'INR',
-    billing_cycle: editingPlan?.billing_cycle || 'monthly',
-    description: editingPlan?.description || '',
-    tier1_commission_percentage: editingPlan?.tier1_commission_percentage || '15',
-    jb_commission_percentage: editingPlan?.jb_commission_percentage || '10',
-    status: editingPlan?.status || 'active'
+    name: '',
+    price: '',
+    currency: 'INR',
+    billing_cycle: 'monthly',
+    description: '',
+    tier1_commission_percentage: '',
+    jb_commission_percentage: '',
+    status: 'active'
   });
+
+  // --- useEffect hook is now in the correct position ---
+  useEffect(() => {
+    if (editingPlan) {
+        setFormData({
+            name: editingPlan.name || '',
+            price: editingPlan.price || '',
+            currency: editingPlan.currency || 'INR',
+            billing_cycle: editingPlan.billing_cycle || 'monthly',
+            description: editingPlan.description || '',
+            tier1_commission_percentage: editingPlan.admin_commission_pct || '',
+            jb_commission_percentage: editingPlan.jb_commission_percentage || '',
+            status: editingPlan.status || 'active'
+        });
+    } else {
+        // Reset form when there is no editingPlan (e.g., for creating a new plan)
+        setFormData({
+            name: '',
+            price: '',
+            currency: 'INR',
+            billing_cycle: 'monthly',
+            description: '',
+            tier1_commission_percentage: '',
+            jb_commission_percentage: '',
+            status: 'active'
+        });
+    }
+  }, [editingPlan]); 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,7 +94,7 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
       billing_cycle: formData.billing_cycle,
       currency: formData.currency,
       status: formData.status,
-      tier1_commission_percentage: parseFloat(formData.tier1_commission_percentage)
+      admin_commission_pct: parseFloat(formData.tier1_commission_percentage)
     };
 
     if (formType === 'seller_admin') {
@@ -74,20 +102,6 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
     }
 
     onSubmit(planData);
-    
-    if (!editingPlan) {
-      setFormData({
-        name: '',
-        price: '',
-        currency: 'INR',
-        billing_cycle: 'monthly',
-        description: '',
-        tier1_commission_percentage: '15',
-        jb_commission_percentage: '10',
-        status: 'active'
-      });
-    }
-    
     onClose();
     
     toast({
@@ -99,7 +113,6 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
   const handleChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
-
 
   if (!isOpen) return null;
 
@@ -114,13 +127,13 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* --- Your form JSX (no changes needed here) --- */}
             <div className="space-y-2">
               <Label htmlFor="name">Plan Name *</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => handleChange('name', e.target.value)}
-                placeholder="e.g., Premium Plan"
                 required
               />
             </div>
@@ -133,7 +146,6 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
                   type="number"
                   value={formData.price}
                   onChange={(e) => handleChange('price', e.target.value)}
-                  placeholder="25000"
                   required
                 />
               </div>
@@ -178,7 +190,6 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
                   step="0.1"
                   value={formData.tier1_commission_percentage}
                   onChange={(e) => handleChange('tier1_commission_percentage', e.target.value)}
-                  placeholder="15"
                   required
                 />
                 <div className="text-xs text-gray-500">
@@ -208,18 +219,6 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
             </div>
 
             <div className="space-y-2">
-              <Label>Price Preview</Label>
-              <div className="px-3 py-2 bg-gray-50 border rounded-md">
-                <span className="text-lg font-semibold">
-                  {currencyOptions.find(c => c.code === formData.currency)?.symbol || '₹'}
-                  {formData.price ? parseInt(formData.price).toLocaleString() : '0'} 
-                  <span className="text-sm text-gray-500"> / {formData.billing_cycle}</span>
-                </span>
-                <div className="text-xs text-gray-500 mt-1">{formData.currency}</div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
@@ -229,7 +228,6 @@ const AddPlanForm: React.FC<AddPlanFormProps> = ({ isOpen, onClose, onSubmit, ed
                 rows={3}
               />
             </div>
-
 
             <div className="flex items-center space-x-2">
               <Checkbox

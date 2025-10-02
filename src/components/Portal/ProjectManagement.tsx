@@ -123,54 +123,67 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
     company: ''
   });
 
-  const handleAddProject = async () => {
-    const isValid = newProject.name && newProject.description && newProject.project_type;
-    
-    if (isValid) {
-      try {
-        const projectData = {
-          name: newProject.name,
-          description: newProject.description,
-          project_type: newProject.project_type,
-          project_value: 0,
-          commission_percentage: 0,
-          status: newProject.status,
-          tier2_seller_id: newProject.tier2_seller_id.trim() || null
-        };
-        
-        await apiService.createProject(projectData);
-        
-        // Refresh the projects list to get the complete project data
-        const updatedProjects = await apiService.getProjects();
-        setProjects(updatedProjects);
-        
-        setNewProject({ 
-          name: '', 
-          description: '', 
-          project_type: '', 
-          project_value: 0,
-          commission_percentage: 0,
-          subscription_plan_id: '',
-          admin_commission_percentage: 0,
-          status: 'active',
-          tier2_seller_id: ''
-        });
-        setIsDialogOpen(false);
-        
-        toast({
-          title: "Success",
-          description: "Project created successfully",
-        });
-      } catch (err) {
-        console.error('Failed to create project:', err);
-        toast({
-          title: "Error",
-          description: "Failed to create project",
-          variant: "destructive",
-        });
-      }
+  // In your ProjectManagement.tsx file
+
+const handleAddProject = async () => {
+  // --- VALIDATION: Ensure a subscription plan is selected ---
+  const isValid = newProject.name && newProject.description && newProject.project_type && newProject.subscription_plan_id;
+  
+  if (isValid) {
+    try {
+      // --- FIX: Add subscription_plan_id to the data sent to the API ---
+      const projectData = {
+        name: newProject.name,
+        description: newProject.description,
+        project_type: newProject.project_type,
+        project_value: 0, // As per your existing logic
+        commission_percentage: 0, // As per your existing logic
+        status: newProject.status,
+        tier2_seller_id: newProject.tier2_seller_id.trim() || null,
+        subscription_plan_id: newProject.subscription_plan_id // <-- THIS LINE IS THE FIX
+      };
+      
+      await apiService.createProject(projectData);
+      
+      // Refresh the projects list
+      const updatedProjects = await apiService.getProjects();
+      setProjects(updatedProjects);
+      
+      // Reset the form
+      setNewProject({ 
+        name: '', 
+        description: '', 
+        project_type: '', 
+        project_value: 0,
+        commission_percentage: 0,
+        subscription_plan_id: '',
+        admin_commission_percentage: 0,
+        status: 'active',
+        tier2_seller_id: ''
+      });
+      setIsDialogOpen(false);
+      
+      toast({
+        title: "Success",
+        description: "Project created successfully",
+      });
+    } catch (err) {
+      console.error('Failed to create project:', err);
+      toast({
+        title: "Error",
+        description: "Failed to create project",
+        variant: "destructive",
+      });
     }
-  };
+  } else {
+      // Optional: Add a toast notification for missing fields
+      toast({
+        title: "Missing Information",
+        description: "Please fill out all required fields, including the subscription plan.",
+        variant: "destructive",
+      });
+  }
+};
 
   const handleDeleteProject = async (id: string) => {
     try {
@@ -606,7 +619,7 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                 
                 {userRole === 'tier1' && (
                   <>
-                    <div>
+                    {/* <div>
                       <p className="text-sm font-medium text-muted-foreground">Project Value</p>
                       <p className="text-sm text-foreground">₹{project.project_value?.toLocaleString() || 'N/A'}</p>
                     </div>
@@ -614,7 +627,7 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Commission %</p>
                       <p className="text-sm text-foreground">{project.commission_percentage || 'N/A'}%</p>
-                    </div>
+                    </div> */}
                   </>
                 )}
                 
@@ -676,7 +689,7 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
             </div>
             {userRole === 'tier1' && (
               <>
-                <div>
+                {/* <div>
                   <Label htmlFor="edit-project_value">Project Value</Label>
                   <Input
                     id="edit-project_value"
@@ -684,8 +697,8 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                     value={editProjectData.project_value}
                     onChange={(e) => setEditProjectData({ ...editProjectData, project_value: Number(e.target.value) })}
                     placeholder="Enter project value"
-                  />
-            </div>
+                  /> */}
+            {/* </div>
             <div>
               <Label htmlFor="edit-subscription_plan">Subscription Plan</Label>
               <Select value={editProjectData.subscription_plan_id} onValueChange={(value) => setEditProjectData({ ...editProjectData, subscription_plan_id: value })}>
@@ -700,8 +713,8 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-                <div>
+            </div> */}
+                {/* <div>
                   <Label htmlFor="edit-commission_percentage">Commission %</Label>
                   <Input
                     id="edit-commission_percentage"
@@ -717,10 +730,10 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                   {editingProject?.commission_percentage && editingProject.commission_percentage > 0 && (
                     <p className="text-xs text-muted-foreground mt-1">Commission percentage cannot be changed once set</p>
                   )}
-                </div>
+                </div> */}
               </>
             )}
-            {userRole === 'tier1' && (
+            {/* {userRole === 'tier1' && (
               <div>
                 <Label htmlFor="edit-tier2_seller_id">Tier 2 Seller (Optional)</Label>
                 <Select value={editProjectData.tier2_seller_id || "none"} onValueChange={(value) => setEditProjectData({ ...editProjectData, tier2_seller_id: value === "none" ? "" : value })}>
@@ -737,7 +750,7 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
                   </SelectContent>
                 </Select>
               </div>
-            )}
+            )} */}
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={closeEditDialog}>
                 Cancel
