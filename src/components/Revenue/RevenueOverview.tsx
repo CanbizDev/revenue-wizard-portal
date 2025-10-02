@@ -12,11 +12,12 @@ import { apiService, RevenueData } from '@/services/api';
 interface BillingRecord {
   client_name: string;
   invoice_id: string;
-  bill_amount: number;
+  project_value: number;
+  commission_percentage: number;
+  commission_amount: number;
   due_date: string;
   payment_date?: string;
   status: 'Paid' | 'Pending' | 'Overdue';
-  tier: string;
 }
 
 const RevenueOverview: React.FC = () => {
@@ -24,7 +25,7 @@ const RevenueOverview: React.FC = () => {
   const [filteredData, setFilteredData] = useState<BillingRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
-  const [sortField, setSortField] = useState<'bill_amount' | 'due_date'>('due_date');
+  const [sortField, setSortField] = useState<'commission_amount' | 'due_date'>('due_date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   // Load billing data from API
@@ -76,7 +77,7 @@ const RevenueOverview: React.FC = () => {
   };
 
   // Handle sort column toggle
-  const toggleSort = (field: 'bill_amount' | 'due_date') => {
+  const toggleSort = (field: 'commission_amount' | 'due_date') => {
     if (sortField === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
@@ -196,12 +197,14 @@ const RevenueOverview: React.FC = () => {
                   <TableRow>
                     <TableHead>Project Name</TableHead>
                     <TableHead>Invoice ID</TableHead>
+                    <TableHead>Project Value</TableHead>
+                    <TableHead>Commission %</TableHead>
                     <TableHead>
                       <Button
                         variant="ghost"
                         size="sm"
                         className="h-auto p-0 font-semibold"
-                        onClick={() => toggleSort('bill_amount')}
+                        onClick={() => toggleSort('commission_amount')}
                       >
                         Amount
                         <ArrowUpDown className="ml-1 h-3 w-3" />
@@ -220,7 +223,6 @@ const RevenueOverview: React.FC = () => {
                     </TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Payment Date</TableHead>
-                    <TableHead>Tier</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -228,8 +230,10 @@ const RevenueOverview: React.FC = () => {
                     <TableRow key={`${record.invoice_id}-${index}`}>
                       <TableCell className="font-medium">{record.client_name}</TableCell>
                       <TableCell className="font-mono text-sm">{record.invoice_id}</TableCell>
+                      <TableCell>₹{record.project_value?.toLocaleString()}</TableCell>
+                      <TableCell>{record.commission_percentage}%</TableCell>
                       <TableCell className="font-semibold">
-                        {formatAmount(record.bill_amount, '$')}
+                        {formatAmount(record.commission_amount, '₹')}
                       </TableCell>
                       <TableCell>{formatDate(record.due_date)}</TableCell>
                       <TableCell>
@@ -239,11 +243,6 @@ const RevenueOverview: React.FC = () => {
                       </TableCell>
                       <TableCell>
                         {record.payment_date ? formatDate(record.payment_date) : '-'}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="text-xs">
-                          {record.tier}
-                        </Badge>
                       </TableCell>
                     </TableRow>
                   ))}

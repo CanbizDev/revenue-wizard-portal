@@ -60,11 +60,12 @@ export interface RevenueData {
   billing_details: Array<{
     client_name: string;
     invoice_id: string;
-    bill_amount: number;
+    project_value: number;
+    commission_percentage: number;
+    commission_amount: number;
     due_date: string;
     payment_date?: string;
     status: 'Paid' | 'Pending' | 'Overdue';
-    tier: string;
   }>;
 }
 

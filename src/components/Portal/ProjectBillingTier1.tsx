@@ -28,48 +28,47 @@ const ProjectBillingTier1: React.FC = () => {
   const [selectedTier2Project, setSelectedTier2Project] = useState<string>('all');
   const [tier1OwnProjects, setTier1OwnProjects] = useState<ProjectBilling[]>([]);
   const [tier2SellerProjects, setTier2SellerProjects] = useState<ProjectBilling[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchBilling = async () => {
       try {
-        // Fetch Tier1's own projects
-        const tier1Res = await apiService.getRevenueData();
-        const tier1Transformed = tier1Res.billing_details.map((bill: any, idx: number) => ({
+        setLoading(true);
+        const res = await apiService.getRevenueData();
+        
+        // Transform billing data
+        const allBilling = res.billing_details.map((bill: any, idx: number) => ({
           id: String(idx),
           projectName: bill.client_name,
-          totalBilling: bill.bill_amount,
-          paidAmount: bill.status.toLowerCase() === 'paid' ? bill.bill_amount : 0,
-          pendingAmount: bill.status.toLowerCase() !== 'paid' ? bill.bill_amount : 0,
+          totalBilling: bill.commission_amount || 0,
+          paidAmount: bill.status.toLowerCase() === 'paid' ? bill.commission_amount : 0,
+          pendingAmount: bill.status.toLowerCase() !== 'paid' ? bill.commission_amount : 0,
           lastPayment: bill.payment_date || '-',
-          status: bill.status.toLowerCase(),
-          invoiceId: bill.invoice_id,
+          status: bill.status.toLowerCase() as 'paid' | 'pending' | 'overdue',
+          invoiceId: bill.invoice_id || '-',
           dueDate: bill.due_date || '-',
           projectValue: bill.project_value || 0,
-          adminCommissionPercentage: bill.admin_commission_percentage || 0,
-          tier1CommissionPercentage: bill.tier1_commission_percentage || 0
+          adminCommissionPercentage: bill.commission_percentage || 0,
+          tier1CommissionPercentage: bill.commission_percentage || 0
         }));
-        setTier1OwnProjects(tier1Transformed);
 
-        // Fetch Tier2 seller projects (commission for Tier1)
-        // TODO: Replace with actual API call when available
-        // For now, using mock data structure
-        const tier2Mock = tier1Res.billing_details.map((bill: any, idx: number) => ({
-          id: String(idx + 100),
-          projectName: `Tier2 - ${bill.client_name}`,
-          totalBilling: bill.bill_amount,
-          paidAmount: bill.status.toLowerCase() === 'paid' ? bill.bill_amount : 0,
-          pendingAmount: bill.status.toLowerCase() !== 'paid' ? bill.bill_amount : 0,
-          lastPayment: bill.payment_date || '-',
-          status: bill.status.toLowerCase(),
-          invoiceId: `T2-${bill.invoice_id}`,
-          dueDate: bill.due_date || '-',
-          projectValue: bill.project_value || 0,
-          adminCommissionPercentage: 0,
-          tier1CommissionPercentage: bill.tier1_commission_percentage || 15
-        }));
-        setTier2SellerProjects(tier2Mock);
+        // For Tier1 seller viewing this page:
+        // The backend returns commission_percentage based on user role
+        // Since we're logged in as Tier1, all projects show admin_commission_pct
+        // We need separate endpoints or flags to differentiate project types
+        
+        // Temporary solution: Assume all projects are Tier1's own projects showing admin commission
+        // until backend provides project owner information
+        setTier1OwnProjects(allBilling);
+        
+        // Tier2 projects would need a separate endpoint or flag in the response
+        // For now, set empty array
+        setTier2SellerProjects([]);
+        
       } catch (err) {
         console.error('Error fetching billing:', err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchBilling();
@@ -109,6 +108,14 @@ const ProjectBillingTier1: React.FC = () => {
 
   const uniqueTier1Projects = [...new Set(tier1OwnProjects.map(b => b.projectName))];
   const uniqueTier2Projects = [...new Set(tier2SellerProjects.map(b => b.projectName))];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
