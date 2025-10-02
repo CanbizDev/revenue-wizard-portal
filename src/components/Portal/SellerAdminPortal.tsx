@@ -65,27 +65,29 @@ interface SellerAdminPortalProps {
 
 const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'marketstrendai', onNavigate, activeTab: propActiveTab }) => {
   const [activeTab, setActiveTab] = useState(propActiveTab || 'dashboard');
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null); 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  
+  // State for forms and dialogs
   const [showAddClientForm, setShowAddClientForm] = useState(false);
   const [showIntakeForm, setShowIntakeForm] = useState(false);
-  
   const [showAddPlanForm, setShowAddPlanForm] = useState(false);
   const [selectedClient, setSelectedClient] = useState<any>(null);
   const [editingPlan, setEditingPlan] = useState<any>(null);
   
   const { toast } = useToast();
   
+  // State for dashboard data
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   
-  // These are placeholders, to be populated from other API calls as needed
+  // These are now placeholders and not used for display logic
   const clients: any[] = [];
   const plans: any[] = [];
   const commissions: any[] = [];
 
-  // Mock functions for actions that might not be implemented yet
+  // Mock functions for actions
   const addClient = async (clientData: any) => console.log('Mock add client:', clientData);
   const addPlan = async (planData: any) => console.log('Mock add plan:', planData);
   const updatePlan = async (planId: string, planData: any) => console.log('Mock update plan:', planId, planData);
@@ -97,6 +99,7 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
     const fetchPortalData = async () => {
       try {
         setLoading(true);
+        setError(null);
         const user = apiService.getCurrentUser();
         if (!user) {
           setError("No user found. Please log in again.");
@@ -145,12 +148,16 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
   }, [propActiveTab, activeTab]);
 
   const renderDashboard = () => {
-    // Correctly extract data from the API response
+    // --- CORRECTLY EXTRACT ALL DATA FROM THE API RESPONSE ---
     const totalProjects = dashboardData?.total_projects || 0;
     const totalTier2Sellers = dashboardData?.total_tier2_sellers || 0;
     const totalRevenue = dashboardData?.total_revenue || 0;
     const totalPaid = dashboardData?.total_paid || 0;
     const pendingAmount = dashboardData?.pending_amount || 0;
+    
+    // For Tier 2, paid_amount and pending_amount are what's relevant
+    const paidAmount_t2 = dashboardData?.paid_amount || 0;
+    const pendingAmount_t2 = dashboardData?.pending_amount || 0;
 
     return (
       <div className="space-y-6">
@@ -161,13 +168,15 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
           <p className="text-gray-600">Overview of your business operations</p>
         </div>
         
-        <div className={`grid grid-cols-1 sm:grid-cols-2 ${company === 'marketstrendai' ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-4 sm:gap-6`}>
+        <div className={`grid grid-cols-1 sm:grid-cols-2 ${company === 'marketstrendai' ? 'lg:grid-cols-5' : 'lg:grid-cols-3'} gap-4 sm:gap-6`}>
           <DashboardCard
             title="Total Projects"
             value={totalProjects.toString()}
             description="Your direct projects"
             icon={FileText}
           />
+          
+          {/* --- TIER 1 SELLER CARDS --- */}
           {company === 'marketstrendai' && (
             <>
               <DashboardCard
@@ -196,18 +205,20 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
               />
             </>
           )}
+
+          {/* --- TIER 2 SELLER CARDS --- */}
           {company === 'xyzseller' && (
              <>
               <DashboardCard
                 title="Paid Amount"
-                value={`₹${totalPaid.toLocaleString()}`}
-                description="Total payments to Tier-1"
+                value={`₹${paidAmount_t2.toLocaleString()}`}
+                description="Total commission paid to Tier-1"
                 icon={CheckCircle}
               />
               <DashboardCard
                 title="Pending Amount"
-                value={`₹${pendingAmount.toLocaleString()}`}
-                description="Pending payments to Tier-1"
+                value={`₹${pendingAmount_t2.toLocaleString()}`}
+                description="Pending commission to Tier-1"
                 icon={Clock}
               />
             </>
@@ -216,8 +227,7 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
       </div>
     );
   };
-
-  // --- RESTORED RENDER FUNCTION ---
+  
   const renderSubscriptionPlans = () => (
     <Tier1SubscriptionPlanManagement />
   );
@@ -230,7 +240,6 @@ const SellerAdminPortal: React.FC<SellerAdminPortalProps> = ({ company = 'market
         return <ProjectManagement userRole={company === 'xyzseller' ? 'tier2' : 'tier1'} />;
       case 'tier2-sellers':
         return company === 'marketstrendai' ? <SellerAdminTier2Management currentTier1SellerId={currentUser?.id} currentTier1SellerName={currentUser?.name} /> : renderDashboard();
-      // --- RESTORED CASE FOR SUBSCRIPTION PLANS ---
       case 'subscription-plans':
         return renderSubscriptionPlans();
       case 'billing':
