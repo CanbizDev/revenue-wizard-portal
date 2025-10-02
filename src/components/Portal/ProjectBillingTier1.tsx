@@ -36,34 +36,45 @@ const ProjectBillingTier1: React.FC = () => {
         setLoading(true);
         const res = await apiService.getRevenueData();
         
-        // Transform billing data
-        const allBilling = res.billing_details.map((bill: any, idx: number) => ({
-          id: String(idx),
-          projectName: bill.client_name,
-          totalBilling: bill.commission_amount || 0,
-          paidAmount: bill.status.toLowerCase() === 'paid' ? bill.commission_amount : 0,
-          pendingAmount: bill.status.toLowerCase() !== 'paid' ? bill.commission_amount : 0,
-          lastPayment: bill.payment_date || '-',
-          status: bill.status.toLowerCase() as 'paid' | 'pending' | 'overdue',
-          invoiceId: bill.invoice_id || '-',
-          dueDate: bill.due_date || '-',
-          projectValue: bill.project_value || 0,
-          adminCommissionPercentage: bill.commission_percentage || 0,
-          tier1CommissionPercentage: bill.commission_percentage || 0
-        }));
+        // Check if we have the new Tier1 response structure
+        if (res.tier1_project_billing || res.tier2_project_billing) {
+          // New Tier1 seller response structure
+          const tier1Transformed = (res.tier1_project_billing || []).map((bill: any, idx: number) => ({
+            id: String(idx),
+            projectName: bill.client_name,
+            totalBilling: bill.commission_amount || 0,
+            paidAmount: bill.status.toLowerCase() === 'paid' ? bill.commission_amount : 0,
+            pendingAmount: bill.status.toLowerCase() !== 'paid' ? bill.commission_amount : 0,
+            lastPayment: bill.payment_date || '-',
+            status: bill.status.toLowerCase() as 'paid' | 'pending' | 'overdue',
+            invoiceId: bill.invoice_id || '-',
+            dueDate: bill.due_date || '-',
+            projectValue: bill.project_value || 0,
+            adminCommissionPercentage: bill.commission_percentage || 0,
+            tier1CommissionPercentage: 0
+          }));
+          setTier1OwnProjects(tier1Transformed);
 
-        // For Tier1 seller viewing this page:
-        // The backend returns commission_percentage based on user role
-        // Since we're logged in as Tier1, all projects show admin_commission_pct
-        // We need separate endpoints or flags to differentiate project types
-        
-        // Temporary solution: Assume all projects are Tier1's own projects showing admin commission
-        // until backend provides project owner information
-        setTier1OwnProjects(allBilling);
-        
-        // Tier2 projects would need a separate endpoint or flag in the response
-        // For now, set empty array
-        setTier2SellerProjects([]);
+          const tier2Transformed = (res.tier2_project_billing || []).map((bill: any, idx: number) => ({
+            id: String(idx + 1000),
+            projectName: bill.client_name,
+            totalBilling: bill.commission_amount || 0,
+            paidAmount: bill.status.toLowerCase() === 'paid' ? bill.commission_amount : 0,
+            pendingAmount: bill.status.toLowerCase() !== 'paid' ? bill.commission_amount : 0,
+            lastPayment: bill.payment_date || '-',
+            status: bill.status.toLowerCase() as 'paid' | 'pending' | 'overdue',
+            invoiceId: bill.invoice_id || '-',
+            dueDate: bill.due_date || '-',
+            projectValue: bill.project_value || 0,
+            adminCommissionPercentage: 0,
+            tier1CommissionPercentage: bill.commission_percentage || 0
+          }));
+          setTier2SellerProjects(tier2Transformed);
+        } else {
+          // Fallback for old response structure or empty data
+          setTier1OwnProjects([]);
+          setTier2SellerProjects([]);
+        }
         
       } catch (err) {
         console.error('Error fetching billing:', err);

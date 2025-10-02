@@ -43,12 +43,19 @@ const RevenueOverview: React.FC = () => {
 
   // Apply filters and sorting to billing records
   const applyFiltersAndSort = () => {
-    if (!revenueData || !revenueData.billing_details || !Array.isArray(revenueData.billing_details)) {
+    if (!revenueData) {
+      setFilteredData([]);
+      return;
+    }
+
+    // Handle both response structures
+    const billingDetails = revenueData.billing_details || [];
+    if (!Array.isArray(billingDetails)) {
       setFilteredData([]);
       return;
     }
     
-    let filtered = [...revenueData.billing_details];
+    let filtered = [...billingDetails];
 
     // Apply status filter
     if (statusFilter !== 'all') {

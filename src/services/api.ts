@@ -48,16 +48,38 @@ export interface AdminDashboardData {
 }
 
 export interface RevenueData {
-  summary: {
+  // For Admin and Tier2 sellers
+  summary?: {
     total_bills: number;
-    paid_bills: number;
-    pending_bills: number;
-    overdue_bills: number;
-    total_value: number;
-    collected_amount: number;
-    outstanding_amount: number;
+    paid_bills?: number;
+    pending_bills?: number;
+    overdue_bills?: number;
+    total_value?: number;
+    collected_amount?: number;
+    outstanding_amount?: number;
   };
-  billing_details: Array<{
+  billing_details?: Array<{
+    client_name: string;
+    invoice_id: string;
+    project_value: number;
+    commission_percentage: number;
+    commission_amount: number;
+    due_date: string;
+    payment_date?: string;
+    status: 'Paid' | 'Pending' | 'Overdue';
+  }>;
+  // For Tier1 sellers - separate arrays
+  tier1_project_billing?: Array<{
+    client_name: string;
+    invoice_id: string;
+    project_value: number;
+    commission_percentage: number;
+    commission_amount: number;
+    due_date: string;
+    payment_date?: string;
+    status: 'Paid' | 'Pending' | 'Overdue';
+  }>;
+  tier2_project_billing?: Array<{
     client_name: string;
     invoice_id: string;
     project_value: number;
