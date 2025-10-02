@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, CheckCircle, Clock, AlertCircle, ArrowUpDown } from 'lucide-react';
+import { FileText, CheckCircle, Clock, AlertCircle, TrendingUp, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import MetricCard from '../Dashboard/MetricCard';
 import { apiService, RevenueData } from '@/services/api';
 
-interface BillingRecord {
+interface DirectRevenueRecord {
   client_name: string;
   invoice_id: string;
   project_value: number;
@@ -18,15 +16,27 @@ interface BillingRecord {
   due_date: string;
   payment_date?: string;
   status: 'Paid' | 'Pending' | 'Overdue';
+  seller_name?: string;
+}
+
+interface IndirectRevenueRecord {
+  client_name: string;
+  invoice_id: string;
+  project_value: number;
+  tier1_commission_amount: number;
+  admin_commission_amount: number;
+  due_date: string;
+  payment_date?: string;
+  status: 'Paid' | 'Pending' | 'Overdue';
+  tier1_seller_name?: string;
+  tier2_seller_name?: string;
 }
 
 const RevenueOverview: React.FC = () => {
   const [revenueData, setRevenueData] = useState<RevenueData | null>(null);
-  const [filteredData, setFilteredData] = useState<BillingRecord[]>([]);
+  const [directRevenue, setDirectRevenue] = useState<DirectRevenueRecord[]>([]);
+  const [indirectRevenue, setIndirectRevenue] = useState<IndirectRevenueRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [sortField, setSortField] = useState<'commission_amount' | 'due_date'>('due_date');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   // Load billing data from API
   const loadBillingData = async () => {
@@ -34,6 +44,10 @@ const RevenueOverview: React.FC = () => {
       setLoading(true);
       const data = await apiService.getRevenueData();
       setRevenueData(data);
+      
+      // Set direct and indirect revenue data
+      setDirectRevenue(data.direct_revenue_details || []);
+      setIndirectRevenue(data.indirect_revenue_details || []);
     } catch (error) {
       console.error('Failed to load billing data:', error);
     } finally {
@@ -41,67 +55,10 @@ const RevenueOverview: React.FC = () => {
     }
   };
 
-  // Apply filters and sorting to billing records
-  const applyFiltersAndSort = () => {
-    if (!revenueData) {
-      setFilteredData([]);
-      return;
-    }
-
-    // Handle both response structures
-    const billingDetails = revenueData.billing_details || [];
-    if (!Array.isArray(billingDetails)) {
-      setFilteredData([]);
-      return;
-    }
-    
-    let filtered = [...billingDetails];
-
-    // Apply status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(record => record.status.toLowerCase() === statusFilter);
-    }
-
-    // Apply sorting
-    filtered.sort((a, b) => {
-      let aValue = a[sortField];
-      let bValue = b[sortField];
-
-      // Handle date sorting
-      if (sortField === 'due_date') {
-        aValue = new Date(aValue as string).getTime();
-        bValue = new Date(bValue as string).getTime();
-      }
-
-      if (sortOrder === 'asc') {
-        return aValue > bValue ? 1 : -1;
-      } else {
-        return aValue < bValue ? 1 : -1;
-      }
-    });
-
-    setFilteredData(filtered);
-  };
-
-  // Handle sort column toggle
-  const toggleSort = (field: 'commission_amount' | 'due_date') => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortOrder('asc');
-    }
-  };
-
   // Load data on component mount
   useEffect(() => {
     loadBillingData();
   }, []);
-
-  // Apply filters when data or filter settings change
-  useEffect(() => {
-    applyFiltersAndSort();
-  }, [revenueData, statusFilter, sortField, sortOrder]);
 
   // Utility functions for formatting and styling
   const getStatusColor = (status: string) => {
@@ -115,161 +72,116 @@ const RevenueOverview: React.FC = () => {
 
   const getStatusIcon = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'paid': return CheckCircle;
-      case 'pending': return Clock;
-      case 'overdue': return AlertCircle;
-      default: return AlertCircle;
+      case 'paid': return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case 'pending': return <TrendingUp className="h-4 w-4 text-yellow-600" />;
+      case 'overdue': return <AlertTriangle className="h-4 w-4 text-red-600" />;
+      default: return null;
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
-  const formatAmount = (amount: number, symbol: string = '$') => {
-    return `${symbol}${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
   };
 
   // Loading state with skeletons
   if (loading) {
-    return (
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Skeleton className="h-32" />
-          <Skeleton className="h-32" />
-          <Skeleton className="h-32" />
-        </div>
-        <Card>
-          <CardContent className="p-6">
-            <div className="space-y-4">
-              <Skeleton className="h-8 w-48" />
-              <Skeleton className="h-48" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <div>Loading billing data...</div>;
   }
 
   return (
     <div className="space-y-6">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <MetricCard
-          title="Total Bills"
-          value={revenueData?.summary?.total_bills || 0}
-          icon={FileText}
-        />
-        <MetricCard
-          title="Paid Bills"
-          value={revenueData?.summary?.paid_bills || 0}
-          icon={CheckCircle}
-        />
-        <MetricCard
-          title="Pending Bills"
-          value={revenueData?.summary?.pending_bills || 0}
-          icon={Clock}
-        />
-      </div>
+      <h2 className="text-2xl font-bold">Revenue Overview</h2>
 
-      {/* Billing Records Table */}
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <CardTitle className="text-lg font-semibold">Billing Records</CardTitle>
-            <div className="flex gap-2">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="paid">Paid</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="overdue">Overdue</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {filteredData.length > 0 ? (
-            <div className="overflow-x-auto">
+      <Tabs defaultValue="direct-revenue" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="direct-revenue">Direct Revenue (Tier-1 Projects)</TabsTrigger>
+          <TabsTrigger value="indirect-revenue">Indirect Revenue (Tier-2 Projects)</TabsTrigger>
+        </TabsList>
+
+        {/* Tab 1: Direct Revenue from Tier-1 Projects */}
+        <TabsContent value="direct-revenue">
+          <Card>
+            <CardHeader><CardTitle>Direct Revenue - Commission from Tier-1 Sellers</CardTitle></CardHeader>
+            <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Project Name</TableHead>
-                    <TableHead>Invoice ID</TableHead>
+                    <TableHead>Project</TableHead>
+                    <TableHead>Seller</TableHead>
+                    <TableHead>Invoice</TableHead>
                     <TableHead>Project Value</TableHead>
                     <TableHead>Commission %</TableHead>
-                    <TableHead>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-auto p-0 font-semibold"
-                        onClick={() => toggleSort('commission_amount')}
-                      >
-                        Amount
-                        <ArrowUpDown className="ml-1 h-3 w-3" />
-                      </Button>
-                    </TableHead>
-                    <TableHead>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-auto p-0 font-semibold"
-                        onClick={() => toggleSort('due_date')}
-                      >
-                        Due Date
-                        <ArrowUpDown className="ml-1 h-3 w-3" />
-                      </Button>
-                    </TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>Commission Amount</TableHead>
+                    <TableHead>Due Date</TableHead>
                     <TableHead>Payment Date</TableHead>
+                    <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredData.map((record, index) => (
-                    <TableRow key={`${record.invoice_id}-${index}`}>
-                      <TableCell className="font-medium">{record.client_name}</TableCell>
-                      <TableCell className="font-mono text-sm">{record.invoice_id}</TableCell>
+                  {directRevenue.map((record, index) => (
+                    <TableRow key={`direct-${index}`}>
+                      <TableCell>{record.client_name}</TableCell>
+                      <TableCell>{record.seller_name || 'N/A'}</TableCell>
+                      <TableCell>{record.invoice_id || '-'}</TableCell>
                       <TableCell>₹{record.project_value?.toLocaleString()}</TableCell>
                       <TableCell>{record.commission_percentage}%</TableCell>
-                      <TableCell className="font-semibold">
-                        {formatAmount(record.commission_amount, '₹')}
-                      </TableCell>
-                      <TableCell>{formatDate(record.due_date)}</TableCell>
+                      <TableCell>₹{record.commission_amount?.toLocaleString()}</TableCell>
+                      <TableCell>{record.due_date || '-'}</TableCell>
+                      <TableCell>{record.payment_date || '-'}</TableCell>
                       <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(record.status)}`}>
-                          {record.status}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        {record.payment_date ? formatDate(record.payment_date) : '-'}
+                        <Badge className={getStatusColor(record.status)}>
+                          {getStatusIcon(record.status)} {record.status}
+                        </Badge>
                       </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
-            </div>
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <FileText className="mx-auto h-12 w-12 mb-4 opacity-50" />
-              <p className="text-lg font-medium mb-2">No billing records found</p>
-              <p className="text-sm">
-                {statusFilter !== 'all' 
-                  ? `No records match the "${statusFilter}" status filter.`
-                  : 'There are no billing records to display at this time.'
-                }
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Tab 2: Indirect Revenue from Tier-2 Projects */}
+        <TabsContent value="indirect-revenue">
+          <Card>
+            <CardHeader><CardTitle>Indirect Revenue - Commission from Tier-2 Sellers</CardTitle></CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Project</TableHead>
+                    <TableHead>Tier-1 Seller</TableHead>
+                    <TableHead>Tier-2 Seller</TableHead>
+                    <TableHead>Invoice</TableHead>
+                    <TableHead>Project Value</TableHead>
+                    <TableHead>Tier-1 Commission</TableHead>
+                    <TableHead>Admin Commission</TableHead>
+                    <TableHead>Due Date</TableHead>
+                    <TableHead>Payment Date</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {indirectRevenue.map((record, index) => (
+                    <TableRow key={`indirect-${index}`}>
+                      <TableCell>{record.client_name}</TableCell>
+                      <TableCell>{record.tier1_seller_name || 'N/A'}</TableCell>
+                      <TableCell>{record.tier2_seller_name || 'N/A'}</TableCell>
+                      <TableCell>{record.invoice_id || '-'}</TableCell>
+                      <TableCell>₹{record.project_value?.toLocaleString()}</TableCell>
+                      <TableCell>₹{record.tier1_commission_amount?.toLocaleString()}</TableCell>
+                      <TableCell>₹{record.admin_commission_amount?.toLocaleString()}</TableCell>
+                      <TableCell>{record.due_date || '-'}</TableCell>
+                      <TableCell>{record.payment_date || '-'}</TableCell>
+                      <TableCell>
+                        <Badge className={getStatusColor(record.status)}>
+                          {getStatusIcon(record.status)} {record.status}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

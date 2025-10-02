@@ -48,7 +48,7 @@ export interface AdminDashboardData {
 }
 
 export interface RevenueData {
-  // For Admin and Tier2 sellers
+  // For Admin - two separate arrays
   summary?: {
     total_bills: number;
     paid_bills?: number;
@@ -58,6 +58,30 @@ export interface RevenueData {
     collected_amount?: number;
     outstanding_amount?: number;
   };
+  direct_revenue_details?: Array<{
+    client_name: string;
+    invoice_id: string;
+    project_value: number;
+    commission_percentage: number;
+    commission_amount: number;
+    due_date: string;
+    payment_date?: string;
+    status: 'Paid' | 'Pending' | 'Overdue';
+    seller_name?: string;
+  }>;
+  indirect_revenue_details?: Array<{
+    client_name: string;
+    invoice_id: string;
+    project_value: number;
+    tier1_commission_amount: number;
+    admin_commission_amount: number;
+    due_date: string;
+    payment_date?: string;
+    status: 'Paid' | 'Pending' | 'Overdue';
+    tier1_seller_name?: string;
+    tier2_seller_name?: string;
+  }>;
+  // For Tier2 sellers (legacy)
   billing_details?: Array<{
     client_name: string;
     invoice_id: string;
@@ -78,6 +102,8 @@ export interface RevenueData {
     due_date: string;
     payment_date?: string;
     status: 'Paid' | 'Pending' | 'Overdue';
+    admin_commission_percentage?: number;
+    admin_commission_amount?: number;
   }>;
   tier2_project_billing?: Array<{
     client_name: string;
@@ -88,6 +114,8 @@ export interface RevenueData {
     due_date: string;
     payment_date?: string;
     status: 'Paid' | 'Pending' | 'Overdue';
+    admin_commission_percentage?: number;
+    admin_commission_amount?: number;
   }>;
 }
 
