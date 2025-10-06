@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Edit2, Trash2, Users, FileText, Activity, Loader2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Users, FileText, Activity, Loader2, Copy } from 'lucide-react';
 import { apiService } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 
@@ -63,6 +63,17 @@ const ProjectManagement: React.FC<ProjectManagementProps> = ({ userRole }) => {
     commission_percentage: 0,
     admin_commission_percentage: 0,
     subscription_plan_id: '',
+    tier2_seller_id: ''
+  });
+
+  // Replicate project state
+  const [isReplicateDialogOpen, setIsReplicateDialogOpen] = useState(false);
+  const [replicateProjectData, setReplicateProjectData] = useState({
+    name: '',
+    description: '',
+    project_type: '',
+    subscription_plan_id: '',
+    status: 'active' as 'active' | 'inactive',
     tier2_seller_id: ''
   });
 
@@ -313,6 +324,74 @@ const handleAddProject = async () => {
   const openAddClientDialog = (projectId: string) => {
     setSelectedProjectId(projectId);
     setIsClientDialogOpen(true);
+  };
+
+  const openReplicateDialog = (project: Project) => {
+    setReplicateProjectData({
+      name: project.name,
+      description: project.description,
+      project_type: project.project_type,
+      subscription_plan_id: (project as any).subscription_plan_id || '',
+      status: project.status,
+      tier2_seller_id: project.tier2_seller_id || ''
+    });
+    setIsReplicateDialogOpen(true);
+  };
+
+  const closeReplicateDialog = () => {
+    setIsReplicateDialogOpen(false);
+    setReplicateProjectData({
+      name: '',
+      description: '',
+      project_type: '',
+      subscription_plan_id: '',
+      status: 'active',
+      tier2_seller_id: ''
+    });
+  };
+
+  const handleReplicateProject = async () => {
+    if (!replicateProjectData.name.trim() || !replicateProjectData.subscription_plan_id) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill out all required fields, including the subscription plan.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const projectData = {
+        name: replicateProjectData.name,
+        description: replicateProjectData.description,
+        project_type: replicateProjectData.project_type,
+        project_value: 0,
+        commission_percentage: 0,
+        status: replicateProjectData.status,
+        tier2_seller_id: replicateProjectData.tier2_seller_id.trim() || null,
+        subscription_plan_id: replicateProjectData.subscription_plan_id
+      };
+      
+      await apiService.createProject(projectData);
+      
+      // Refresh the projects list
+      const updatedProjects = await apiService.getProjects();
+      setProjects(updatedProjects);
+      
+      closeReplicateDialog();
+      
+      toast({
+        title: "Success",
+        description: "Project replicated successfully",
+      });
+    } catch (err) {
+      console.error('Failed to replicate project:', err);
+      toast({
+        title: "Error",
+        description: "Failed to replicate project",
+        variant: "destructive",
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -578,6 +657,14 @@ const handleAddProject = async () => {
                   <Button 
                     size="sm" 
                     variant="ghost"
+                    onClick={() => openReplicateDialog(project)}
+                    title="Replicate Project"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="ghost"
                     onClick={() => openEditDialog(project)}
                     title="Edit Project"
                   >
@@ -652,6 +739,85 @@ const handleAddProject = async () => {
           </Card>
         ))}
       </div>
+
+      {/* Replicate Project Dialog */}
+      <Dialog open={isReplicateDialogOpen} onOpenChange={setIsReplicateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Replicate Project</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="replicate-name">Project Name</Label>
+              <Input
+                id="replicate-name"
+                value={replicateProjectData.name}
+                onChange={(e) => setReplicateProjectData({ ...replicateProjectData, name: e.target.value })}
+                placeholder="Enter project name"
+                disabled
+                className="bg-muted"
+              />
+            </div>
+            <div>
+              <Label htmlFor="replicate-description">Description</Label>
+              <Textarea
+                id="replicate-description"
+                value={replicateProjectData.description}
+                onChange={(e) => setReplicateProjectData({ ...replicateProjectData, description: e.target.value })}
+                placeholder="Enter project description"
+                disabled
+                className="bg-muted"
+              />
+            </div>
+            <div>
+              <Label htmlFor="replicate-project_type">Project Type</Label>
+              <Input
+                id="replicate-project_type"
+                value={replicateProjectData.project_type}
+                onChange={(e) => setReplicateProjectData({ ...replicateProjectData, project_type: e.target.value })}
+                placeholder="Enter project type"
+                disabled
+                className="bg-muted"
+              />
+            </div>
+            <div>
+              <Label htmlFor="replicate-subscription_plan">Subscription Plan (Editable)</Label>
+              <Select value={replicateProjectData.subscription_plan_id} onValueChange={(value) => setReplicateProjectData({ ...replicateProjectData, subscription_plan_id: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a subscription plan" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover z-50">
+                  {subscriptionPlans.map((plan) => (
+                    <SelectItem key={plan.id} value={plan.id}>
+                      {plan.name} - ${plan.price}/{plan.billing_cycle || 'monthly'}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="replicate-status">Status</Label>
+              <Select value={replicateProjectData.status} onValueChange={(value: 'active' | 'inactive') => setReplicateProjectData({ ...replicateProjectData, status: value })} disabled>
+                <SelectTrigger className="bg-muted">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={closeReplicateDialog}>
+                Cancel
+              </Button>
+              <Button onClick={handleReplicateProject}>
+                Create Replica
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Edit Project Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
