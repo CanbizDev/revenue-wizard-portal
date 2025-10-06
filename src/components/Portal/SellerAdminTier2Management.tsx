@@ -144,7 +144,7 @@ const SellerAdminTier2Management: React.FC<SellerAdminTier2ManagementProps> = ({
                     <TableHead>Subdomain</TableHead>
                     
                     <TableHead>Projects</TableHead>
-                    <TableHead>Revenue</TableHead>
+                    {/* <TableHead>Revenue</TableHead> */}
                     <TableHead>Status</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
@@ -188,9 +188,9 @@ const SellerAdminTier2Management: React.FC<SellerAdminTier2ManagementProps> = ({
                       <TableCell>
                         <div className="font-medium">{seller.project_count || 0}</div>
                       </TableCell>
-                      <TableCell>
+                      {/* <TableCell>
                         <div className="font-medium">₹{seller.revenue || 0}</div>
-                      </TableCell>
+                      </TableCell> */}
                       <TableCell>
                         <Badge 
                           variant={seller.status === 'active' ? 'default' : 'secondary'}

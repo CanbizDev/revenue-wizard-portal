@@ -218,10 +218,10 @@ const AdminPortal: React.FC = () => {
                       <p className="font-medium">{seller.project_count || 0}</p>
                       <p className="text-xs">Projects</p>
                     </div>
-                    <div className="text-center">
+                    {/* <div className="text-center">
                       <p className="font-medium">₹{seller.revenue || 0}</p>
                       <p className="text-xs">Revenue</p>
-                    </div>
+                    </div> */}
                     <Badge 
                       variant={seller.status === 'active' ? 'default' : 'secondary'}
                       className={seller.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}
@@ -306,10 +306,10 @@ const AdminPortal: React.FC = () => {
                       <p className="font-medium">{seller.project_count || 0}</p>
                       <p className="text-xs">Projects</p>
                     </div>
-                    <div className="text-center">
+                    {/* <div className="text-center">
                       <p className="font-medium">₹{seller.revenue || 0}</p>
                       <p className="text-xs">Revenue</p>
-                    </div>
+                    </div> */}
                     <Badge 
                       variant={seller.status === 'active' ? 'default' : 'secondary'}
                       className={seller.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}
