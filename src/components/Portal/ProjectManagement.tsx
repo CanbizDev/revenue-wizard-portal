@@ -410,7 +410,21 @@ const handleAddProject = async () => {
   const getSubscriptionPlanName = (planId: string | null): string => {
     if (!planId) return 'No plan selected';
     const plan = subscriptionPlans.find(p => p.id === planId);
-    return plan ? `${plan.name} - $${plan.price}/${plan.billing_cycle}` : `Unknown Plan (ID: ${planId})`;
+    
+    if (!plan) return `Unknown Plan (ID: ${planId})`;
+    
+    let displayText = `${plan.name} - $${plan.price}/${plan.billing_cycle || 'monthly'}`;
+    
+    // For Tier 1 sellers, show admin commission
+    if (userRole === 'tier1' && plan.admin_commission_pct != null) {
+      displayText += ` | Commission-${plan.admin_commission_pct}%`;
+    }
+    // For Tier 2 sellers, show tier1 commission
+    else if (userRole === 'tier2' && plan.tier1_commission_pct != null) {
+      displayText += ` | Commission-${plan.tier1_commission_pct}%`;
+    }
+    
+    return displayText;
   };
 
   // Calculate totals
@@ -498,11 +512,19 @@ const handleAddProject = async () => {
                     <SelectValue placeholder="Select a subscription plan" />
                   </SelectTrigger>
                   <SelectContent className="bg-popover z-50">
-                    {subscriptionPlans.map((plan) => (
-                      <SelectItem key={plan.id} value={plan.id}>
-                        {plan.name} - ${plan.price}/{plan.billing_cycle || 'monthly'}
-                      </SelectItem>
-                    ))}
+                    {subscriptionPlans.map((plan) => {
+                      const commissionText = userRole === 'tier1' && plan.admin_commission_pct != null
+                        ? ` | Commission-${plan.admin_commission_pct}%`
+                        : userRole === 'tier2' && plan.tier1_commission_pct != null
+                        ? ` | Commission-${plan.tier1_commission_pct}%`
+                        : '';
+                      
+                      return (
+                        <SelectItem key={plan.id} value={plan.id}>
+                          {plan.name} - ${plan.price}/{plan.billing_cycle || 'monthly'}{commissionText}
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>
@@ -787,11 +809,19 @@ const handleAddProject = async () => {
                   <SelectValue placeholder="Select a subscription plan" />
                 </SelectTrigger>
                 <SelectContent className="bg-popover z-50">
-                  {subscriptionPlans.map((plan) => (
-                    <SelectItem key={plan.id} value={plan.id}>
-                      {plan.name} - ${plan.price}/{plan.billing_cycle || 'monthly'}
-                    </SelectItem>
-                  ))}
+                  {subscriptionPlans.map((plan) => {
+                    const commissionText = userRole === 'tier1' && plan.admin_commission_pct != null
+                      ? ` | Commission-${plan.admin_commission_pct}%`
+                      : userRole === 'tier2' && plan.tier1_commission_pct != null
+                      ? ` | Commission-${plan.tier1_commission_pct}%`
+                      : '';
+                    
+                    return (
+                      <SelectItem key={plan.id} value={plan.id}>
+                        {plan.name} - ${plan.price}/{plan.billing_cycle || 'monthly'}{commissionText}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>
