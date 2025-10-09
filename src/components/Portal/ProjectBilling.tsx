@@ -5,7 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DollarSign, TrendingUp, AlertTriangle, CheckCircle, Download } from 'lucide-react';
-import { apiService } from '@/services/api';  // 👈 make sure you call API from here
+import { apiService } from '@/services/api';
+import { Elements } from '@stripe/react-stripe-js';
+import { stripePromise } from '@/lib/stripe';
+import { PaymentModal } from '@/components/Payment/PaymentModal';
 
 interface ProjectBilling {
   id: string;
@@ -24,6 +27,8 @@ interface ProjectBilling {
 const ProjectBilling: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<string>('all');
   const [billingData, setBillingData] = useState<ProjectBilling[]>([]);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<{ id: string; number: string; amount: number } | null>(null);
 
   useEffect(() => {
     const fetchBilling = async () => {
@@ -78,6 +83,44 @@ const ProjectBilling: React.FC = () => {
 
   const uniqueProjects = [...new Set(billingData.map(b => b.projectName))];
 
+  const handlePayNow = (billing: ProjectBilling) => {
+    const amountInCents = Math.round((billing.projectValue * (billing.commissionPercentage / 100)) * 100);
+    setSelectedInvoice({
+      id: billing.invoiceId,
+      number: billing.invoiceId,
+      amount: amountInCents,
+    });
+    setPaymentModalOpen(true);
+  };
+
+  const handlePaymentModalClose = () => {
+    setPaymentModalOpen(false);
+    setSelectedInvoice(null);
+    // Refresh billing data
+    const fetchBilling = async () => {
+      try {
+        const res = await apiService.getRevenueData();
+        const transformed = res.billing_details.map((bill: any, idx: number) => ({
+          id: String(idx),
+          projectName: bill.client_name,
+          totalBilling: bill.bill_amount,
+          paidAmount: bill.status.toLowerCase() === 'paid' ? bill.bill_amount : 0,
+          pendingAmount: bill.status.toLowerCase() !== 'paid' ? bill.bill_amount : 0,
+          lastPayment: bill.payment_date || '-',
+          status: bill.status.toLowerCase(),
+          invoiceId: bill.invoice_id,
+          dueDate: bill.due_date || '-',
+          projectValue: bill.project_value || 0,
+          commissionPercentage: bill.commission_percentage || 0
+        }));
+        setBillingData(transformed);
+      } catch (err) {
+        console.error('Error fetching billing:', err);
+      }
+    };
+    fetchBilling();
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Project Billing</h2>
@@ -115,6 +158,7 @@ const ProjectBilling: React.FC = () => {
                 <TableHead>Due</TableHead>
                 <TableHead>Last Payment</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -132,12 +176,35 @@ const ProjectBilling: React.FC = () => {
                       {getStatusIcon(billing.status)} {billing.status}
                     </Badge>
                   </TableCell>
+                  <TableCell>
+                    {billing.status !== 'paid' && (
+                      <Button 
+                        size="sm" 
+                        onClick={() => handlePayNow(billing)}
+                      >
+                        Pay Now
+                      </Button>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
+      {/* Payment Modal */}
+      <Elements stripe={stripePromise}>
+        {selectedInvoice && (
+          <PaymentModal
+            isOpen={paymentModalOpen}
+            onClose={handlePaymentModalClose}
+            invoiceId={selectedInvoice.id}
+            invoiceNumber={selectedInvoice.number}
+            amount={selectedInvoice.amount}
+          />
+        )}
+      </Elements>
     </div>
   );
 };
