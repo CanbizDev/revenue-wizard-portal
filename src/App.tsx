@@ -8,8 +8,6 @@ import CompanyLanding from "./pages/CompanyLanding";
 import ClientLogin from "./pages/ClientLogin";
 import AdminPortal from "./components/Portal/AdminPortal";
 import SellerAdminPortal from "./components/Portal/SellerAdminPortal";
-import PaymentSuccess from "./pages/PaymentSuccess";
-import PaymentFailed from "./pages/PaymentFailed";
 
 const queryClient = new QueryClient();
 
@@ -30,15 +28,6 @@ const App = () => {
   const renderCurrentPage = () => {
     if (!selectedCompany) {
       return <Index onCompanySelect={handleCompanySelect} />;
-    }
-
-    // Handle payment success/failure pages
-    if (currentPath === '/payment-success') {
-      return <PaymentSuccess />;
-    }
-    
-    if (currentPath === '/payment-failed') {
-      return <PaymentFailed />;
     }
 
     // Handle navigation to different portals

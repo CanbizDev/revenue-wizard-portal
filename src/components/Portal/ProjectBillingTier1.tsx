@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CheckCircle, AlertTriangle, TrendingUp } from 'lucide-react';
 import { apiService } from '@/services/api';
-import { Elements } from '@stripe/react-stripe-js';
-import { stripePromise } from '@/lib/stripe';
-import { PaymentModal } from '@/components/Payment/PaymentModal';
 
 interface ProjectBilling {
   id: string;
@@ -30,9 +26,9 @@ const ProjectBillingTier1: React.FC = () => {
   // State for the three different data sets
   const [myProjectsBilling, setMyProjectsBilling] = useState<ProjectBilling[]>([]);
   const [tier2MyCommission, setTier2MyCommission] = useState<ProjectBilling[]>([]);
+  // We'll use the tier2MyCommission data for the new tab for now
+  
   const [loading, setLoading] = useState(true);
-  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState<{ id: string; number: string; amount: number } | null>(null);
 
   useEffect(() => {
     const fetchBilling = async () => {
@@ -100,64 +96,6 @@ const ProjectBillingTier1: React.FC = () => {
       default: return null;
     }
   };
-
-  const handlePayNow = (billing: ProjectBilling, isAdminCommission: boolean = false) => {
-    const amount = isAdminCommission ? billing.adminCommissionAmount : billing.tier1CommissionAmount;
-    const amountInCents = Math.round(amount * 100);
-    setSelectedInvoice({
-      id: billing.invoiceId || billing.id,
-      number: billing.invoiceId || billing.id,
-      amount: amountInCents,
-    });
-    setPaymentModalOpen(true);
-  };
-
-  const refreshBillingData = async () => {
-    try {
-      setLoading(true);
-      const res = await apiService.getRevenueData();
-      
-      const myProjectsTransformed = (res.tier1_project_billing || []).map((bill: any, idx: number) => ({
-        id: `t1-${idx}`,
-        projectName: bill.client_name,
-        projectValue: bill.project_value || 0,
-        tier1CommissionPercentage: null,
-        tier1CommissionAmount: 0,
-        adminCommissionPercentage: bill.commission_percentage || null,
-        adminCommissionAmount: bill.commission_amount || 0,
-        status: bill.status.toLowerCase(),
-        invoiceId: bill.invoice_id,
-        dueDate: bill.due_date,
-        lastPayment: bill.payment_date,
-      }));
-      setMyProjectsBilling(myProjectsTransformed);
-
-      const tier2Transformed = (res.tier2_project_billing || []).map((bill: any, idx: number) => ({
-        id: `t2-${idx}`,
-        projectName: bill.client_name,
-        projectValue: bill.project_value || 0,
-        tier1CommissionPercentage: bill.commission_percentage || null,
-        tier1CommissionAmount: bill.commission_amount || 0,
-        adminCommissionPercentage: bill.admin_commission_percentage || null,
-        adminCommissionAmount: bill.admin_commission_amount || 0,
-        status: bill.status.toLowerCase(),
-        invoiceId: bill.invoice_id,
-        dueDate: bill.due_date,
-        lastPayment: bill.payment_date,
-      }));
-      setTier2MyCommission(tier2Transformed);
-    } catch (err) {
-      console.error('Error fetching billing:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePaymentModalClose = () => {
-    setPaymentModalOpen(false);
-    setSelectedInvoice(null);
-    refreshBillingData();
-  };
   
   if (loading) return <div>Loading billing data...</div>;
 
@@ -189,7 +127,6 @@ const ProjectBillingTier1: React.FC = () => {
                     <TableHead>Due</TableHead>
                     <TableHead>Last Payment</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -206,16 +143,6 @@ const ProjectBillingTier1: React.FC = () => {
                         <Badge className={getStatusColor(bill.status)}>
                           {getStatusIcon(bill.status)} {bill.status}
                         </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {bill.status !== 'paid' && (
-                          <Button 
-                            size="sm" 
-                            onClick={() => handlePayNow(bill, false)}
-                          >
-                            Pay Now
-                          </Button>
-                        )}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -307,19 +234,6 @@ const ProjectBillingTier1: React.FC = () => {
           </Card>
         </TabsContent>
       </Tabs>
-
-      {/* Payment Modal */}
-      <Elements stripe={stripePromise}>
-        {selectedInvoice && (
-          <PaymentModal
-            isOpen={paymentModalOpen}
-            onClose={handlePaymentModalClose}
-            invoiceId={selectedInvoice.id}
-            invoiceNumber={selectedInvoice.number}
-            amount={selectedInvoice.amount}
-          />
-        )}
-      </Elements>
     </div>
   );
 };
