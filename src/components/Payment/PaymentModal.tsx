@@ -4,7 +4,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -12,13 +11,22 @@ interface PaymentModalProps {
   invoiceId: string;
   invoiceNumber: string;
   amount: number; // in cents
+  onSuccess?: (invoiceNumber: string, amount: number) => void;
+  onFailure?: (invoiceNumber: string, error: string) => void;
 }
 
-export const PaymentModal = ({ isOpen, onClose, invoiceId, invoiceNumber, amount }: PaymentModalProps) => {
+export const PaymentModal = ({ 
+  isOpen, 
+  onClose, 
+  invoiceId, 
+  invoiceNumber, 
+  amount,
+  onSuccess,
+  onFailure 
+}: PaymentModalProps) => {
   const stripe = useStripe();
   const elements = useElements();
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [processing, setProcessing] = useState(false);
 
   const handlePayment = async () => {
@@ -83,7 +91,9 @@ export const PaymentModal = ({ isOpen, onClose, invoiceId, invoiceNumber, amount
           description: `Invoice #${invoiceNumber} has been paid.`,
         });
         onClose();
-        navigate('/payment-success', { state: { invoiceNumber, amount } });
+        if (onSuccess) {
+          onSuccess(invoiceNumber, amount);
+        }
       }
     } catch (error: any) {
       console.error('Payment error:', error);
@@ -92,7 +102,9 @@ export const PaymentModal = ({ isOpen, onClose, invoiceId, invoiceNumber, amount
         description: error.message || 'An error occurred during payment.',
         variant: 'destructive',
       });
-      navigate('/payment-failed', { state: { invoiceNumber, error: error.message } });
+      if (onFailure) {
+        onFailure(invoiceNumber, error.message);
+      }
     } finally {
       setProcessing(false);
     }
