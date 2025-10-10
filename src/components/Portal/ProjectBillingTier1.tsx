@@ -128,7 +128,7 @@ const ProjectBillingTier1: React.FC = () => {
       default:
         return 'bg-gray-100 text-gray-800';
     }
-  };
+  }; 
 
   const getStatusIcon = (status: string) => {
     switch (status) {
