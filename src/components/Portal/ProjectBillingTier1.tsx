@@ -1,10 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button'; // Import Button
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CheckCircle, AlertTriangle, TrendingUp } from 'lucide-react';
 import { apiService } from '@/services/api';
+import PaymentModal from '@/components/Revenue/PaymentModal'; // Corrected path
+import { useNavigate } from 'react-router-dom';
 
 interface ProjectBilling {
   id: string;
@@ -20,25 +30,36 @@ interface ProjectBilling {
   invoiceId: string | null;
   dueDate: string | null;
   lastPayment: string | null;
+  // Added for payment modal
+  totalBilling?: number;
 }
 
 const ProjectBillingTier1: React.FC = () => {
   // State for the three different data sets
-  const [myProjectsBilling, setMyProjectsBilling] = useState<ProjectBilling[]>([]);
-  const [tier2MyCommission, setTier2MyCommission] = useState<ProjectBilling[]>([]);
-  // We'll use the tier2MyCommission data for the new tab for now
-  
+  const [myProjectsBilling, setMyProjectsBilling] = useState<ProjectBilling[]>(
+    []
+  );
+  const [tier2MyCommission, setTier2MyCommission] = useState<ProjectBilling[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchBilling = async () => {
-      try {
-        setLoading(true);
-        const res = await apiService.getRevenueData();
-        
-        // Data for "My Projects" tab
-        const myProjectsTransformed = (res.tier1_project_billing || []).map((bill: any, idx: number) => ({
-          id: `t1-${idx}`,
+  // State for Payment Modal
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<ProjectBilling | null>(
+    null
+  );
+  const navigate = useNavigate();
+
+  const fetchBilling = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await apiService.getRevenueData();
+
+      // Data for "My Projects" tab
+      const myProjectsTransformed = (res.tier1_project_billing || []).map(
+        (bill: any, idx: number) => ({
+          id: bill.invoice_id || `t1-${idx}`, // Use actual invoice ID if available
           projectName: bill.client_name,
           projectValue: bill.project_value || 0,
           tier1CommissionPercentage: null,
@@ -49,12 +70,15 @@ const ProjectBillingTier1: React.FC = () => {
           invoiceId: bill.invoice_id,
           dueDate: bill.due_date,
           lastPayment: bill.payment_date,
-        }));
-        setMyProjectsBilling(myProjectsTransformed);
+          totalBilling: bill.commission_amount || 0, // Pass amount to modal
+        })
+      );
+      setMyProjectsBilling(myProjectsTransformed);
 
-        // Data for the two "Tier-2 Seller" tabs
-        const tier2Transformed = (res.tier2_project_billing || []).map((bill: any, idx: number) => ({
-          id: `t2-${idx}`,
+      // Data for the two "Tier-2 Seller" tabs
+      const tier2Transformed = (res.tier2_project_billing || []).map(
+        (bill: any, idx: number) => ({
+          id: bill.invoice_id || `t2-${idx}`,
           projectName: bill.client_name,
           projectValue: bill.project_value || 0,
           tier1CommissionPercentage: bill.commission_percentage || null,
@@ -65,38 +89,62 @@ const ProjectBillingTier1: React.FC = () => {
           invoiceId: bill.invoice_id,
           dueDate: bill.due_date,
           lastPayment: bill.payment_date,
-        }));
-        setTier2MyCommission(tier2Transformed);
-
-      } catch (err) {
-        console.error('Error fetching billing:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchBilling();
+        })
+      );
+      setTier2MyCommission(tier2Transformed);
+    } catch (err) {
+      console.error('Error fetching billing:', err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchBilling();
+  }, [fetchBilling]);
+
+  // --- Handlers for Payment Flow ---
+  const handlePayNow = (invoice: ProjectBilling) => {
+    setSelectedInvoice(invoice);
+    setIsPaymentModalOpen(true);
+  };
+
+  const handlePaymentSuccess = () => {
+    fetchBilling(); // Refresh the billing data
+    navigate('/payment-success');
+  };
+  // --- End of Payment Flow Handlers ---
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'paid': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'invoiced': return 'bg-blue-100 text-blue-800';
-      case 'overdue': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'paid':
+        return 'bg-green-100 text-green-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'invoiced':
+        return 'bg-blue-100 text-blue-800';
+      case 'overdue':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'paid': return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'pending': return <TrendingUp className="h-4 w-4 text-yellow-600" />;
-      case 'invoiced': return <TrendingUp className="h-4 w-4 text-blue-600" />;
-      case 'overdue': return <AlertTriangle className="h-4 w-4 text-red-600" />;
-      default: return null;
+      case 'paid':
+        return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case 'pending':
+        return <TrendingUp className="h-4 w-4 text-yellow-600" />;
+      case 'invoiced':
+        return <TrendingUp className="h-4 w-4 text-blue-600" />;
+      case 'overdue':
+        return <AlertTriangle className="h-4 w-4 text-red-600" />;
+      default:
+        return null;
     }
   };
-  
+
   if (loading) return <div>Loading billing data...</div>;
 
   return (
@@ -104,17 +152,22 @@ const ProjectBillingTier1: React.FC = () => {
       <h2 className="text-2xl font-bold">Project Billing</h2>
 
       <Tabs defaultValue="my-projects" className="w-full">
-        {/* --- ADDED A THIRD TAB TRIGGER --- */}
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="my-projects">My Projects</TabsTrigger>
-          <TabsTrigger value="tier2-my-commission">Tier-2 Projects (My Commission)</TabsTrigger>
-          <TabsTrigger value="tier2-admin-commission">Tier-2 Projects (Admin Commission)</TabsTrigger>
+          <TabsTrigger value="tier2-my-commission">
+            Tier-2 Projects (My Commission)
+          </TabsTrigger>
+          <TabsTrigger value="tier2-admin-commission">
+            Tier-2 Projects (Admin Commission)
+          </TabsTrigger>
         </TabsList>
 
         {/* Tab 1: My Projects (Commission to Admin) */}
         <TabsContent value="my-projects">
           <Card>
-            <CardHeader><CardTitle>My Projects - Commission to Admin</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>My Projects - Commission to Admin</CardTitle>
+            </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
@@ -127,6 +180,7 @@ const ProjectBillingTier1: React.FC = () => {
                     <TableHead>Due</TableHead>
                     <TableHead>Last Payment</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Action</TableHead> {/* New Table Head */}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -134,15 +188,27 @@ const ProjectBillingTier1: React.FC = () => {
                     <TableRow key={bill.id}>
                       <TableCell>{bill.projectName}</TableCell>
                       <TableCell>{bill.invoiceId || '-'}</TableCell>
-                      <TableCell>₹{bill.projectValue?.toLocaleString()}</TableCell>
+                      <TableCell>
+                        ₹{bill.projectValue?.toLocaleString()}
+                      </TableCell>
                       <TableCell>{bill.adminCommissionPercentage}%</TableCell>
-                      <TableCell>₹{bill.adminCommissionAmount?.toLocaleString()}</TableCell>
+                      <TableCell>
+                        ₹{bill.adminCommissionAmount?.toLocaleString()}
+                      </TableCell>
                       <TableCell>{bill.dueDate || '-'}</TableCell>
                       <TableCell>{bill.lastPayment || '-'}</TableCell>
                       <TableCell>
                         <Badge className={getStatusColor(bill.status)}>
                           {getStatusIcon(bill.status)} {bill.status}
                         </Badge>
+                      </TableCell>
+                      {/* --- New Table Cell with Pay Now Button --- */}
+                      <TableCell>
+                        {bill.status.toLowerCase() !== 'paid' && (
+                          <Button size="sm" onClick={() => handlePayNow(bill)}>
+                            Pay Now
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -155,9 +221,11 @@ const ProjectBillingTier1: React.FC = () => {
         {/* Tab 2: Tier-2 Projects (My Commission) */}
         <TabsContent value="tier2-my-commission">
           <Card>
-            <CardHeader><CardTitle>Tier-2 Seller Projects - My Commission</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>Tier-2 Seller Projects - My Commission</CardTitle>
+            </CardHeader>
             <CardContent>
-               <Table>
+              <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Project</TableHead>
@@ -175,9 +243,13 @@ const ProjectBillingTier1: React.FC = () => {
                     <TableRow key={bill.id}>
                       <TableCell>{bill.projectName}</TableCell>
                       <TableCell>{bill.invoiceId || '-'}</TableCell>
-                      <TableCell>₹{bill.projectValue?.toLocaleString()}</TableCell>
+                      <TableCell>
+                        ₹{bill.projectValue?.toLocaleString()}
+                      </TableCell>
                       <TableCell>{bill.tier1CommissionPercentage}%</TableCell>
-                      <TableCell>₹{bill.tier1CommissionAmount?.toLocaleString()}</TableCell>
+                      <TableCell>
+                        ₹{bill.tier1CommissionAmount?.toLocaleString()}
+                      </TableCell>
                       <TableCell>{bill.dueDate || '-'}</TableCell>
                       <TableCell>{bill.lastPayment || '-'}</TableCell>
                       <TableCell>
@@ -192,11 +264,13 @@ const ProjectBillingTier1: React.FC = () => {
             </CardContent>
           </Card>
         </TabsContent>
-        
-        {/* --- NEW TAB CONTENT SECTION --- */}
+
+        {/* Tab 3: Tier-2 Projects (Admin Commission) */}
         <TabsContent value="tier2-admin-commission">
           <Card>
-            <CardHeader><CardTitle>Tier-2 Seller Projects - Admin Commission</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>Tier-2 Seller Projects - Admin Commission</CardTitle>
+            </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
@@ -216,9 +290,13 @@ const ProjectBillingTier1: React.FC = () => {
                     <TableRow key={bill.id}>
                       <TableCell>{bill.projectName}</TableCell>
                       <TableCell>{bill.tier1CommissionPercentage}%</TableCell>
-                      <TableCell>₹{bill.tier1CommissionAmount?.toLocaleString()}</TableCell>
+                      <TableCell>
+                        ₹{bill.tier1CommissionAmount?.toLocaleString()}
+                      </TableCell>
                       <TableCell>{bill.adminCommissionPercentage}%</TableCell>
-                      <TableCell>₹{bill.adminCommissionAmount?.toLocaleString()}</TableCell>
+                      <TableCell>
+                        ₹{bill.adminCommissionAmount?.toLocaleString()}
+                      </TableCell>
                       <TableCell>{bill.dueDate || '-'}</TableCell>
                       <TableCell>{bill.lastPayment || '-'}</TableCell>
                       <TableCell>
@@ -234,6 +312,22 @@ const ProjectBillingTier1: React.FC = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* --- Payment Modal --- */}
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        invoice={
+          selectedInvoice
+            ? {
+                id: selectedInvoice.id,
+                invoiceId: selectedInvoice.invoiceId || '',
+                totalBilling: selectedInvoice.totalBilling || 0,
+              }
+            : null
+        }
+        onPaymentSuccess={handlePaymentSuccess}
+      />
     </div>
   );
 };

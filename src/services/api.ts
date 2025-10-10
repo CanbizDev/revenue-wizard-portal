@@ -47,6 +47,9 @@ export interface AdminDashboardData {
   };
 }
 
+export interface PaymentInitiationResponse {
+  client_secret: string;
+}
 export interface RevenueData {
   // For Admin - two separate arrays
   summary?: {
@@ -650,6 +653,18 @@ class ApiService {
       return response.data;
     } catch (error) {
       console.error('Failed to update subscription plan:', error);
+      throw error;
+    }
+  }
+
+  async initiatePayment(invoiceId: string): Promise<PaymentInitiationResponse> {
+    try {
+      const response = await this.axiosInstance.post<PaymentInitiationResponse>(
+        `/billing/invoice/${invoiceId}/initiate-payment`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Failed to initiate payment:', error);
       throw error;
     }
   }
